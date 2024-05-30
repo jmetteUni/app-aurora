@@ -75,6 +75,11 @@
       is=LEN_TRIM(Coptions)+1
       Coptions(is:is+12)=' ANA_BSFLUX,'
 !
+      IF (Master) WRITE (stdout,20) 'ANA_INITIAL',                      &
+     &   'Analytical initial conditions'
+      is=LEN_TRIM(Coptions)+1
+      Coptions(is:is+13)=' ANA_INITIAL,'
+!
       IF (Master) WRITE (stdout,20) 'ANA_SMFLUX',                       &
      &   'Analytical kinematic surface momentum flux'
       is=LEN_TRIM(Coptions)+1

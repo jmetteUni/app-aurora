@@ -143,18 +143,43 @@
 !=======================================================================
 !
 !-----------------------------------------------------------------------
+!  If analytical initial conditions, compute initial time-evolving
+!  depths with zero free-surface.
+!-----------------------------------------------------------------------
+!
+      DO ng=1,Ngrids
+        DO tile=first_tile(ng),last_tile(ng),+1
+          CALL set_depth (ng, tile, iNLM)
+        END DO
+!$OMP BARRIER
+      END DO
+!
+!-----------------------------------------------------------------------
 !  Set primitive variables initial conditions.
 !-----------------------------------------------------------------------
 !
-!  Read in initial conditions from initial NetCDF file.
+!  Analytical initial conditions for momentum and active tracers.
 !
       DO ng=1,Ngrids
+        IF (nrrec(ng).eq.0) THEN
+          DO tile=first_tile(ng),last_tile(ng),+1
+            CALL ana_initial (ng, tile, iNLM)
+          END DO
+!$OMP BARRIER
+        END IF
+      END DO
+!
+!  If restart, read in initial conditions restart NetCDF file.
+!
+      DO ng=1,Ngrids
+        IF (nrrec(ng).ne.0) THEN
 !$OMP MASTER
-        CALL get_state (ng, iNLM, 1, INI(ng), IniRec(ng), Tindex(ng))
+          CALL get_state (ng, 0, 1, INI(ng), IniRec(ng), Tindex(ng))
 !$OMP END MASTER
 !$OMP BARRIER
-        IF (FoundError(exit_flag, NoError, 418, MyFile)) RETURN
-        time(ng)=io_time                     ! needed for shared-memory
+          IF (FoundError(exit_flag, NoError, 434, MyFile)) RETURN
+          time(ng)=io_time                   ! needed for shared-memory
+        END IF
       END DO
 !
 !-----------------------------------------------------------------------

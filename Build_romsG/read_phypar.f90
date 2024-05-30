@@ -2956,13 +2956,6 @@
           IF (Master.and.Lwrite) WRITE (out,230)                        &
      &      '                 Input Grid File:  ', TRIM(fname)
         END IF
-        fname=INI(ng)%name
-        IF (.not.find_file(ng, out, fname, 'ININAME')) THEN
-          IF (FoundError(exit_flag, NoError, 7447, MyFile)) RETURN
-        ELSE
-          IF (Master.and.Lwrite) WRITE (out,230)                        &
-            '    Input Nonlinear Initial File:  ', TRIM(fname)
-        END IF
         IF (LuvSrc(ng).or.LwSrc(ng).or.(ANY(LtracerSrc(:,ng)))) THEN
           fname=SSF(ng)%name
           IF (.not.find_file(ng, out, fname, 'SSFNAME')) THEN

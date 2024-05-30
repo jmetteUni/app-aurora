@@ -40,7 +40,7 @@
 #define DIAGNOSTICS_UV
 
 #undef ANA_GRID
-#undef ANA_INITIAL
+#define ANA_INITIAL
 #undef ANA_BTFLUX
 
 #define ANA_SMFLUX

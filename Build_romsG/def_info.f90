@@ -358,15 +358,6 @@
           END IF
         END IF
         IF (exit_flag.eq.NoError) THEN
-          status=nf90_put_att(ncid, nf90_global, 'ini_file',            &
-     &                        TRIM(INI(ng)%name))
-          IF (FoundError(status, nf90_noerr, 546, MyFile)) THEN
-            IF (Master) WRITE (stdout,20) 'ini_file', TRIM(ncname)
-            exit_flag=3
-            ioerror=status
-          END IF
-        END IF
-        IF (exit_flag.eq.NoError) THEN
           IF (LuvSrc(ng).or.LwSrc(ng).or.(ANY(LtracerSrc(:,ng)))) THEN
             status=nf90_put_att(ncid, nf90_global, 'river_file',        &
      &                          TRIM(SSF(ng)%name))

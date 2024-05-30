@@ -1178,10 +1178,10 @@
 !  assigned in the 'makefile' to the CPPFLAGS macro.
 !
       git_url="https://github.com/myroms/roms.git"
-      git_rev="91fda4bb549c6cd2f0695939e6dccf351b9495dd"
+      git_rev="b7a47408ba224a4703d9122c33995eee3c5ed06c"
 !
       svn_url="https://www.myroms.org/svn/src/trunk"
-      svn_rev="1215"
+      svn_rev="1219"
 !
 !-----------------------------------------------------------------------
 !  Process ROMS Input/Output metadata file and define variables

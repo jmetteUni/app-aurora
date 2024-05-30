@@ -1,7 +1,7 @@
       MODULE wrt_quick_mod
 !
 !git $Id$
-!svn $Id: wrt_quick.F 1210 2024-01-03 22:03:03Z arango $
+!svn $Id: wrt_quick.F 1219 2024-02-25 02:43:31Z arango $
 !================================================== Hernan G. Arango ===
 !  Copyright (c) 2002-2024 The ROMS/TOMS Group                         !
 !    Licensed under a MIT/X style license                              !
@@ -383,6 +383,7 @@
      &                    OCEAN(ng) % ubar(:,:,kstp(ng)),               &
      &                    OCEAN(ng) % vbar(:,:,kstp(ng)),               &
      &                    Ur2d, Vr2d)
+!
         scale=1.0_dp
         gtype=gfactor*r2dvar
         status=nf_fwrite2d(ng, model, QCK(ng)%ncid, idu2dE,             &
@@ -398,6 +399,7 @@
           ioerror=status
           RETURN
         END IF
+!
         status=nf_fwrite2d(ng, model, QCK(ng)%ncid, idv2dN,             &
      &                     QCK(ng)%Vid(idv2dN),                         &
      &                     QCK(ng)%Rindex, gtype,                       &
@@ -515,6 +517,7 @@
      &                    OCEAN(ng) % u(:,:,:,nrhs(ng)),                &
      &                    OCEAN(ng) % v(:,:,:,nrhs(ng)),                &
      &                    Ur3d, Vr3d)
+!
         IF ((Qout(idu3dE,ng).and.Qout(idv3dN,ng))) THEN
           scale=1.0_dp
           gtype=gfactor*r3dvar
@@ -531,6 +534,7 @@
             ioerror=status
             RETURN
           END IF
+!
           status=nf_fwrite3d(ng, model, QCK(ng)%ncid, idv3dN,           &
      &                       QCK(ng)%Vid(idv3dN),                       &
      &                       QCK(ng)%Rindex, gtype,                     &
@@ -544,6 +548,8 @@
             ioerror=status
             RETURN
           END IF
+          deallocate (Ur3d)
+          deallocate (Vr3d)
         END IF
 !
 !  Write out surface Eastward and Northward momentum components (m/s) at
@@ -557,7 +563,7 @@
      &                       QCK(ng)%Rindex, gtype,                     &
      &                       LBi, UBi, LBj, UBj, scale,                 &
      &                       Ur3d(:,:,N(ng)))
-          IF (FoundError(status, nf90_noerr, 728, MyFile)) THEN
+          IF (FoundError(status, nf90_noerr, 730, MyFile)) THEN
             IF (Master) THEN
               WRITE (stdout,20) TRIM(Vname(1,idUsuE)), QCK(ng)%Rindex
             END IF
@@ -570,7 +576,7 @@
      &                       QCK(ng)%Rindex, gtype,                     &
      &                       LBi, UBi, LBj, UBj, scale,                 &
      &                       Vr3d(:,:,N(ng)))
-          IF (FoundError(status, nf90_noerr, 745, MyFile)) THEN
+          IF (FoundError(status, nf90_noerr, 747, MyFile)) THEN
             IF (Master) THEN
               WRITE (stdout,20) TRIM(Vname(1,idVsuN)), QCK(ng)%Rindex
             END IF
@@ -602,7 +608,7 @@
      &                     QCK(ng)%Rindex, gtype,                       &
      &                     LBi, UBi, LBj, UBj, 0, N(ng), scale,         &
      &                     Wr3d)
-        IF (FoundError(status, nf90_noerr, 780, MyFile)) THEN
+        IF (FoundError(status, nf90_noerr, 782, MyFile)) THEN
           IF (Master) THEN
             WRITE (stdout,20) TRIM(Vname(1,idOvel)), QCK(ng)%Rindex
           END IF
@@ -623,7 +629,7 @@
      &                     QCK(ng)%Rindex, gtype,                       &
      &                     LBi, UBi, LBj, UBj, 0, N(ng), scale,         &
      &                     OCEAN(ng) % wvel)
-        IF (FoundError(status, nf90_noerr, 804, MyFile)) THEN
+        IF (FoundError(status, nf90_noerr, 806, MyFile)) THEN
           IF (Master) THEN
             WRITE (stdout,20) TRIM(Vname(1,idWvel)), QCK(ng)%Rindex
           END IF
@@ -644,7 +650,7 @@
      &                       QCK(ng)%Rindex, gtype,                     &
      &                       LBi, UBi, LBj, UBj, 1, N(ng), scale,       &
      &                       OCEAN(ng) % t(:,:,:,nrhs(ng),itrc))
-          IF (FoundError(status, nf90_noerr, 828, MyFile)) THEN
+          IF (FoundError(status, nf90_noerr, 830, MyFile)) THEN
             IF (Master) THEN
               WRITE (stdout,20) TRIM(Vname(1,idTvar(itrc))),            &
      &                          QCK(ng)%Rindex
@@ -667,7 +673,7 @@
      &                       QCK(ng)%Rindex, gtype,                     &
      &                       LBi, UBi, LBj, UBj, scale,                 &
      &                       OCEAN(ng) % t(:,:,N(ng),nrhs(ng),itrc))
-          IF (FoundError(status, nf90_noerr, 854, MyFile)) THEN
+          IF (FoundError(status, nf90_noerr, 856, MyFile)) THEN
             IF (Master) THEN
               WRITE (stdout,20) TRIM(Vname(1,idsurT(itrc))),            &
      &                          QCK(ng)%Rindex
@@ -689,7 +695,7 @@
      &                     QCK(ng)%Rindex, gtype,                       &
      &                     LBi, UBi, LBj, UBj, 1, N(ng), scale,         &
      &                     OCEAN(ng) % rho)
-        IF (FoundError(status, nf90_noerr, 879, MyFile)) THEN
+        IF (FoundError(status, nf90_noerr, 881, MyFile)) THEN
           IF (Master) THEN
             WRITE (stdout,20) TRIM(Vname(1,idDano)), QCK(ng)%Rindex
           END IF
@@ -710,7 +716,7 @@
      &                     LBi, UBi, LBj, UBj, 0, N(ng), scale,         &
      &                     MIXING(ng) % Akv,                            &
      &                     SetFillVal = .FALSE.)
-        IF (FoundError(status, nf90_noerr, 953, MyFile)) THEN
+        IF (FoundError(status, nf90_noerr, 955, MyFile)) THEN
           IF (Master) THEN
             WRITE (stdout,20) TRIM(Vname(1,idVvis)), QCK(ng)%Rindex
           END IF
@@ -731,7 +737,7 @@
      &                     LBi, UBi, LBj, UBj, 0, N(ng), scale,         &
      &                     MIXING(ng) % Akt(:,:,:,itemp),               &
      &                     SetFillVal = .FALSE.)
-        IF (FoundError(status, nf90_noerr, 977, MyFile)) THEN
+        IF (FoundError(status, nf90_noerr, 979, MyFile)) THEN
           IF (Master) THEN
             WRITE (stdout,20) TRIM(Vname(1,idTdif)), QCK(ng)%Rindex
           END IF
@@ -752,7 +758,7 @@
      &                     LBi, UBi, LBj, UBj, 0, N(ng), scale,         &
      &                     MIXING(ng) % Akt(:,:,:,isalt),               &
      &                     SetFillVal = .FALSE.)
-        IF (FoundError(status, nf90_noerr, 1002, MyFile)) THEN
+        IF (FoundError(status, nf90_noerr, 1004, MyFile)) THEN
           IF (Master) THEN
             WRITE (stdout,20) TRIM(Vname(1,idSdif)), QCK(ng)%Rindex
           END IF
@@ -777,7 +783,7 @@
      &                       QCK(ng)%Rindex, gtype,                     &
      &                       LBi, UBi, LBj, UBj, scale,                 &
      &                       FORCES(ng) % stflx(:,:,itrc))
-          IF (FoundError(status, nf90_noerr, 1182, MyFile)) THEN
+          IF (FoundError(status, nf90_noerr, 1247, MyFile)) THEN
             IF (Master) THEN
               WRITE (stdout,20) TRIM(Vname(1,idTsur(itrc))),            &
      &                          QCK(ng)%Rindex
@@ -799,7 +805,7 @@
      &                     QCK(ng)%Rindex, gtype,                       &
      &                     LBi, UBi, LBj, UBj, scale,                   &
      &                     FORCES(ng) % stflux(:,:,isalt))
-        IF (FoundError(status, nf90_noerr, 1330, MyFile)) THEN
+        IF (FoundError(status, nf90_noerr, 1395, MyFile)) THEN
           IF (Master) THEN
             WRITE (stdout,20) TRIM(Vname(1,idEmPf)), QCK(ng)%Rindex
           END IF
@@ -819,7 +825,7 @@
      &                     QCK(ng)%Rindex, gtype,                       &
      &                     LBi, UBi, LBj, UBj, scale,                   &
      &                     FORCES(ng) % sustr)
-        IF (FoundError(status, nf90_noerr, 1379, MyFile)) THEN
+        IF (FoundError(status, nf90_noerr, 1444, MyFile)) THEN
           IF (Master) THEN
             WRITE (stdout,20) TRIM(Vname(1,idUsms)), QCK(ng)%Rindex
           END IF
@@ -839,7 +845,7 @@
      &                     QCK(ng)%Rindex, gtype,                       &
      &                     LBi, UBi, LBj, UBj, scale,                   &
      &                     FORCES(ng) % svstr)
-        IF (FoundError(status, nf90_noerr, 1402, MyFile)) THEN
+        IF (FoundError(status, nf90_noerr, 1467, MyFile)) THEN
           IF (Master) THEN
             WRITE (stdout,20) TRIM(Vname(1,idVsms)), QCK(ng)%Rindex
           END IF
@@ -859,7 +865,7 @@
      &                     QCK(ng)%Rindex, gtype,                       &
      &                     LBi, UBi, LBj, UBj, scale,                   &
      &                     FORCES(ng) % bustr)
-        IF (FoundError(status, nf90_noerr, 1425, MyFile)) THEN
+        IF (FoundError(status, nf90_noerr, 1490, MyFile)) THEN
           IF (Master) THEN
             WRITE (stdout,20) TRIM(Vname(1,idUbms)), QCK(ng)%Rindex
           END IF
@@ -879,7 +885,7 @@
      &                     QCK(ng)%Rindex, gtype,                       &
      &                     LBi, UBi, LBj, UBj, scale,                   &
      &                     FORCES(ng) % bvstr)
-        IF (FoundError(status, nf90_noerr, 1448, MyFile)) THEN
+        IF (FoundError(status, nf90_noerr, 1513, MyFile)) THEN
           IF (Master) THEN
             WRITE (stdout,20) TRIM(Vname(1,idVbms)), QCK(ng)%Rindex
           END IF
@@ -895,7 +901,7 @@
 !-----------------------------------------------------------------------
 !
       CALL netcdf_sync (ng, model, QCK(ng)%name, QCK(ng)%ncid)
-      IF (FoundError(exit_flag, NoError, 1512, MyFile)) RETURN
+      IF (FoundError(exit_flag, NoError, 1577, MyFile)) RETURN
 !
   10  FORMAT (2x,'WRT_QUICK_NF90   - writing quicksave', t42,           &
      &        'fields (Index=',i1,',',i1,') in record = ',i0)

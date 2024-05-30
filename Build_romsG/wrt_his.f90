@@ -1,7 +1,7 @@
       MODULE wrt_his_mod
 !
 !git $Id$
-!svn $Id: wrt_his.F 1210 2024-01-03 22:03:03Z arango $
+!svn $Id: wrt_his.F 1219 2024-02-25 02:43:31Z arango $
 !================================================== Hernan G. Arango ===
 !  Copyright (c) 2002-2024 The ROMS/TOMS Group                         !
 !    Licensed under a MIT/X style license                              !
@@ -381,6 +381,7 @@
      &                    OCEAN(ng) % ubar(:,:,kstp(ng)),               &
      &                    OCEAN(ng) % vbar(:,:,kstp(ng)),               &
      &                    Ur2d, Vr2d)
+!
         scale=1.0_dp
         gtype=gfactor*r2dvar
         status=nf_fwrite2d(ng, model, HIS(ng)%ncid, idu2dE,             &
@@ -396,6 +397,7 @@
           ioerror=status
           RETURN
         END IF
+!
         status=nf_fwrite2d(ng, model, HIS(ng)%ncid, idv2dN,             &
      &                     HIS(ng)%Vid(idv2dN),                         &
      &                     HIS(ng)%Rindex, gtype,                       &
@@ -472,6 +474,7 @@
      &                    OCEAN(ng) % u(:,:,:,nrhs(ng)),                &
      &                    OCEAN(ng) % v(:,:,:,nrhs(ng)),                &
      &                    Ur3d, Vr3d)
+!
         scale=1.0_dp
         gtype=gfactor*r3dvar
         status=nf_fwrite3d(ng, model, HIS(ng)%ncid, idu3dE,             &
@@ -675,7 +678,7 @@
      &                       HIS(ng)%Rindex, gtype,                     &
      &                       LBi, UBi, LBj, UBj, scale,                 &
      &                       FORCES(ng) % stflx(:,:,itrc))
-          IF (FoundError(status, nf90_noerr, 1561, MyFile)) THEN
+          IF (FoundError(status, nf90_noerr, 1624, MyFile)) THEN
             IF (Master) THEN
               WRITE (stdout,20) TRIM(Vname(1,idTsur(itrc))),            &
      &                          HIS(ng)%Rindex
@@ -697,7 +700,7 @@
      &                     HIS(ng)%Rindex, gtype,                       &
      &                     LBi, UBi, LBj, UBj, scale,                   &
      &                     FORCES(ng) % stflux(:,:,isalt))
-        IF (FoundError(status, nf90_noerr, 1709, MyFile)) THEN
+        IF (FoundError(status, nf90_noerr, 1772, MyFile)) THEN
           IF (Master) THEN
             WRITE (stdout,20) TRIM(Vname(1,idEmPf)), HIS(ng)%Rindex
           END IF
@@ -717,7 +720,7 @@
      &                     HIS(ng)%Rindex, gtype,                       &
      &                     LBi, UBi, LBj, UBj, scale,                   &
      &                     FORCES(ng) % sustr)
-        IF (FoundError(status, nf90_noerr, 1762, MyFile)) THEN
+        IF (FoundError(status, nf90_noerr, 1825, MyFile)) THEN
           IF (Master) THEN
             WRITE (stdout,20) TRIM(Vname(1,idUsms)), HIS(ng)%Rindex
           END IF
@@ -737,7 +740,7 @@
      &                     HIS(ng)%Rindex, gtype,                       &
      &                     LBi, UBi, LBj, UBj, scale,                   &
      &                     FORCES(ng) % svstr)
-        IF (FoundError(status, nf90_noerr, 1789, MyFile)) THEN
+        IF (FoundError(status, nf90_noerr, 1852, MyFile)) THEN
           IF (Master) THEN
             WRITE (stdout,20) TRIM(Vname(1,idVsms)), HIS(ng)%Rindex
           END IF
@@ -757,7 +760,7 @@
      &                     HIS(ng)%Rindex, gtype,                       &
      &                     LBi, UBi, LBj, UBj, scale,                   &
      &                     FORCES(ng) % bustr)
-        IF (FoundError(status, nf90_noerr, 1812, MyFile)) THEN
+        IF (FoundError(status, nf90_noerr, 1875, MyFile)) THEN
           IF (Master) THEN
             WRITE (stdout,20) TRIM(Vname(1,idUbms)), HIS(ng)%Rindex
           END IF
@@ -777,7 +780,7 @@
      &                     HIS(ng)%Rindex, gtype,                       &
      &                     LBi, UBi, LBj, UBj, scale,                   &
      &                     FORCES(ng) % bvstr)
-        IF (FoundError(status, nf90_noerr, 1835, MyFile)) THEN
+        IF (FoundError(status, nf90_noerr, 1898, MyFile)) THEN
           IF (Master) THEN
             WRITE (stdout,20) TRIM(Vname(1,idVbms)), HIS(ng)%Rindex
           END IF
@@ -793,7 +796,7 @@
 !-----------------------------------------------------------------------
 !
       CALL netcdf_sync (ng, model, HIS(ng)%name, HIS(ng)%ncid)
-      IF (FoundError(exit_flag, NoError, 1899, MyFile)) RETURN
+      IF (FoundError(exit_flag, NoError, 1962, MyFile)) RETURN
 !
   10  FORMAT (2x,'WRT_HIS_NF90     - writing history', t42,             &
      &        'fields (Index=',i1,',',i1,') in record = ',i0)
