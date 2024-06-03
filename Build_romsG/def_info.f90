@@ -368,32 +368,6 @@
             END IF
           END IF
         END IF
-        IF (exit_flag.eq.NoError) THEN
-          IF (LprocessTides(ng)) THEN
-            status=nf90_put_att(ncid, nf90_global, 'tide_file',         &
-     &                          TRIM(TIDE(ng)%name))
-            IF (FoundError(status, nf90_noerr, 703, MyFile)) THEN
-              IF (Master) WRITE (stdout,20) 'tide_file', TRIM(ncname)
-              exit_flag=3
-              ioerror=status
-            END IF
-          END IF
-        END IF
-        IF (exit_flag.eq.NoError) THEN
-          DO i=1,nFfiles(ng)
-            CALL join_string (FRC(i,ng)%files, FRC(i,ng)%Nfiles,        &
-     &                        string, lstr)
-            WRITE (frcatt,30) 'frc_file_', i
-            status=nf90_put_att(ncid, nf90_global, frcatt,              &
-     &                          string(1:lstr))
-            IF (FoundError(status, nf90_noerr, 720, MyFile)) THEN
-              IF (Master) WRITE (stdout,20) TRIM(frcatt), TRIM(ncname)
-              exit_flag=3
-              ioerror=status
-              EXIT
-            END IF
-          END DO
-        END IF
         IF (ObcData(ng)) THEN
           DO i=1,nBCfiles(ng)
             IF (exit_flag.eq.NoError) THEN

@@ -47,9 +47,6 @@
      &                         initialize_ocean
       USE mod_sources,  ONLY : allocate_sources,                        &
      &                         deallocate_sources
-      USE mod_tides,    ONLY : allocate_tides,                          &
-     &                         deallocate_tides,                        &
-     &                         initialize_tides
 !
       implicit none
 !
@@ -118,7 +115,6 @@
           CALL allocate_grid (ng, LBi, UBi, LBj, UBj, LBij, UBij)
           CALL allocate_mixing (ng, LBi, UBi, LBj, UBj)
           CALL allocate_ocean (ng, LBi, UBi, LBj, UBj)
-          CALL allocate_tides (ng, LBi, UBi, LBj, UBj)
           IF (LuvSrc(ng).or.LwSrc(ng).or.ANY(LtracerSrc(:,ng))) THEN
             CALL allocate_sources (ng)
           END IF
@@ -176,7 +172,6 @@
         CALL deallocate_grid (ng)
         CALL deallocate_mixing (ng)
         CALL deallocate_ocean (ng)
-        CALL deallocate_tides (ng)
         IF (LuvSrc(ng).or.LwSrc(ng).or.ANY(LtracerSrc(:,ng))) THEN
           CALL deallocate_sources (ng)
         END IF
@@ -241,7 +236,6 @@
           CALL initialize_grid (ng, tile, model)
           CALL initialize_mixing (ng, tile, model)
           CALL initialize_ocean (ng, tile, model)
-          CALL initialize_tides (ng, tile)
         END DO
 !$OMP BARRIER
       END DO

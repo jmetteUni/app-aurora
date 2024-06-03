@@ -26,7 +26,6 @@
       USE analytical_mod,       ONLY : ana_vmix
       USE dateclock_mod,        ONLY : time_string
       USE diag_mod,             ONLY : diag
-      USE equilibrium_tide_mod, ONLY : equilibrium_tide
       USE ini_fields_mod,       ONLY : ini_fields, ini_zeta
       USE omega_mod,            ONLY : omega
       USE rho_eos_mod,          ONLY : rho_eos
@@ -34,7 +33,6 @@
       USE set_avg_mod,          ONLY : set_avg
       USE set_depth_mod,        ONLY : set_depth
       USE set_massflux_mod,     ONLY : set_massflux
-      USE set_tides_mod,        ONLY : set_tides
       USE set_vbc_mod,          ONLY : set_vbc
       USE set_zeta_mod,         ONLY : set_zeta
       USE step2d_mod,           ONLY : step2d
@@ -171,7 +169,6 @@
               DO tile=first_tile(ng),last_tile(ng),+1
                 CALL set_massflux (ng, tile, iNLM)
                 CALL rho_eos (ng, tile, iNLM)
-                CALL equilibrium_tide (ng, tile, iNLM)
                 CALL diag (ng, tile)
               END DO
 !$OMP BARRIER
@@ -187,7 +184,6 @@
               ng=GridNumber(ig,nl)
               DO tile=first_tile(ng),last_tile(ng),+1
                 CALL set_vbc (ng, tile)
-                CALL set_tides (ng, tile)
               END DO
 !$OMP BARRIER
             END DO

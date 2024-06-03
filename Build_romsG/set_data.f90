@@ -220,12 +220,7 @@
 !
 !  Set kinematic bottom net heat flux (degC m/s).
 !
-      CALL set_2dfld_tile (ng, tile, iNLM, idTbot(itemp),               &
-     &                     LBi, UBi, LBj, UBj,                          &
-     &                     FORCES(ng)%btfluxG(:,:,:,itemp),             &
-     &                     FORCES(ng)%btflux (:,:,itemp),               &
-     &                     update)
-      IF (FoundError(exit_flag, NoError, 463, MyFile)) RETURN
+      CALL ana_btflux (ng, tile, iNLM, itemp)
 !
 !  Surface freshwater (E-P) flux (m/s) from analytical function.
 !

@@ -897,8 +897,8 @@
         Dmem(1)=Dmem(1)+2.0_r8*REAL(NV*Ngrids,r8)
       END IF
       IF (.not.allocated(Vtime)) THEN
-        allocate ( Vtime(MAX(2,MTC),NV,Ngrids) )
-        Dmem(1)=Dmem(1)+REAL(MAX(2,MTC)*NV*Ngrids,r8)
+        allocate ( Vtime(2,NV,Ngrids) )
+        Dmem(1)=Dmem(1)+REAL(NV*Ngrids,r8)
       END IF
       IF (.not.allocated(Cinfo)) THEN
         allocate ( Cinfo(NV,Ngrids) )

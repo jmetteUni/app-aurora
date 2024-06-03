@@ -16,7 +16,6 @@
 !  ubar         Vertically integrated U-momentum component (m/s).      !
 !  vbar         Vertically integrated V-momentum component (m/s).      !
 !  zeta         Free surface (m).                                      !
-!  eq_tide      Equilibrium tides (m) used in tide generating forces.  !
 !                                                                      !
 !  3D Primitive Variables.                                             !
 !                                                                      !
@@ -53,7 +52,6 @@
           real(r8), pointer :: ubar(:,:,:)
           real(r8), pointer :: vbar(:,:,:)
           real(r8), pointer :: zeta(:,:,:)
-          real(r8), pointer :: eq_tide(:,:)
           real(r8), pointer :: pden(:,:,:)
           real(r8), pointer :: rho(:,:,:)
           real(r8), pointer :: ru(:,:,:,:)
@@ -112,8 +110,6 @@
       Dmem(ng)=Dmem(ng)+3.0_r8*size2d
       allocate ( OCEAN(ng) % zeta(LBi:UBi,LBj:UBj,3) )
       Dmem(ng)=Dmem(ng)+3.0_r8*size2d
-      allocate ( OCEAN(ng) % eq_tide(LBi:UBi,LBj:UBj) )
-      Dmem(ng)=Dmem(ng)+size2d
       allocate ( OCEAN(ng) % pden(LBi:UBi,LBj:UBj,N(ng)) )
       Dmem(ng)=Dmem(ng)+REAL(N(ng),r8)*size2d
       allocate ( OCEAN(ng) % rho(LBi:UBi,LBj:UBj,N(ng)) )
@@ -298,7 +294,6 @@
             OCEAN(ng) % zeta(i,j,1) = IniVal
             OCEAN(ng) % zeta(i,j,2) = IniVal
             OCEAN(ng) % zeta(i,j,3) = IniVal
-            OCEAN(ng) % eq_tide(i,j) = IniVal
           END DO
           DO k=1,N(ng)
             DO i=Imin,Imax

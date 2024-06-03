@@ -60,20 +60,15 @@
       is=LEN_TRIM(Coptions)+1
       Coptions(is:is)=','
 !
-      IF (Master) WRITE (stdout,20) 'ADD_FSOBC',                        &
-     &   'Adding tidal elevation to processed OBC data'
-      is=LEN_TRIM(Coptions)+1
-      Coptions(is:is+11)=' ADD_FSOBC,'
-!
-      IF (Master) WRITE (stdout,20) 'ADD_M2OBC',                        &
-     &   'Adding tidal currents to processed OBC data'
-      is=LEN_TRIM(Coptions)+1
-      Coptions(is:is+11)=' ADD_M2OBC,'
-!
       IF (Master) WRITE (stdout,20) 'ANA_BSFLUX',                       &
      &   'Analytical kinematic bottom salinity flux'
       is=LEN_TRIM(Coptions)+1
       Coptions(is:is+12)=' ANA_BSFLUX,'
+!
+      IF (Master) WRITE (stdout,20) 'ANA_BTFLUX',                       &
+     &   'Analytical kinematic bottom temperature flux'
+      is=LEN_TRIM(Coptions)+1
+      Coptions(is:is+12)=' ANA_BTFLUX,'
 !
       IF (Master) WRITE (stdout,20) 'ANA_INITIAL',                      &
      &   'Analytical initial conditions'
@@ -206,16 +201,6 @@
       is=LEN_TRIM(Coptions)+1
       Coptions(is:is+15)=' SPLINES_VVISC,'
 !
-      IF (Master) WRITE (stdout,20) 'SSH_TIDES',                        &
-     &   'Adding tidal elevation to SSH climatology'
-      is=LEN_TRIM(Coptions)+1
-      Coptions(is:is+11)=' SSH_TIDES,'
-!
-      IF (Master) WRITE (stdout,20) 'TIDE_GENERATING_FORCES',           &
-     &   'Adding astronomical TGF term to pressure gradient'
-      is=LEN_TRIM(Coptions)+1
-      Coptions(is:is+24)=' TIDE_GENERATING_FORCES,'
-!
       IF (Master) WRITE (stdout,20) 'TS_DIF2',                          &
      &   'Harmonic mixing of tracers'
       is=LEN_TRIM(Coptions)+1
@@ -248,11 +233,6 @@
       is=LEN_TRIM(Coptions)+1
       Coptions(is:is+10)=' UV_LDRAG,'
       ibbl=ibbl+1
-!
-      IF (Master) WRITE (stdout,20) 'UV_TIDES',                         &
-     &   'Add tidal currents to 2D momentum climatologies'
-      is=LEN_TRIM(Coptions)+1
-      Coptions(is:is+10)=' UV_TIDES,'
 !
       IF (Master) WRITE (stdout,20) 'UV_VIS2',                          &
      &   'Harmonic mixing of momentum'

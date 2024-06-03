@@ -181,24 +181,24 @@ ad_Vadvection == C4       \                     ! temperature
 !
 !                   1       2       3       4
 
-   LBC(isFsur) ==   Cha     Cha     Cha     Cha         ! free-surface
-!   LBC(isFsur) ==   Clo     Clo     Clo     Clo         ! free-surface
-   LBC(isUbar) ==   Shc     Shc     Shc     Shc         ! 2D U-momentum
-!   LBC(isUbar) ==   Clo     Clo     Clo     Clo         ! 2D U-momentum
-   LBC(isVbar) ==   Shc     Shc     Shc     Shc         ! 2D V-momentum
-!   LBC(isVbar) ==   Clo     Clo     Clo     Clo         ! 2D V-momentum
-   LBC(isUvel) ==   RadNud  RadNud  RadNud  RadNud      ! 3D U-momentum
-!   LBC(isUvel) ==   Clo     Clo     Clo     Clo         ! 3D U-momentum
-   LBC(isVvel) ==   RadNud  RadNud  RadNud  RadNud      ! 3D V-momentum
-!   LBC(isVvel) ==   Clo     Clo     Clo     Clo      ! 3D V-momentum
-   LBC(isMtke) ==   Gra     Gra     Gra     Gra         ! mixing TKE
-!   LBC(isMtke) ==   Clo     Clo     Clo     Clo         ! mixing TKE
+!   LBC(isFsur) ==   Cha     Cha     Cha     Cha         ! free-surface
+   LBC(isFsur) ==   Clo     Clo     Clo     Clo         ! free-surface
+!   LBC(isUbar) ==   Shc     Shc     Shc     Shc         ! 2D U-momentum
+   LBC(isUbar) ==   Clo     Clo     Clo     Clo         ! 2D U-momentum
+!   LBC(isVbar) ==   Shc     Shc     Shc     Shc         ! 2D V-momentum
+   LBC(isVbar) ==   Clo     Clo     Clo     Clo         ! 2D V-momentum
+!   LBC(isUvel) ==   RadNud  RadNud  RadNud  RadNud      ! 3D U-momentum
+   LBC(isUvel) ==   Clo     Clo     Clo     Clo         ! 3D U-momentum
+!   LBC(isVvel) ==   RadNud  RadNud  RadNud  RadNud      ! 3D V-momentum
+   LBC(isVvel) ==   Clo     Clo     Clo     Clo      ! 3D V-momentum
+!   LBC(isMtke) ==   Gra     Gra     Gra     Gra         ! mixing TKE
+   LBC(isMtke) ==   Clo     Clo     Clo     Clo         ! mixing TKE
 
-   LBC(isTvar) ==   RadNud  RadNud  RadNud  RadNud \       ! temperature
-                    RadNud  RadNud  RadNud  RadNud       ! salinity
+!   LBC(isTvar) ==   RadNud  RadNud  RadNud  RadNud \       ! temperature
+!                    RadNud  RadNud  RadNud  RadNud       ! salinity
                     
-!   LBC(isTvar) ==   Clo     Clo     Clo     Clo \       ! temperature
-!                    Clo     Clo     Clo     Clo       ! salinity
+   LBC(isTvar) ==   Clo     Clo     Clo     Clo \       ! temperature
+                    Clo     Clo     Clo     Clo       ! salinity
 
 ! Waves Effect on Currents lateral boundary conditions.
 
@@ -1105,8 +1105,8 @@ PIO_I2C_Preq = 65                 ! Maximum pending I2C requests
 
     NBCFILES == 1                          ! number of boundary files
 
-!      BRYNAME == roms_bry.nc
-      BRYNAME == ../aurora/Data/Grid_Aurora_M55L55_bry_nemo_20210530T00_20210630T00.nc
+      BRYNAME == roms_bry.nc
+!      BRYNAME == ../aurora/Data/Grid_Aurora_M55L55_bry_nemo_20210530T00_20210630T00.nc
 
 ! Input climatology file names. The USER has the option to separate the
 ! climatology variables into individual NetCDF files (NCLMFILES > 1),
@@ -1130,8 +1130,8 @@ PIO_I2C_Preq = 65                 ! Maximum pending I2C requests
 
 ! Input tidal forcing file name.
 
-!    TIDENAME == roms_tides.nc
-   TIDENAME == ../aurora/Data/Grid_Aurora_M55L55_tides.nc
+    TIDENAME == roms_tides.nc
+!   TIDENAME == ../aurora/Data/Grid_Aurora_M55L55_tides.nc
      
 ! Input forcing NetCDF file name(s).
 !
@@ -1153,8 +1153,8 @@ PIO_I2C_Preq = 65                 ! Maximum pending I2C requests
 
      NFFILES == 1                          ! number of unique forcing files
 
-!     FRCNAME == roms_frc.nc
-     FRCNAME == ../aurora/Data/Grid_Aurora_M55L55_bhflux_130MW_large_heat3_20230605T00.nc               ! forcing file 1, grid 1
+     FRCNAME == roms_frc.nc
+!     FRCNAME == ../aurora/Data/Grid_Aurora_M55L55_bhflux_130MW_large_heat3_20230605T00.nc               ! forcing file 1, grid 1
 !     FRCNAME == ../aurora/Data/Grid_Aurora_M55L55_bhflux_100000000MW__large_heat3_20230605T00.nc               ! forcing file 1, grid 1
 
 ! Output NetCDF file names, [1:Ngrids].

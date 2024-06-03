@@ -2746,7 +2746,7 @@
         LdefTIDE(ng)=.FALSE.
         LreadADM(ng)=.FALSE.
         LreadBLK(ng)=.FALSE.
-        LreadFRC(ng)=.TRUE.
+        LreadFRC(ng)=.FALSE.
         LreadFWD(ng)=.FALSE.
         LreadQCK(ng)=.FALSE.
         LreadSTD(ng)=.FALSE.

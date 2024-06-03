@@ -135,18 +135,6 @@
         IF (FoundError(exit_flag, NoError, 174, MyFile)) RETURN
       END IF
 !
-!-----------------------------------------------------------------------
-!  Input forcing data.
-!-----------------------------------------------------------------------
-!
-      IF (LreadFRC(ng)) THEN
-        file_type='Forcing'
-        max_files=MAXVAL(nFfiles)
-        CALL multifile_info_s2d (ng, model, file_type, nFfiles,         &
-     &                           max_files, FRC)
-        IF (FoundError(exit_flag, NoError, 189, MyFile)) RETURN
-      END IF
-!
       RETURN
       END SUBROUTINE check_multifile
 !

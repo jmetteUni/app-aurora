@@ -18,7 +18,6 @@
       USE mod_scalars
 !
       USE analytical_mod
-      USE equilibrium_tide_mod, ONLY : harmonic_constituents
       USE get_grid_mod,         ONLY : get_grid
       USE get_nudgcoef_mod,     ONLY : get_nudgcoef
       USE metrics_mod,          ONLY : metrics
@@ -87,14 +86,6 @@
 !$OMP BARRIER
         IF (FoundError(exit_flag, NoError, 174, MyFile)) RETURN
       END IF
-!
-!-----------------------------------------------------------------------
-!  If applying tide generating forces, compute harmonic constituent
-!  parameters of the equilibrium tide on Greenwich meridian for the
-!  reference tide date number.
-!-----------------------------------------------------------------------
-!
-      CALL harmonic_constituents (Lnodal)
 !
       RETURN
       END SUBROUTINE set_grid

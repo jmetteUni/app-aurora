@@ -105,15 +105,6 @@
 !
       Lprocess=.TRUE.
 !
-!  Bottom net heat flux.
-!
-      CALL get_2dfld (ng, iNLM, idTbot(itemp),                          &
-     &                FRCncid(idTbot(itemp),ng),                        &
-     &                nFfiles(ng), FRC(1,ng), update(1),                &
-     &                LBi, UBi, LBj, UBj, 2, 1,                         &
-     &                FORCES(ng) % btfluxG(:,:,:,itemp))
-      IF (FoundError(exit_flag, NoError, 630, MyFile)) RETURN
-!
 !=======================================================================
 !  Read in open boundary conditions from BOUNDARY NetCDF file.
 !=======================================================================

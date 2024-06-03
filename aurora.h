@@ -41,7 +41,7 @@
 
 #undef ANA_GRID
 #define ANA_INITIAL
-#undef ANA_BTFLUX
+#define ANA_BTFLUX
 
 #define ANA_SMFLUX
 #define ANA_STFLUX
@@ -50,7 +50,7 @@
 
 #define RADIATION_2D
 
-#define TIDE_GENERATING_FORCES
+#undef TIDE_GENERATING_FORCES
 #if defined TIDE_GENERATING_FORCES
 #define SSH_TIDES
 #define UV_TIDES

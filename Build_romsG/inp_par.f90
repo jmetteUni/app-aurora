@@ -118,18 +118,6 @@
         END IF
       END DO
 !
-!  Determine the switch to process input tidal forcing data.
-!
-!  In nesting applications, the tides are processed only by the main
-!  coarser grid (RefineScale(ng)=0) and the other grids get tidal
-!  forcing from the contact areas.
-!
-      DO ng=1,Ngrids
-        IF (.not.(RefinedGrid(ng).and.RefineScale(ng).gt.0)) THEN
-          LprocessTides(ng)=.TRUE.
-        END IF
-      END DO
-!
 !  Set boundary edge I- or J-indices for each variable type.
 !
       DO ng=1,Ngrids
