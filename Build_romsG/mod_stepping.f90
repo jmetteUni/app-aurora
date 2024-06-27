@@ -35,6 +35,8 @@
 !              changes are added to compute new 3D primitive equation  !
 !              variables.                                              !
 !                                                                      !
+!  NTC       Number of tidal components to consider.                   !
+!                                                                      !
 !=======================================================================
 !
 !       USE mod_param
@@ -60,6 +62,7 @@
 !
         integer, allocatable :: Lnew(:)
         integer, allocatable :: Lold(:)
+        integer, allocatable :: NTC(:)
 !
       CONTAINS
 !
@@ -115,6 +118,9 @@
         allocate ( Lold(Ngrids) )
       END IF
       Lold(1:Ngrids)=1
+      IF (.not.allocated(NTC)) THEN
+        allocate ( NTC(Ngrids) )
+      END IF
 !
       RETURN
       END SUBROUTINE allocate_stepping
@@ -142,6 +148,7 @@
 !$OMP END PARALLEL
       IF (allocated(Lnew))  deallocate ( Lnew )
       IF (allocated(Lold))  deallocate ( Lold )
+      IF (allocated(NTC))   deallocate ( NTC )
 !
       RETURN
       END SUBROUTINE deallocate_stepping

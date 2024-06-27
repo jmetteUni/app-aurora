@@ -98,6 +98,23 @@
 !
       IF ((exit_flag.eq.5).or.(exit_flag.eq.6)) RETURN
 !
+!  If appropriate, close input forcing files and set several parameter
+!  to closed state.
+!
+      DO i=1,nFfiles(ng)
+        IF ((FRC(i,ng)%Nfiles.gt.0).and.(FRC(i,ng)%ncid.ne.-1)) THEN
+          Fcount=FRC(i,ng)%Fcount
+          CALL close_file (ng, model, FRC(i,ng),                        &
+     &                     FRC(i,ng)%files(Fcount), .FALSE.)
+          IF (FoundError(exit_flag, NoError, 126, MyFile)) RETURN
+          FRCids=-1
+          FRCncid=-1
+          Fcount=1
+          FRC(i,ng)%Fcount=Fcount
+          FRC(i,ng)%name=TRIM(FRC(i,ng)%files(Fcount))
+        END IF
+      END DO
+!
 !  If appropriate, close boundary files.
 !
       IF (ObcData(ng)) THEN

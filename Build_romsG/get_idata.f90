@@ -23,6 +23,7 @@
       USE mod_scalars
       USE mod_sources
       USE mod_stepping
+      USE mod_tides
 !
       USE nf_fread3d_mod, ONLY : nf_fread3d
       USE nf_fread4d_mod, ONLY : nf_fread4d
@@ -61,6 +62,86 @@
 !-----------------------------------------------------------------------
 !
       CALL wclock_on (ng, iNLM, 3, 118, MyFile)
+!
+!-----------------------------------------------------------------------
+!  Tide period, amplitude, phase, and currents.
+!-----------------------------------------------------------------------
+!
+!  Tidal Period.
+!
+      IF (LprocessTides(ng)) THEN
+        IF (iic(ng).eq.0) THEN
+          CALL get_ngfld (ng, iNLM, idTper, TIDE(ng)%ncid,              &
+     &                    1, TIDE(ng), recordless, update(1),           &
+     &                    1, MTC, 1, 1, 1, NTC(ng), 1,                  &
+     &                    TIDES(ng) % Tperiod)
+          IF (FoundError(exit_flag, NoError, 138, MyFile)) RETURN
+        END IF
+      END IF
+!
+!  Tidal elevation amplitude and phase. In order to read data as a
+!  function of tidal period, we need to reset the model time variables
+!  temporarily.
+!
+      IF (LprocessTides(ng)) THEN
+        IF (iic(ng).eq.0) THEN
+          time_save=time(ng)
+          time(ng)=8640000.0_r8
+          tdays(ng)=time(ng)*sec2day
+!
+          CALL get_2dfld (ng, iNLM, idTzam, TIDE(ng)%ncid,              &
+     &                    1, TIDE(ng), update(1),                       &
+     &                    LBi, UBi, LBj, UBj, MTC, NTC(ng),             &
+     &                    TIDES(ng) % SSH_Tamp)
+          IF (FoundError(exit_flag, NoError, 165, MyFile)) RETURN
+!
+          CALL get_2dfld (ng, iNLM, idTzph, TIDE(ng)%ncid,              &
+     &                    1, TIDE(ng), update(1),                       &
+     &                    LBi, UBi, LBj, UBj, MTC, NTC(ng),             &
+     &                    TIDES(ng) % SSH_Tphase)
+          IF (FoundError(exit_flag, NoError, 177, MyFile)) RETURN
+!
+          time(ng)=time_save
+          tdays(ng)=time(ng)*sec2day
+        END IF
+      END IF
+!
+!  Tidal currents angle, phase, major and minor ellipse axis.
+!
+      IF (LprocessTides(ng)) THEN
+        IF (iic(ng).eq.0) THEN
+          time_save=time(ng)
+          time(ng)=8640000.0_r8
+          tdays(ng)=time(ng)*sec2day
+!
+          CALL get_2dfld (ng, iNLM, idTvan, TIDE(ng)%ncid,              &
+     &                    1, TIDE(ng), update(1),                       &
+     &                    LBi, UBi, LBj, UBj, MTC, NTC(ng),             &
+     &                    TIDES(ng) % UV_Tangle)
+          IF (FoundError(exit_flag, NoError, 205, MyFile)) RETURN
+!
+          CALL get_2dfld (ng, iNLM, idTvph, TIDE(ng)%ncid,              &
+     &                    1, TIDE(ng), update(1),                       &
+     &                    LBi, UBi, LBj, UBj, MTC, NTC(ng),             &
+     &                    TIDES(ng) % UV_Tphase)
+          IF (FoundError(exit_flag, NoError, 217, MyFile)) RETURN
+!
+          CALL get_2dfld (ng, iNLM, idTvma, TIDE(ng)%ncid,              &
+     &                    1, TIDE(ng), update(1),                       &
+     &                    LBi, UBi, LBj, UBj, MTC, NTC(ng),             &
+     &                    TIDES(ng) % UV_Tmajor)
+          IF (FoundError(exit_flag, NoError, 229, MyFile)) RETURN
+!
+          CALL get_2dfld (ng, iNLM, idTvmi, TIDE(ng)%ncid,              &
+     &                    1, TIDE(ng), update(1),                       &
+     &                    LBi, UBi, LBj, UBj, MTC, NTC(ng),             &
+     &                    TIDES(ng) % UV_Tminor)
+          IF (FoundError(exit_flag, NoError, 241, MyFile)) RETURN
+!
+          time(ng)=time_save
+          tdays(ng)=time(ng)*sec2day
+        END IF
+      END IF
 !
 !-----------------------------------------------------------------------
 !  Read in point Sources/Sinks position, direction, special flag, and

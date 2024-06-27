@@ -67,6 +67,9 @@
      &                   GRID(ng) % angler,                             &
      &                   GRID(ng) % CosAngler,                          &
      &                   GRID(ng) % SinAngler,                          &
+     &                   GRID(ng) % Cos2Lat,                            &
+     &                   GRID(ng) % SinLat2,                            &
+     &                   GRID(ng) % latr,                               &
      &                   GRID(ng) % Hz,                                 &
      &                   GRID(ng) % z_r,                                &
      &                   GRID(ng) % z_w,                                &
@@ -98,6 +101,7 @@
      &                         nstp, nnew,                              &
      &                         f, h, pm, pn,                            &
      &                         angler, CosAngler, SinAngler,            &
+     &                         Cos2Lat, SinLat2, latr,                  &
      &                         Hz, z_r, z_w,                            &
      &                         om_p, om_r, om_u, om_v,                  &
      &                         on_p, on_r, on_u, on_v,                  &
@@ -126,6 +130,7 @@
       real(r8), intent(in) :: f(LBi:,LBj:)
       real(r8), intent(in) :: pm(LBi:,LBj:)
       real(r8), intent(in) :: pn(LBi:,LBj:)
+      real(r8), intent(in) :: latr(LBi:,LBj:)
       real(r8), intent(inout) :: h(LBi:,LBj:)
       real(r8), intent(inout) :: angler(LBi:,LBj:)
       real(r8), intent(out) :: om_p(LBi:,LBj:)
@@ -148,6 +153,8 @@
       real(r8), intent(out) :: pmon_v(LBi:,LBj:)
       real(r8), intent(out) :: CosAngler(LBi:,LBj:)
       real(r8), intent(out) :: SinAngler(LBi:,LBj:)
+      real(r8), intent(out) :: Cos2Lat(LBi:,LBj:)
+      real(r8), intent(out) :: SinLat2(LBi:,LBj:)
       real(r8), intent(out) :: Hz(LBi:,LBj:,:)
       real(r8), intent(out) :: z_r(LBi:,LBj:,:)
       real(r8), intent(out) :: z_w(LBi:,LBj:,0:)
@@ -156,6 +163,7 @@
 !
       integer :: NSUB, i, ibry, is, j, k, rec
       real(r8) :: cff, cff1, cff2
+      real(r8) :: cosphi, phi
       real(dp) :: my_DXmax, my_DXmin, my_DYmax, my_DYmin
       real(dp) :: my_DZmax, my_DZmin
       real(dp) :: my_Cg_Cor, my_Cg_max, my_Cg_min, my_grdmax
@@ -384,6 +392,30 @@
         CALL exchange_r2d_tile (ng, tile,                               &
      &                          LBi, UBi, LBj, UBj,                     &
      &                          SinAngler)
+      END IF
+!
+!-----------------------------------------------------------------------
+! Compute squared cosine of latitude and sine of twice latitude.
+!-----------------------------------------------------------------------
+!
+      DO j=JstrT,JendT
+        DO i=IstrT,IendT
+          phi=latr(i,j)*deg2rad
+          cosphi=COS(phi)
+          Cos2Lat(i,j)=cosphi*cosphi                     ! COS2(latr)
+          SinLat2(i,j)=SIN(2.0_r8*phi)                   ! SIN(2*latr)
+        END DO
+      END DO
+!
+!  Exchange boundary information.
+!
+      IF (EWperiodic(ng).or.NSperiodic(ng)) THEN
+        CALL exchange_r2d_tile (ng, tile,                               &
+     &                          LBi, UBi, LBj, UBj,                     &
+     &                          Cos2Lat)
+        CALL exchange_r2d_tile (ng, tile,                               &
+     &                          LBi, UBi, LBj, UBj,                     &
+     &                          SinLat2)
       END IF
 !
 !-----------------------------------------------------------------------

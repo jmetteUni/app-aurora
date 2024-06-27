@@ -121,16 +121,16 @@
 !  4D-Var control vector.
 !
       IF ((model.le.11).or.(model.eq.14).or.(model.eq.15)) THEN
-        IF (nrrec(ng).ne.0) THEN
-          get_var(idFsur)=.TRUE.
+        get_var(idFsur)=.TRUE.
+        IF (model.ne.7) THEN        ! not needed by impulse forcing
           get_var(idUbar)=.TRUE.
           get_var(idVbar)=.TRUE.
-          get_var(idUvel)=.TRUE.
-          get_var(idVvel)=.TRUE.
-          DO itrc=1,NAT
-            get_var(idTvar(itrc))=.TRUE.
-          END DO
         END IF
+        get_var(idUvel)=.TRUE.
+        get_var(idVvel)=.TRUE.
+        DO itrc=1,NAT
+          get_var(idTvar(itrc))=.TRUE.
+        END DO
       END IF
 !
 !  Scan variable list from input NetCDF and activate switches for

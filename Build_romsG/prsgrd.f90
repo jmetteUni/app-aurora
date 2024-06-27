@@ -91,6 +91,7 @@
      &                    GRID(ng) % z_r,                               &
      &                    GRID(ng) % z_w,                               &
      &                    OCEAN(ng) % rho,                              &
+     &                    OCEAN(ng) % eq_tide,                          &
      &                    DIAGS(ng) % DiaRU,                            &
      &                    DIAGS(ng) % DiaRV,                            &
      &                    OCEAN(ng) % ru,                               &
@@ -108,6 +109,7 @@
      &                          om_v, on_u,                             &
      &                          Hz, z_r, z_w,                           &
      &                          rho,                                    &
+     &                          eq_tide,                                &
      &                          DiaRU, DiaRV,                           &
      &                          ru, rv)
 !***********************************************************************
@@ -127,6 +129,7 @@
       real(r8), intent(in) :: z_r(LBi:,LBj:,:)
       real(r8), intent(in) :: z_w(LBi:,LBj:,0:)
       real(r8), intent(in) :: rho(LBi:,LBj:,:)
+      real(r8), intent(in) :: eq_tide(LBi:,LBj:)
       real(r8), intent(inout) :: DiaRU(LBi:,LBj:,:,:,:)
       real(r8), intent(inout) :: DiaRV(LBi:,LBj:,:,:,:)
       real(r8), intent(inout) :: ru(LBi:,LBj:,0:,:)
@@ -249,6 +252,7 @@
           P(i,j,N(ng))=g*z_w(i,j,N(ng))+                                &
      &                 GRho*(rho(i,j,N(ng))+cff2)*                      &
      &                 (z_w(i,j,N(ng))-z_r(i,j,N(ng)))
+          P(i,j,N(ng))=P(i,j,N(ng))-g*eq_tide(i,j)
         END DO
         DO k=N(ng)-1,1,-1
           DO i=IstrU-1,Iend

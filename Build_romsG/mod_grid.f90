@@ -25,6 +25,8 @@
 !               RHO-points.                                            !
 !  CosAngler  Cosine of curvilinear angle, angler.                     !
 !  SinAngler  Sine of curvilinear angle, angler.                       !
+!  Cos2Lat    Squared cosine of latitude, COS2(latr).                  !
+!  SinLat2    Sine of twice the latitude, SIN(2*latr).                 !
 !  dmde       ETA-derivative of inverse metric factor pm,              !
 !               d(1/pm)/d(ETA).                                        !
 !  dndx       XI-derivative  of inverse metric factor pn,              !
@@ -105,6 +107,8 @@
           real(r8), pointer :: angler(:,:)
           real(r8), pointer :: CosAngler(:,:)
           real(r8), pointer :: SinAngler(:,:)
+          real(r8), pointer :: Cos2Lat(:,:)
+          real(r8), pointer :: SinLat2(:,:)
           real(r8), pointer :: f(:,:)
           real(r8), pointer :: fomn(:,:)
           real(r8), pointer :: grdscl(:,:)
@@ -196,6 +200,10 @@
       allocate ( GRID(ng) % CosAngler(LBi:UBi,LBj:UBj) )
       Dmem(ng)=Dmem(ng)+size2d
       allocate ( GRID(ng) % SinAngler(LBi:UBi,LBj:UBj) )
+      Dmem(ng)=Dmem(ng)+size2d
+      allocate ( GRID(ng) % Cos2Lat(LBi:UBi,LBj:UBj) )
+      Dmem(ng)=Dmem(ng)+size2d
+      allocate ( GRID(ng) % SinLat2(LBi:UBi,LBj:UBj) )
       Dmem(ng)=Dmem(ng)+size2d
       allocate ( GRID(ng) % f(LBi:UBi,LBj:UBj) )
       Dmem(ng)=Dmem(ng)+size2d
@@ -458,6 +466,8 @@
             GRID(ng) % angler(i,j) = IniMetricVal
             GRID(ng) % CosAngler(i,j) = IniVal
             GRID(ng) % SinAngler(i,j) = IniVal
+            GRID(ng) % Cos2Lat(i,j) = IniVal
+            GRID(ng) % SinLat2(i,j) = IniVal
             GRID(ng) % f(i,j) = IniMetricVal
             GRID(ng) % fomn(i,j) = IniVal
             GRID(ng) % grdscl(i,j) = IniVal

@@ -596,6 +596,9 @@
             CASE ('BVF_BAK')
               Npts=load_r(Nval, Rval, 1, Rvalue)
               bvf_bak=Rvalue(1)
+            CASE ('Lnodal')
+              Npts=load_l(Nval, Cval, 1, Lvalue)
+              Lnodal=Lvalue(1)
             CASE ('DSTART')
               Npts=load_r(Nval, Rval, 1, Dvalue)
               dstart=Dvalue(1)
@@ -1941,6 +1944,10 @@
               label='SSF - Sources/Sinks forcing fields'
               Npts=load_s1d(Nval, Cval, Cdim, line, label, igrid,       &
      &                      Ngrids, Nfiles, inp_lib, SSF)
+            CASE ('TIDENAME')
+              label='TIDE - Tidal forcing fields'
+              Npts=load_s1d(Nval, Cval, Cdim, line, label, igrid,       &
+     &                      Ngrids, Nfiles, inp_lib, TIDE)
             CASE ('NFFILES')
               Npts=load_i(Nval, Rval, Ngrids, nFfiles)
               DO ng=1,Ngrids
@@ -2328,8 +2335,12 @@
           END IF
           WRITE (out,140) rho0, 'rho0',                                 &
      &          'Mean density (kg/m3) for Boussinesq approximation.'
+          WRITE (out,170) Lnodal, 'Lnodal',                             &
+     &          'Switch to apply a 18.5-year lunar nodal correction.'
           WRITE (out,140) dstart, 'dstart',                             &
      &          'Time-stamp assigned to model initialization (days).'
+          WRITE (out,140) tide_start, 'tide_start',                     &
+     &          'Reference time origin for tidal forcing (days).'
           WRITE (out,150) time_ref, 'time_ref',                         &
      &          'Reference time for units attribute (yyyymmdd.dd)'
           DO i=1,NAT+NPT
@@ -2945,6 +2956,13 @@
           IF (Master.and.Lwrite) WRITE (out,230)                        &
      &      '                 Input Grid File:  ', TRIM(fname)
         END IF
+        fname=INI(ng)%name
+        IF (.not.find_file(ng, out, fname, 'ININAME')) THEN
+          IF (FoundError(exit_flag, NoError, 7447, MyFile)) RETURN
+        ELSE
+          IF (Master.and.Lwrite) WRITE (out,230)                        &
+            '    Input Nonlinear Initial File:  ', TRIM(fname)
+        END IF
         IF (LuvSrc(ng).or.LwSrc(ng).or.(ANY(LtracerSrc(:,ng)))) THEN
           fname=SSF(ng)%name
           IF (.not.find_file(ng, out, fname, 'SSFNAME')) THEN
@@ -2954,6 +2972,31 @@
      &        '        Input Sources/Sinks File:  ', TRIM(fname)
           END IF
         END IF
+        IF (ng.eq.1) THEN                 ! only tidal forcing on grid 1
+          fname=TIDE(ng)%name
+          IF (.not.find_file(ng, out, fname, 'TIDENAME')) THEN
+            IF (FoundError(exit_flag, NoError, 7515, MyFile)) RETURN
+          ELSE
+            IF (Master.and.Lwrite) WRITE (out,230)                      &
+     &        '              Tidal Forcing File:  ', TRIM(fname)
+          END IF
+        END IF
+        DO i=1,nFfiles(ng)
+          DO ifile=1,FRC(i,ng)%Nfiles
+            fname=FRC(i,ng)%files(ifile)
+            IF (.not.find_file(ng, out, fname, 'FRCNAME')) THEN
+              IF (FoundError(exit_flag, NoError, 7527, MyFile))         &
+     &          RETURN
+            ELSE
+              IF (ifile.eq.1) THEN
+                IF (Master.and.Lwrite) WRITE (out,310)                  &
+     &            '           Input Forcing File ', i,':  ', TRIM(fname)
+              ELSE
+                IF (Master.and.Lwrite) WRITE (out,'(37x,a)') TRIM(fname)
+              END IF
+            END IF
+          END DO
+        END DO
         DO i=1,nCLMfiles(ng)
           IF (CLM_FILE(ng)) THEN
             DO ifile=1,CLM(i,ng)%Nfiles
@@ -3029,6 +3072,14 @@
           END DO
         END IF
       END IF
+!
+!-----------------------------------------------------------------------
+!  Check and report tidal reference date for zero phase.
+!-----------------------------------------------------------------------
+!
+      DO ng=1,Ngrids
+        CALL tides_date (ng)
+      END DO
 !
 !-----------------------------------------------------------------------
 !  Rescale active tracer parameters
