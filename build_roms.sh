@@ -145,7 +145,7 @@ export   ROMS_APPLICATION=AURORA
 if [ -n "${ROMS_ROOT_DIR:+1}" ]; then
   export      MY_ROOT_DIR=${ROMS_ROOT_DIR}
 else
-  export      MY_ROOT_DIR=${HOME}/Dokumente/model
+  export      MY_ROOT_DIR=${HOME}
 fi
 
 export     MY_PROJECT_DIR=${PWD}

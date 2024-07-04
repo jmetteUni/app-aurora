@@ -260,9 +260,9 @@
         character (len=80)  :: my_fc = "/usr/bin/gfortran"
         character (len=512) :: my_fflags = "-frepack-arrays -fallow-argument-mismatch        -g -O0 -fbounds-check -fbacktrace -fcheck=all -finit-real=nan -ffpe-trap=invalid,zero,overflow -ffree-form -ffree-line-length-none"
 !
-        character (len=256) :: Adir = "/home/jonathan/Dokumente/model/roms_project/aurora/Functionals"
-        character (len=256) :: Hdir = "/home/jonathan/Dokumente/model/roms_project/aurora"
+        character (len=256) :: Adir = "/home/jmette/roms_project/app-aurora/Functionals"
+        character (len=256) :: Hdir = "/home/jmette/roms_project/app-aurora"
         character (len=256) :: Hfile = "aurora.h"
-        character (len=256) :: Rdir = "/home/jonathan/Dokumente/model/roms"
+        character (len=256) :: Rdir = "/home/jmette/roms"
 !
       END MODULE mod_strings

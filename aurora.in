@@ -73,7 +73,7 @@
 ! Input variable information file name.  This file needs to be processed
 ! first so all information arrays can be initialized properly.
 
-     VARNAME = /home/jonathan/Dokumente/model/roms_project/aurora/varinfo.yaml
+     VARNAME = /home/jmette/roms_project/app-aurora/varinfo.yaml
 
 ! Number of nested grids.
 
@@ -1061,8 +1061,8 @@ PIO_I2C_Preq = 65                 ! Maximum pending I2C requests
 
 ! Input NetCDF file names, [1:Ngrids].
 
-     GRDNAME == ../aurora/Data/Grid_Aurora_M64L64.nc
-     ININAME == ../aurora/Data/Grid_Aurora_M64L64_ini_nemo_06420304T00_64layer.nc
+     GRDNAME == ../app-aurora/Data/Grid_Aurora_M64L64.nc
+     ININAME == ../app-aurora/Data/Grid_Aurora_M64L64_ini_nemo_06420304T00_64layer.nc
 !     ININAME == roms_ini.nc
      ITLNAME == roms_itl.nc
      IRPNAME == roms_irp.nc
@@ -1106,7 +1106,7 @@ PIO_I2C_Preq = 65                 ! Maximum pending I2C requests
     NBCFILES == 1                          ! number of boundary files
 
 !      BRYNAME == roms_bry.nc
-      BRYNAME == ../aurora/Data/Grid_Aurora_M64L64_bry_nemo_20220726T00_20230701T00.nc
+      BRYNAME == ../app-aurora/Data/Grid_Aurora_M64L64_bry_nemo_20220726T00_20230701T00.nc
 
 ! Input climatology file names. The USER has the option to separate the
 ! climatology variables into individual NetCDF files (NCLMFILES > 1),
@@ -1131,7 +1131,7 @@ PIO_I2C_Preq = 65                 ! Maximum pending I2C requests
 ! Input tidal forcing file name.
 
 !    TIDENAME == roms_tides.nc
-   TIDENAME == ../aurora/Data/Grid_Aurora_M64L64_tides.nc
+   TIDENAME == ../app-aurora/Data/Grid_Aurora_M64L64_tides.nc
      
 ! Input forcing NetCDF file name(s).
 !
@@ -1154,8 +1154,8 @@ PIO_I2C_Preq = 65                 ! Maximum pending I2C requests
      NFFILES == 1                          ! number of unique forcing files
 
 !     FRCNAME == roms_frc.nc
-!     FRCNAME == ../aurora/Data/Grid_Aurora_M55L55_bhflux_130MW_large_heat3_20230605T00.nc               ! forcing file 1, grid 1
-     FRCNAME == ../aurora/Data/Grid_Aurora_M64L64_bhflux_90000000MW__large_heat3_20220726T00.nc              ! forcing file 1, grid 1
+!     FRCNAME == ../app-aurora/Data/Grid_Aurora_M55L55_bhflux_130MW_large_heat3_20230605T00.nc               ! forcing file 1, grid 1
+     FRCNAME == ../app-aurora/Data/Grid_Aurora_M64L64_bhflux_90000000MW__large_heat3_20220726T00.nc              ! forcing file 1, grid 1
 
 ! Output NetCDF file names, [1:Ngrids].
 
