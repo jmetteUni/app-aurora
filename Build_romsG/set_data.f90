@@ -79,6 +79,8 @@
       USE exchange_2d_mod
       USE set_2dfld_mod
       USE set_3dfld_mod
+      USE mp_exchange_mod, ONLY : mp_exchange2d
+      USE mp_exchange_mod, ONLY : mp_exchange3d
       USE strings_mod,     ONLY : FoundError
 !
       implicit none

@@ -30,6 +30,7 @@
       USE mod_scalars
 !
       USE exchange_3d_mod
+      USE mp_exchange_mod, ONLY : mp_exchange3d
       USE dateclock_mod,   ONLY : time_string
 !
 !  Imported variable declarations.
@@ -243,6 +244,19 @@
      &                              LBi, UBi, LBj, UBj, LBk, UBk,       &
      &                              Fout)
           END IF
+        END IF
+        IF (.not.LapplyBC) THEN
+          CALL mp_exchange3d (ng, tile, model, 1,                       &
+     &                        LBi, UBi, LBj, UBj, LBk, UBk,             &
+     &                        NghostPoints,                             &
+     &                        .FALSE., .FALSE.,                         &
+     &                        Fout)
+        ELSE
+          CALL mp_exchange3d (ng, tile, model, 1,                       &
+     &                        LBi, UBi, LBj, UBj, LBk, UBk,             &
+     &                        NghostPoints,                             &
+     &                        EWperiodic(ng), NSperiodic(ng),           &
+     &                        Fout)
         END IF
       END IF
       RETURN

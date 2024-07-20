@@ -145,12 +145,12 @@
 !-----------------------------------------------------------------------
 !
       IF (EWperiodic(ng)) THEN
-        EW_exchange=.TRUE.
+        EW_exchange=NtileI(ng).eq.1
       ELSE
         EW_exchange=.FALSE.
       END IF
       IF (NSperiodic(ng)) THEN
-        NS_exchange=.TRUE.
+        NS_exchange=NtileJ(ng).eq.1
       ELSE
         NS_exchange=.FALSE.
       END IF
@@ -373,12 +373,12 @@
 !-----------------------------------------------------------------------
 !
       IF (EWperiodic(ng)) THEN
-        EW_exchange=.TRUE.
+        EW_exchange=NtileI(ng).eq.1
       ELSE
         EW_exchange=.FALSE.
       END IF
       IF (NSperiodic(ng)) THEN
-        NS_exchange=.TRUE.
+        NS_exchange=NtileJ(ng).eq.1
       ELSE
         NS_exchange=.FALSE.
       END IF
@@ -601,12 +601,12 @@
 !-----------------------------------------------------------------------
 !
       IF (EWperiodic(ng)) THEN
-        EW_exchange=.TRUE.
+        EW_exchange=NtileI(ng).eq.1
       ELSE
         EW_exchange=.FALSE.
       END IF
       IF (NSperiodic(ng)) THEN
-        NS_exchange=.TRUE.
+        NS_exchange=NtileJ(ng).eq.1
       ELSE
         NS_exchange=.FALSE.
       END IF
@@ -829,12 +829,12 @@
 !-----------------------------------------------------------------------
 !
       IF (EWperiodic(ng)) THEN
-        EW_exchange=.TRUE.
+        EW_exchange=NtileI(ng).eq.1
       ELSE
         EW_exchange=.FALSE.
       END IF
       IF (NSperiodic(ng)) THEN
-        NS_exchange=.TRUE.
+        NS_exchange=NtileJ(ng).eq.1
       ELSE
         NS_exchange=.FALSE.
       END IF

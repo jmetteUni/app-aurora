@@ -30,6 +30,7 @@
       USE mod_scalars
 !
       USE exchange_2d_mod
+      USE mp_exchange_mod, ONLY : mp_exchange2d
 !
 !  Imported variable declarations.
 !
@@ -225,6 +226,19 @@
      &                              LBi, UBi, LBj, UBj,                 &
      &                              Fout)
           END IF
+        END IF
+        IF (.not.LapplyBC) THEN
+          CALL mp_exchange2d (ng, tile, model, 1,                       &
+     &                        LBi, UBi, LBj, UBj,                       &
+     &                        NghostPoints,                             &
+     &                        .FALSE., .FALSE.,                         &
+     &                        Fout)
+        ELSE
+          CALL mp_exchange2d (ng, tile, model, 1,                       &
+     &                        LBi, UBi, LBj, UBj,                       &
+     &                        NghostPoints,                             &
+     &                        EWperiodic(ng), NSperiodic(ng),           &
+     &                        Fout)
         END IF
       END IF
       RETURN

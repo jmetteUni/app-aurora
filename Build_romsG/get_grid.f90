@@ -23,6 +23,7 @@
       USE mod_scalars
 !
       USE exchange_2d_mod
+      USE mp_exchange_mod, ONLY : mp_exchange2d
       USE nf_fread2d_mod,  ONLY : nf_fread2d
       USE strings_mod,     ONLY : FoundError, find_string
 !
@@ -252,6 +253,11 @@
      &                                LBi, UBi, LBj, UBj,               &
      &                                GRID(ng) % h)
             END IF
+            CALL mp_exchange2d (ng, tile, model, 1,                     &
+     &                          LBi, UBi, LBj, UBj,                     &
+     &                          NghostPoints,                           &
+     &                          EWperiodic(ng), NSperiodic(ng),         &
+     &                          GRID(ng) % h)
 !
 !  Read in horizontal, spatially varying factor to increase/decrease
 !  viscosity (nondimensional) in specific areas of the domain.
@@ -281,6 +287,11 @@
      &                                  LBi, UBi, LBj, UBj,             &
      &                                  MIXING(ng) % visc_factor)
               END IF
+              CALL mp_exchange2d (ng, tile, model, 1,                   &
+     &                            LBi, UBi, LBj, UBj,                   &
+     &                            NghostPoints,                         &
+     &                            EWperiodic(ng), NSperiodic(ng),       &
+     &                            MIXING(ng) % visc_factor)
             END IF
 !
 !  Read in horizontal, spatially varying factor to increase/decrease
@@ -311,6 +322,11 @@
      &                                  LBi, UBi, LBj, UBj,             &
      &                                  MIXING(ng) % diff_factor)
               END IF
+              CALL mp_exchange2d (ng, tile, model, 1,                   &
+     &                            LBi, UBi, LBj, UBj,                   &
+     &                            NghostPoints,                         &
+     &                            EWperiodic(ng), NSperiodic(ng),       &
+     &                            MIXING(ng) % diff_factor)
             END IF
 !
 !  Read in Coriolis parameter.
@@ -338,6 +354,11 @@
      &                                LBi, UBi, LBj, UBj,               &
      &                                GRID(ng) % f)
             END IF
+            CALL mp_exchange2d (ng, tile, model, 1,                     &
+     &                          LBi, UBi, LBj, UBj,                     &
+     &                          NghostPoints,                           &
+     &                          EWperiodic(ng), NSperiodic(ng),         &
+     &                          GRID(ng) % f)
 !
 !  Read in coordinate transfomation metrics (m) associated with the
 !  differential distances in XI.
@@ -365,6 +386,11 @@
      &                                LBi, UBi, LBj, UBj,               &
      &                                GRID(ng) % pm)
             END IF
+            CALL mp_exchange2d (ng, tile, model, 1,                     &
+     &                          LBi, UBi, LBj, UBj,                     &
+     &                          NghostPoints,                           &
+     &                          EWperiodic(ng), NSperiodic(ng),         &
+     &                          GRID(ng) % pm)
 !
 !  Read in coordinate transfomation metrics (n) associated with the
 !  differential distances in ETA.
@@ -392,6 +418,11 @@
      &                                LBi, UBi, LBj, UBj,               &
      &                                GRID(ng) % pn)
             END IF
+            CALL mp_exchange2d (ng, tile, model, 1,                     &
+     &                          LBi, UBi, LBj, UBj,                     &
+     &                          NghostPoints,                           &
+     &                          EWperiodic(ng), NSperiodic(ng),         &
+     &                          GRID(ng) % pn)
 !
 !  Read in X-coordinates at PSI-points.
 !
@@ -413,6 +444,11 @@
      &                            ng, TRIM(ncname), Fmin, Fmax
               END IF
             END IF
+            CALL mp_exchange2d (ng, tile, model, 1,                     &
+     &                          LBi, UBi, LBj, UBj,                     &
+     &                          NghostPoints,                           &
+     &                          .FALSE., .FALSE.,                       &
+     &                          GRID(ng) % xp)
 !
 !  Read in Y-coordinates at PSI-points.
 !
@@ -434,6 +470,11 @@
      &                            ng, TRIM(ncname), Fmin, Fmax
               END IF
             END IF
+            CALL mp_exchange2d (ng, tile, model, 1,                     &
+     &                          LBi, UBi, LBj, UBj,                     &
+     &                          NghostPoints,                           &
+     &                          .FALSE., .FALSE.,                       &
+     &                          GRID(ng) % yp)
 !
 !  Read in X-coordinates at RHO-points.
 !
@@ -459,6 +500,11 @@
               LonMin(ng)=Fmin
               LonMax(ng)=Fmax
             END IF
+            CALL mp_exchange2d (ng, tile, model, 1,                     &
+     &                          LBi, UBi, LBj, UBj,                     &
+     &                          NghostPoints,                           &
+     &                          .FALSE., .FALSE.,                       &
+     &                          GRID(ng) % xr)
 !
 !  Read in Y-coordinates at RHO-points.
 !
@@ -484,6 +530,11 @@
               LatMin(ng)=Fmin
               LatMax(ng)=Fmax
             END IF
+            CALL mp_exchange2d (ng, tile, model, 1,                     &
+     &                          LBi, UBi, LBj, UBj,                     &
+     &                          NghostPoints,                           &
+     &                          .FALSE., .FALSE.,                       &
+     &                          GRID(ng) % yr)
 !
 !  Read in X-coordinates at U-points.
 !
@@ -505,6 +556,11 @@
      &                            ng, TRIM(ncname), Fmin, Fmax
               END IF
             END IF
+            CALL mp_exchange2d (ng, tile, model, 1,                     &
+     &                          LBi, UBi, LBj, UBj,                     &
+     &                          NghostPoints,                           &
+     &                          .FALSE., .FALSE.,                       &
+     &                          GRID(ng) % xu)
 !
 !  Read in Y-coordinates at U-points.
 !
@@ -526,6 +582,11 @@
      &                            ng, TRIM(ncname), Fmin, Fmax
               END IF
             END IF
+            CALL mp_exchange2d (ng, tile, model, 1,                     &
+     &                          LBi, UBi, LBj, UBj,                     &
+     &                          NghostPoints,                           &
+     &                          .FALSE., .FALSE.,                       &
+     &                          GRID(ng) % yu)
 !
 !  Read in X-coordinates at V-points.
 !
@@ -547,6 +608,11 @@
      &                            ng, TRIM(ncname), Fmin, Fmax
               END IF
             END IF
+            CALL mp_exchange2d (ng, tile, model, 1,                     &
+     &                          LBi, UBi, LBj, UBj,                     &
+     &                          NghostPoints,                           &
+     &                          .FALSE., .FALSE.,                       &
+     &                          GRID(ng) % xv)
 !
 !  Read in Y-coordinates at V-points.
 !
@@ -568,6 +634,11 @@
      &                            ng, TRIM(ncname), Fmin, Fmax
               END IF
             END IF
+            CALL mp_exchange2d (ng, tile, model, 1,                     &
+     &                          LBi, UBi, LBj, UBj,                     &
+     &                          NghostPoints,                           &
+     &                          .FALSE., .FALSE.,                       &
+     &                          GRID(ng) % yv)
 !
 !  Read in longitude at PSI-points.
 !
@@ -590,6 +661,11 @@
      &                              ng, TRIM(ncname), Fmin, Fmax
                 END IF
               END IF
+              CALL mp_exchange2d (ng, tile, model, 1,                   &
+     &                            LBi, UBi, LBj, UBj,                   &
+     &                            NghostPoints,                         &
+     &                            .FALSE., .FALSE.,                     &
+     &                            GRID(ng) % lonp)
             END IF
 !
 !  Read in latitude at PSI-points.
@@ -613,6 +689,11 @@
      &                              ng, TRIM(ncname), Fmin, Fmax
                 END IF
               END IF
+              CALL mp_exchange2d (ng, tile, model, 1,                   &
+     &                            LBi, UBi, LBj, UBj,                   &
+     &                            NghostPoints,                         &
+     &                            .FALSE., .FALSE.,                     &
+     &                            GRID(ng) % latp)
             END IF
 !
 !  Read in longitude at RHO-points.
@@ -637,6 +718,11 @@
      &                              LonMin(ng), LonMax(ng)
                 END IF
               END IF
+              CALL mp_exchange2d (ng, tile, model, 1,                   &
+     &                            LBi, UBi, LBj, UBj,                   &
+     &                            NghostPoints,                         &
+     &                            .FALSE., .FALSE.,                     &
+     &                            GRID(ng) % lonr)
             END IF
 !
 !  Read in latitude at RHO-points.
@@ -661,6 +747,11 @@
      &                              LatMin(ng), LatMax(ng)
                 END IF
               END IF
+              CALL mp_exchange2d (ng, tile, model, 1,                   &
+     &                            LBi, UBi, LBj, UBj,                   &
+     &                            NghostPoints,                         &
+     &                            .FALSE., .FALSE.,                     &
+     &                            GRID(ng) % latr)
             END IF
 !
 !  Read in longitude at U-points.
@@ -684,6 +775,11 @@
      &                              ng, TRIM(ncname), Fmin, Fmax
                 END IF
               END IF
+              CALL mp_exchange2d (ng, tile, model, 1,                   &
+     &                            LBi, UBi, LBj, UBj,                   &
+     &                            NghostPoints,                         &
+     &                            .FALSE., .FALSE.,                     &
+     &                            GRID(ng) % lonu)
             END IF
 !
 !  Read in latitude at U-points.
@@ -707,6 +803,11 @@
      &                              ng, TRIM(ncname), Fmin, Fmax
                 END IF
               END IF
+              CALL mp_exchange2d (ng, tile, model, 1,                   &
+     &                            LBi, UBi, LBj, UBj,                   &
+     &                            NghostPoints,                         &
+     &                            .FALSE., .FALSE.,                     &
+     &                            GRID(ng) % latu)
             END IF
 !
 !  Read in longitude at V-points.
@@ -730,6 +831,11 @@
      &                              ng, TRIM(ncname), Fmin, Fmax
                 END IF
               END IF
+              CALL mp_exchange2d (ng, tile, model, 1,                   &
+     &                            LBi, UBi, LBj, UBj,                   &
+     &                            NghostPoints,                         &
+     &                            .FALSE., .FALSE.,                     &
+     &                            GRID(ng) % lonv)
             END IF
 !
 !  Read in latitude at V-points.
@@ -753,6 +859,11 @@
      &                              ng, TRIM(ncname), Fmin, Fmax
                 END IF
               END IF
+              CALL mp_exchange2d (ng, tile, model, 1,                   &
+     &                            LBi, UBi, LBj, UBj,                   &
+     &                            NghostPoints,                         &
+     &                            .FALSE., .FALSE.,                     &
+     &                            GRID(ng) % latv)
             END IF
 !
 !  Read in angle (radians) between XI-axis and EAST at RHO-points.
@@ -781,6 +892,11 @@
      &                                LBi, UBi, LBj, UBj,               &
      &                                GRID(ng) % angler)
             END IF
+            CALL mp_exchange2d (ng, tile, model, 1,                     &
+     &                          LBi, UBi, LBj, UBj,                     &
+     &                          NghostPoints,                           &
+     &                          EWperiodic(ng), NSperiodic(ng),         &
+     &                          GRID(ng) % angler)
         END SELECT
       END DO
       IF (FoundError(exit_flag, NoError, 2085, MyFile)) THEN

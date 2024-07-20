@@ -81,6 +81,9 @@
       USE bc_2d_mod
       USE bc_3d_mod
       USE exchange_2d_mod
+      USE mp_exchange_mod, ONLY : mp_exchange2d
+      USE mp_exchange_mod, ONLY : mp_exchange3d
+      USE mp_exchange_mod, ONLY : mp_exchange4d
 !
       implicit none
 !
@@ -380,6 +383,11 @@
      &                          LBi, UBi, LBj, UBj,                     &
      &                          DIAGS(ng)%avgzeta)
       END IF
+      CALL mp_exchange2d (ng, tile, iNLM, 1,                            &
+     &                    LBi, UBi, LBj, UBj,                           &
+     &                    NghostPoints,                                 &
+     &                    EWperiodic(ng), NSperiodic(ng),               &
+     &                    DIAGS(ng)%avgzeta)
 !
 !  3D tracer diagnostics.
 !
@@ -389,6 +397,11 @@
      &                        LBi, UBi, LBj, UBj, 1, N(ng),             &
      &                        DIAGS(ng)%DiaTrc(:,:,:,it,idiag))
           END DO
+          CALL mp_exchange4d (ng, tile, iNLM, 1,                        &
+     &                        LBi, UBi, LBj, UBj, 1, N(ng), 1, NT(ng),  &
+     &                        NghostPoints,                             &
+     &                        EWperiodic(ng), NSperiodic(ng),           &
+     &                        DIAGS(ng)%DiaTrc(:,:,:,:,idiag))
         END DO
 !
 !  2D momentum diagnostics.
@@ -401,6 +414,12 @@
      &                      LBi, UBi, LBj, UBj,                         &
      &                      DIAGS(ng)%DiaV2d(:,:,idiag))
         END DO
+        CALL mp_exchange3d (ng, tile, iNLM, 2,                          &
+     &                      LBi, UBi, LBj, UBj, 1, NDM2d,               &
+     &                      NghostPoints,                               &
+     &                      EWperiodic(ng), NSperiodic(ng),             &
+     &                      DIAGS(ng)%DiaU2d,                           &
+     &                      DIAGS(ng)%DiaV2d)
 !
 !  3D momentum diagnostics.
 !
@@ -412,6 +431,12 @@
      &                      LBi, UBi, LBj, UBj, 1, N(ng),               &
      &                      DIAGS(ng)%DiaV3d(:,:,:,idiag))
         END DO
+        CALL mp_exchange4d (ng, tile, iNLM, 2,                          &
+     &                      LBi, UBi, LBj, UBj, 1, N(ng), 1, NDM3d,     &
+     &                      NghostPoints,                               &
+     &                      EWperiodic(ng), NSperiodic(ng),             &
+     &                      DIAGS(ng)%DiaU3d,                           &
+     &                      DIAGS(ng)%DiaV3d)
       END IF
 !
       RETURN

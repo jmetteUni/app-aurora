@@ -125,6 +125,7 @@
       USE mod_parallel
       USE mod_scalars
 !
+      USE distribute_mod, ONLY : mp_scatter2d
       USE nrutil, ONLY : gasdev
 !
 !  Imported variable declarations.
@@ -194,13 +195,10 @@
             Rmax=MAX(Rmax,random(ic))
           END DO
         END IF
-        ic=0
-        DO j=Jmin,Jmax
-          DO i=Imin,Imax
-            ic=ic+1
-            R(i,j)=random(ic)
-          END DO
-        END DO
+        Npts=SIZE(random)
+        CALL mp_scatter2d (ng, model, LBi, UBi, LBj, UBj,               &
+     &                     NghostPoints, gtype, Rmin, Rmax,             &
+     &                     Npts, random, R)
         IF (allocated(random)) THEN
           deallocate (random)
         END IF
@@ -219,6 +217,8 @@
       USE mod_parallel
       USE mod_scalars
 !
+      USE distribute_mod, ONLY : mp_bcastf
+      USE mp_exchange_mod, ONLY : mp_exchange2d_bry
       USE nrutil, ONLY : gasdev
 !
 !  Imported variable declarations.
@@ -274,6 +274,7 @@
         IF (Master) THEN
           CALL gasdev (random)
         END IF
+        CALL mp_bcastf (ng, model, random)
         Rmin=MINVAL(random)
         Rmax=MAXVAL(random)
         Ioff=1-LBij
@@ -281,6 +282,11 @@
           ic=i+Ioff
           R(i)=random(ic)
         END DO
+        CALL mp_exchange2d_bry (ng, tile, model, 1, boundary,           &
+     &                          LBij, UBij,                             &
+     &                          NghostPoints,                           &
+     &                          EWperiodic(ng), NSperiodic(ng),         &
+     &                          R)
       END IF
       RETURN
       END SUBROUTINE white_noise2d_bry
@@ -296,6 +302,7 @@
       USE mod_parallel
       USE mod_scalars
 !
+      USE distribute_mod, ONLY : mp_scatter3d
       USE nrutil, ONLY : gasdev
 !
 !  Imported variable declarations.
@@ -369,15 +376,10 @@
             Rmax=MAX(Rmax,random(ic))
           END DO
         END IF
-        ic=0
-        DO k=LBk,UBk
-          DO j=Jmin,Jmax
-            DO i=Imin,Imax
-              ic=ic+1
-              R(i,j,k)=random(ic)
-            END DO
-          END DO
-        END DO
+        Npts=SIZE(random)
+        CALL mp_scatter3d (ng, model, LBi, UBi, LBj, UBj, LBk, UBk,     &
+     &                     NghostPoints, gtype, Rmin, Rmax,             &
+     &                     Npts, random, R)
         IF (allocated(random)) THEN
           deallocate (random)
         END IF
@@ -396,6 +398,8 @@
       USE mod_parallel
       USE mod_scalars
 !
+      USE distribute_mod, ONLY : mp_bcastf
+      USE mp_exchange_mod, ONLY : mp_exchange3d_bry
       USE nrutil, ONLY : gasdev
 !
 !  Imported variable declarations.
@@ -455,6 +459,7 @@
         IF (Master) THEN
           CALL gasdev (random)
         END IF
+        CALL mp_bcastf (ng, model, random)
         Rmin=MINVAL(random)
         Rmax=MAXVAL(random)
         Ilen=UBij-LBij+1
@@ -466,6 +471,11 @@
             R(i,k)=random(ic)
           END DO
         END DO
+        CALL mp_exchange3d_bry (ng, tile, model, 1, boundary,           &
+     &                          LBij, UBij, LBk, UBk,                   &
+     &                          NghostPoints,                           &
+     &                          EWperiodic(ng), NSperiodic(ng),         &
+     &                          R)
       END IF
       RETURN
       END SUBROUTINE white_noise3d_bry

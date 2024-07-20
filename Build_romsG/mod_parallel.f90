@@ -16,6 +16,8 @@
 !
       implicit none
 !
+      include 'mpif.h'
+!
       PUBLIC :: allocate_parallel
       PUBLIC :: deallocate_parallel
       PUBLIC :: initialize_parallel
@@ -78,6 +80,12 @@
 !$OMP THREADPRIVATE (proc)
 !$OMP THREADPRIVATE (Cstr, Cend)
 !
+!  Switch manage time clock in "mp_bcasts". During initialization is
+!  set to .FALSE. because the profiling variables cannot be allocated
+!  and initialized before the "Ngrids" parameter is known.
+!
+      logical :: Lwclock = .FALSE.
+!
 !  Distributed-memory master process.
 !
       integer :: MyMaster = 0
@@ -89,6 +97,19 @@
       integer :: MyRank = 0
       integer :: MyThread = 0
 !$OMP THREADPRIVATE (MyThread)
+!
+!  Distributed-memory group communicator handles.
+!
+      integer :: OCN_COMM_WORLD             ! internal ROMS communicator
+!
+!  Set mpi_info opaque object handle.
+!
+      integer :: MP_INFO = MPI_INFO_NULL
+!
+!  Type of message-passage floating point bindings.
+!
+      integer, parameter :: MP_FLOAT = MPI_DOUBLE_PRECISION
+      integer, parameter :: MP_DOUBLE = MPI_DOUBLE_PRECISION
 !
       CONTAINS
 !
@@ -146,6 +167,13 @@
       Ctotal=0.0_r8
       total_cpu=0.0_r8
       total_model=0.0_r8
+!
+! Activate wall clock switch used only in "mp_bcasts". This switch
+! is set to .FALSE. during initialization before calling "inp_par.F"
+! because the above profiling variables are allocated and initialized
+! after the value of "Ngrids" is known.
+!
+      Lwclock=.TRUE.
       RETURN
       END SUBROUTINE allocate_parallel
 !
@@ -188,16 +216,37 @@
 !  Local variable declarations.
 !
       integer :: i
-      integer :: my_numthreads, my_threadnum
+      integer :: MyError
 !
 !-----------------------------------------------------------------------
-!  Initialize serial configuration.
+!  Initialize distributed-memory (1) configuration.
 !-----------------------------------------------------------------------
 !
-      numthreads=my_numthreads()
-      Master=.TRUE.
-      InpThread=.TRUE.
-      OutThread=.TRUE.
+!  Get the number of processes in the group associated with the world
+!  communicator.  Here FullRank and MyRank are the same. It is computed
+!  for consistency wity concurrent applications.
+!
+      CALL mpi_comm_size (OCN_COMM_WORLD, numthreads, MyError)
+      IF (MyError.ne.0) THEN
+        WRITE (stdout,10)
+  10    FORMAT (/,' ROMS/TOMS - Unable to inquire number of',           &
+     &            ' processors in the group.')
+        exit_flag=6
+        RETURN
+      END IF
+      CALL mpi_comm_rank (OCN_COMM_WORLD, FullRank, MyError)
+      ForkSize=numthreads
+!
+!  Identify master, input and output threads.
+!
+      Master=.FALSE.
+      InpThread=.FALSE.
+      OutThread=.FALSE.
+      IF (MyRank.eq.MyMaster) THEN
+        Master=.TRUE.
+        InpThread=.TRUE.
+        OutThread=.TRUE.
+      END IF
 !
       RETURN
       END SUBROUTINE initialize_parallel

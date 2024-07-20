@@ -93,6 +93,8 @@
 !
       USE exchange_2d_mod
       USE exchange_3d_mod
+      USE mp_exchange_mod, ONLY : mp_exchange2d
+      USE mp_exchange_mod, ONLY : mp_exchange3d
       USE uv_rotate_mod, ONLY : uv_rotate2d
       USE uv_rotate_mod, ONLY : uv_rotate3d
       USE vorticity_mod, ONLY : vorticity_tile
@@ -974,6 +976,11 @@
             CALL exchange_r2d_tile (ng, tile,                           &
      &                              LBi, UBi, LBj, UBj,                 &
      &                              AVERAGE(ng)%avgzeta)
+            CALL mp_exchange2d (ng, tile, iNLM, 1,                      &
+     &                          LBi, UBi, LBj, UBj,                     &
+     &                          NghostPoints,                           &
+     &                          EWperiodic(ng), NSperiodic(ng),         &
+     &                          AVERAGE(ng)%avgzeta)
           END IF
         END IF
         IF (Aout(idUbar,ng)) THEN
@@ -987,6 +994,11 @@
             CALL exchange_u2d_tile (ng, tile,                           &
      &                              LBi, UBi, LBj, UBj,                 &
      &                              AVERAGE(ng)%avgu2d)
+            CALL mp_exchange2d (ng, tile, iNLM, 1,                      &
+     &                          LBi, UBi, LBj, UBj,                     &
+     &                          NghostPoints,                           &
+     &                          EWperiodic(ng), NSperiodic(ng),         &
+     &                          AVERAGE(ng)%avgu2d)
           END IF
         END IF
         IF (Aout(idVbar,ng)) THEN
@@ -1000,6 +1012,11 @@
             CALL exchange_v2d_tile (ng, tile,                           &
      &                              LBi, UBi, LBj, UBj,                 &
      &                              AVERAGE(ng)%avgv2d)
+            CALL mp_exchange2d (ng, tile, iNLM, 1,                      &
+     &                          LBi, UBi, LBj, UBj,                     &
+     &                          NghostPoints,                           &
+     &                          EWperiodic(ng), NSperiodic(ng),         &
+     &                          AVERAGE(ng)%avgv2d)
           END IF
         END IF
         IF (Aout(idu2dE,ng).and.Aout(idv2dN,ng)) THEN
@@ -1018,6 +1035,12 @@
             CALL exchange_r2d_tile (ng, tile,                           &
      &                              LBi, UBi, LBj, UBj,                 &
      &                              AVERAGE(ng)%avgv2dN)
+            CALL mp_exchange2d (ng, tile, iNLM, 2,                      &
+     &                          LBi, UBi, LBj, UBj,                     &
+     &                          NghostPoints,                           &
+     &                          EWperiodic(ng), NSperiodic(ng),         &
+     &                          AVERAGE(ng)%avgu2dE,                    &
+     &                          AVERAGE(ng)%avgv2dN)
           END IF
         END IF
         IF (Aout(idUvel,ng)) THEN
@@ -1033,6 +1056,11 @@
             CALL exchange_u3d_tile (ng, tile,                           &
      &                              LBi, UBi, LBj, UBj, 1, N(ng),       &
      &                              AVERAGE(ng)%avgu3d)
+            CALL mp_exchange3d (ng, tile, iNLM, 1,                      &
+     &                          LBi, UBi, LBj, UBj, 1, N(ng),           &
+     &                          NghostPoints,                           &
+     &                          EWperiodic(ng), NSperiodic(ng),         &
+     &                          AVERAGE(ng)%avgu3d)
           END IF
         END IF
         IF (Aout(idVvel,ng)) THEN
@@ -1048,6 +1076,11 @@
             CALL exchange_v3d_tile (ng, tile,                           &
      &                              LBi, UBi, LBj, UBj, 1, N(ng),       &
      &                              AVERAGE(ng)%avgv3d)
+            CALL mp_exchange3d (ng, tile, iNLM, 1,                      &
+     &                          LBi, UBi, LBj, UBj, 1, N(ng),           &
+     &                          NghostPoints,                           &
+     &                          EWperiodic(ng), NSperiodic(ng),         &
+     &                          AVERAGE(ng)%avgv3d)
           END IF
         END IF
         IF (Aout(idu3dE,ng).and.Aout(idv3dN,ng)) THEN
@@ -1068,6 +1101,12 @@
             CALL exchange_r3d_tile (ng, tile,                           &
      &                              LBi, UBi, LBj, UBj, 1, N(ng),       &
      &                              AVERAGE(ng)%avgv3dN)
+            CALL mp_exchange3d (ng, tile, iNLM, 2,                      &
+     &                          LBi, UBi, LBj, UBj, 1, N(ng),           &
+     &                          NghostPoints,                           &
+     &                          EWperiodic(ng), NSperiodic(ng),         &
+     &                          AVERAGE(ng)%avgu3dE,                    &
+     &                          AVERAGE(ng)%avgv3dN)
           END IF
         END IF
         IF (Aout(idOvel,ng)) THEN
@@ -1083,6 +1122,11 @@
             CALL exchange_w3d_tile (ng, tile,                           &
      &                              LBi, UBi, LBj, UBj, 0, N(ng),       &
      &                              AVERAGE(ng)%avgw3d)
+            CALL mp_exchange3d (ng, tile, iNLM, 1,                      &
+     &                          LBi, UBi, LBj, UBj, 0, N(ng),           &
+     &                          NghostPoints,                           &
+     &                          EWperiodic(ng), NSperiodic(ng),         &
+     &                          AVERAGE(ng)%avgw3d)
           END IF
         END IF
         IF (Aout(idWvel,ng)) THEN
@@ -1098,6 +1142,11 @@
             CALL exchange_w3d_tile (ng, tile,                           &
      &                              LBi, UBi, LBj, UBj, 0, N(ng),       &
      &                              AVERAGE(ng)%avgwvel)
+            CALL mp_exchange3d (ng, tile, iNLM, 1,                      &
+     &                          LBi, UBi, LBj, UBj, 0, N(ng),           &
+     &                          NghostPoints,                           &
+     &                          EWperiodic(ng), NSperiodic(ng),         &
+     &                          AVERAGE(ng)%avgwvel)
           END IF
         END IF
         IF (Aout(idDano,ng)) THEN
@@ -1113,6 +1162,11 @@
             CALL exchange_r3d_tile (ng, tile,                           &
      &                              LBi, UBi, LBj, UBj, 1, N(ng),       &
      &                              AVERAGE(ng)%avgrho)
+            CALL mp_exchange3d (ng, tile, iNLM, 1,                      &
+     &                          LBi, UBi, LBj, UBj, 1, N(ng),           &
+     &                          NghostPoints,                           &
+     &                          EWperiodic(ng), NSperiodic(ng),         &
+     &                          AVERAGE(ng)%avgrho)
           END IF
         END IF
         DO it=1,NT(ng)
@@ -1129,6 +1183,11 @@
               CALL exchange_r3d_tile (ng, tile,                         &
      &                                LBi, UBi, LBj, UBj, 1, N(ng),     &
      &                                AVERAGE(ng)%avgt(:,:,:,it))
+              CALL mp_exchange3d (ng, tile, iNLM, 1,                    &
+     &                            LBi, UBi, LBj, UBj, 1, N(ng),         &
+     &                            NghostPoints,                         &
+     &                            EWperiodic(ng), NSperiodic(ng),       &
+     &                            AVERAGE(ng)%avgt(:,:,:,it))
             END IF
           END IF
         END DO
@@ -1146,6 +1205,11 @@
             CALL exchange_u2d_tile (ng, tile,                           &
      &                              LBi, UBi, LBj, UBj,                 &
      &                              AVERAGE(ng)%avgsus)
+            CALL mp_exchange2d (ng, tile, iNLM, 1,                      &
+     &                          LBi, UBi, LBj, UBj,                     &
+     &                          NghostPoints,                           &
+     &                          EWperiodic(ng), NSperiodic(ng),         &
+     &                          AVERAGE(ng)%avgsus)
           END IF
         END IF
         IF (Aout(idVsms,ng)) THEN
@@ -1159,6 +1223,11 @@
             CALL exchange_v2d_tile (ng, tile,                           &
      &                              LBi, UBi, LBj, UBj,                 &
      &                              AVERAGE(ng)%avgsvs)
+            CALL mp_exchange2d (ng, tile, iNLM, 1,                      &
+     &                          LBi, UBi, LBj, UBj,                     &
+     &                          NghostPoints,                           &
+     &                          EWperiodic(ng), NSperiodic(ng),         &
+     &                          AVERAGE(ng)%avgsvs)
           END IF
         END IF
         IF (Aout(idUbms,ng)) THEN
@@ -1172,6 +1241,11 @@
             CALL exchange_u2d_tile (ng, tile,                           &
      &                              LBi, UBi, LBj, UBj,                 &
      &                              AVERAGE(ng)%avgbus)
+            CALL mp_exchange2d (ng, tile, iNLM, 1,                      &
+     &                          LBi, UBi, LBj, UBj,                     &
+     &                          NghostPoints,                           &
+     &                          EWperiodic(ng), NSperiodic(ng),         &
+     &                          AVERAGE(ng)%avgbus)
           END IF
         END IF
         IF (Aout(idVbms,ng)) THEN
@@ -1185,6 +1259,11 @@
             CALL exchange_v2d_tile (ng, tile,                           &
      &                              LBi, UBi, LBj, UBj,                 &
      &                              AVERAGE(ng)%avgbvs)
+            CALL mp_exchange2d (ng, tile, iNLM, 1,                      &
+     &                          LBi, UBi, LBj, UBj,                     &
+     &                          NghostPoints,                           &
+     &                          EWperiodic(ng), NSperiodic(ng),         &
+     &                          AVERAGE(ng)%avgbvs)
           END IF
         END IF
         IF (Aout(idTsur(itemp),ng)) THEN
@@ -1198,6 +1277,11 @@
             CALL exchange_r2d_tile (ng, tile,                           &
      &                              LBi, UBi, LBj, UBj,                 &
      &                              AVERAGE(ng)%avgstf)
+            CALL mp_exchange2d (ng, tile, iNLM, 1,                      &
+     &                          LBi, UBi, LBj, UBj,                     &
+     &                          NghostPoints,                           &
+     &                          EWperiodic(ng), NSperiodic(ng),         &
+     &                          AVERAGE(ng)%avgstf)
           END IF
         END IF
         IF (Aout(idTsur(isalt),ng)) THEN
@@ -1211,6 +1295,11 @@
             CALL exchange_r2d_tile (ng, tile,                           &
      &                              LBi, UBi, LBj, UBj,                 &
      &                              AVERAGE(ng)%avgswf)
+            CALL mp_exchange2d (ng, tile, iNLM, 1,                      &
+     &                          LBi, UBi, LBj, UBj,                     &
+     &                          NghostPoints,                           &
+     &                          EWperiodic(ng), NSperiodic(ng),         &
+     &                          AVERAGE(ng)%avgswf)
           END IF
         END IF
 !
@@ -1227,6 +1316,11 @@
             CALL exchange_p2d_tile (ng, tile,                           &
      &                              LBi, UBi, LBj, UBj,                 &
      &                              AVERAGE(ng)%avgpvor2d)
+            CALL mp_exchange2d (ng, tile, iNLM, 1,                      &
+     &                          LBi, UBi, LBj, UBj,                     &
+     &                          NghostPoints,                           &
+     &                          EWperiodic(ng), NSperiodic(ng),         &
+     &                          AVERAGE(ng)%avgpvor2d)
           END IF
         END IF
         IF (Aout(id2dRV,ng)) THEN
@@ -1240,6 +1334,11 @@
             CALL exchange_p2d_tile (ng, tile,                           &
      &                              LBi, UBi, LBj, UBj,                 &
      &                              AVERAGE(ng)%avgrvor2d)
+            CALL mp_exchange2d (ng, tile, iNLM, 1,                      &
+     &                          LBi, UBi, LBj, UBj,                     &
+     &                          NghostPoints,                           &
+     &                          EWperiodic(ng), NSperiodic(ng),         &
+     &                          AVERAGE(ng)%avgrvor2d)
           END IF
         END IF
         IF (Aout(id3dPV,ng)) THEN
@@ -1255,6 +1354,11 @@
             CALL exchange_p3d_tile (ng, tile,                           &
      &                              LBi, UBi, LBj, UBj, 1, N(ng),       &
      &                              AVERAGE(ng)%avgpvor3d)
+            CALL mp_exchange3d (ng, tile, iNLM, 1,                      &
+     &                          LBi, UBi, LBj, UBj, 1, N(ng),           &
+     &                          NghostPoints,                           &
+     &                          EWperiodic(ng), NSperiodic(ng),         &
+     &                          AVERAGE(ng)%avgpvor3d)
           END IF
         END IF
         IF (Aout(id3dRV,ng)) THEN
@@ -1270,6 +1374,11 @@
             CALL exchange_p3d_tile (ng, tile,                           &
      &                              LBi, UBi, LBj, UBj, 1, N(ng),       &
      &                              AVERAGE(ng)%avgrvor3d)
+            CALL mp_exchange3d (ng, tile, iNLM, 1,                      &
+     &                          LBi, UBi, LBj, UBj, 1, N(ng),           &
+     &                          NghostPoints,                           &
+     &                          EWperiodic(ng), NSperiodic(ng),         &
+     &                          AVERAGE(ng)%avgrvor3d)
           END IF
         END IF
 !
@@ -1286,6 +1395,11 @@
             CALL exchange_r2d_tile (ng, tile,                           &
      &                              LBi, UBi, LBj, UBj,                 &
      &                              AVERAGE(ng)%avgZZ)
+            CALL mp_exchange2d (ng, tile, iNLM, 1,                      &
+     &                          LBi, UBi, LBj, UBj,                     &
+     &                          NghostPoints,                           &
+     &                          EWperiodic(ng), NSperiodic(ng),         &
+     &                          AVERAGE(ng)%avgZZ)
           END IF
         END IF
         IF (Aout(idU2av,ng)) THEN
@@ -1299,6 +1413,11 @@
             CALL exchange_u2d_tile (ng, tile,                           &
      &                              LBi, UBi, LBj, UBj,                 &
      &                              AVERAGE(ng)%avgU2)
+            CALL mp_exchange2d (ng, tile, iNLM, 1,                      &
+     &                          LBi, UBi, LBj, UBj,                     &
+     &                          NghostPoints,                           &
+     &                          EWperiodic(ng), NSperiodic(ng),         &
+     &                          AVERAGE(ng)%avgU2)
           END IF
         END IF
         IF (Aout(idV2av,ng)) THEN
@@ -1312,6 +1431,11 @@
             CALL exchange_v2d_tile (ng, tile,                           &
      &                              LBi, UBi, LBj, UBj,                 &
      &                              AVERAGE(ng)%avgV2)
+            CALL mp_exchange2d (ng, tile, iNLM, 1,                      &
+     &                          LBi, UBi, LBj, UBj,                     &
+     &                          NghostPoints,                           &
+     &                          EWperiodic(ng), NSperiodic(ng),         &
+     &                          AVERAGE(ng)%avgV2)
           END IF
         END IF
         IF (Aout(idUUav,ng)) THEN
@@ -1327,6 +1451,11 @@
             CALL exchange_u3d_tile (ng, tile,                           &
      &                              LBi, UBi, LBj, UBj, 1, N(ng),       &
      &                              AVERAGE(ng)%avgUU)
+            CALL mp_exchange3d (ng, tile, iNLM, 1,                      &
+     &                          LBi, UBi, LBj, UBj, 1, N(ng),           &
+     &                          NghostPoints,                           &
+     &                          EWperiodic(ng), NSperiodic(ng),         &
+     &                          AVERAGE(ng)%avgUU)
           END IF
         END IF
         IF (Aout(idVVav,ng)) THEN
@@ -1342,6 +1471,11 @@
             CALL exchange_v3d_tile (ng, tile,                           &
      &                              LBi, UBi, LBj, UBj, 1, N(ng),       &
      &                              AVERAGE(ng)%avgVV)
+            CALL mp_exchange3d (ng, tile, iNLM, 1,                      &
+     &                          LBi, UBi, LBj, UBj, 1, N(ng),           &
+     &                          NghostPoints,                           &
+     &                          EWperiodic(ng), NSperiodic(ng),         &
+     &                          AVERAGE(ng)%avgVV)
           END IF
         END IF
         IF (Aout(idUVav,ng)) THEN
@@ -1357,6 +1491,11 @@
             CALL exchange_r3d_tile (ng, tile,                           &
      &                              LBi, UBi, LBj, UBj, 1, N(ng),       &
      &                              AVERAGE(ng)%avgUV)
+            CALL mp_exchange3d (ng, tile, iNLM, 1,                      &
+     &                          LBi, UBi, LBj, UBj, 1, N(ng),           &
+     &                          NghostPoints,                           &
+     &                          EWperiodic(ng), NSperiodic(ng),         &
+     &                          AVERAGE(ng)%avgUV)
           END IF
         END IF
         IF (Aout(idHUav,ng)) THEN
@@ -1372,6 +1511,11 @@
             CALL exchange_u3d_tile (ng, tile,                           &
      &                              LBi, UBi, LBj, UBj, 1, N(ng),       &
      &                              AVERAGE(ng)%avgHuon)
+            CALL mp_exchange3d (ng, tile, iNLM, 1,                      &
+     &                          LBi, UBi, LBj, UBj, 1, N(ng),           &
+     &                          NghostPoints,                           &
+     &                          EWperiodic(ng), NSperiodic(ng),         &
+     &                          AVERAGE(ng)%avgHuon)
           END IF
         END IF
         IF (Aout(idHVav,ng)) THEN
@@ -1387,6 +1531,11 @@
             CALL exchange_v3d_tile (ng, tile,                           &
      &                              LBi, UBi, LBj, UBj, 1, N(ng),       &
      &                              AVERAGE(ng)%avgHvom)
+            CALL mp_exchange3d (ng, tile, iNLM, 1,                      &
+     &                          LBi, UBi, LBj, UBj, 1, N(ng),           &
+     &                          NghostPoints,                           &
+     &                          EWperiodic(ng), NSperiodic(ng),         &
+     &                          AVERAGE(ng)%avgHvom)
           END IF
         END IF
         DO it=1,NT(ng)
@@ -1403,6 +1552,11 @@
               CALL exchange_r3d_tile (ng, tile,                         &
      &                                LBi, UBi, LBj, UBj, 1, N(ng),     &
      &                                AVERAGE(ng)%avgTT(:,:,:,it))
+              CALL mp_exchange3d (ng, tile, iNLM, 1,                    &
+     &                            LBi, UBi, LBj, UBj, 1, N(ng),         &
+     &                            NghostPoints,                         &
+     &                            EWperiodic(ng), NSperiodic(ng),       &
+     &                            AVERAGE(ng)%avgTT(:,:,:,it))
             END IF
           END IF
           IF (Aout(idUTav(it),ng)) THEN
@@ -1418,6 +1572,11 @@
               CALL exchange_u3d_tile (ng, tile,                         &
      &                                LBi, UBi, LBj, UBj, 1, N(ng),     &
      &                                AVERAGE(ng)%avgUT(:,:,:,it))
+              CALL mp_exchange3d (ng, tile, iNLM, 1,                    &
+     &                            LBi, UBi, LBj, UBj, 1, N(ng),         &
+     &                            NghostPoints,                         &
+     &                            EWperiodic(ng), NSperiodic(ng),       &
+     &                            AVERAGE(ng)%avgUT(:,:,:,it))
             END IF
           END IF
           IF (Aout(idVTav(it),ng)) THEN
@@ -1433,6 +1592,11 @@
               CALL exchange_v3d_tile (ng, tile,                         &
      &                                LBi, UBi, LBj, UBj, 1, N(ng),     &
      &                                AVERAGE(ng)%avgVT(:,:,:,it))
+              CALL mp_exchange3d (ng, tile, iNLM, 1,                    &
+     &                            LBi, UBi, LBj, UBj, 1, N(ng),         &
+     &                            NghostPoints,                         &
+     &                            EWperiodic(ng), NSperiodic(ng),       &
+     &                            AVERAGE(ng)%avgVT(:,:,:,it))
             END IF
           END IF
           IF (Aout(iHUTav(it),ng)) THEN
@@ -1448,6 +1612,11 @@
               CALL exchange_u3d_tile (ng, tile,                         &
      &                                LBi, UBi, LBj, UBj, 1, N(ng),     &
      &                                AVERAGE(ng)%avgHuonT(:,:,:,it))
+              CALL mp_exchange3d (ng, tile, iNLM, 1,                    &
+     &                            LBi, UBi, LBj, UBj, 1, N(ng),         &
+     &                            NghostPoints,                         &
+     &                            EWperiodic(ng), NSperiodic(ng),       &
+     &                            AVERAGE(ng)%avgHuonT(:,:,:,it))
             END IF
           END IF
           IF (Aout(iHVTav(it),ng)) THEN
@@ -1463,6 +1632,11 @@
               CALL exchange_v3d_tile (ng, tile,                         &
      &                                LBi, UBi, LBj, UBj, 1, N(ng),     &
      &                                AVERAGE(ng)%avgHvomT(:,:,:,it))
+              CALL mp_exchange3d (ng, tile, iNLM, 1,                    &
+     &                            LBi, UBi, LBj, UBj, 1, N(ng),         &
+     &                            NghostPoints,                         &
+     &                            EWperiodic(ng), NSperiodic(ng),       &
+     &                            AVERAGE(ng)%avgHvomT(:,:,:,it))
             END IF
           END IF
         END DO

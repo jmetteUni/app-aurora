@@ -26,8 +26,10 @@
       USE mod_iounits
       USE mod_ncparam
       USE mod_scalars
+      USE mod_strings
 !
       USE dateclock_mod,   ONLY : get_date
+      USE distribute_mod,  ONLY : mp_bcasti, mp_bcasts
       USE lbc_mod,         ONLY : lbc_report
       USE ran_state,       ONLY : ran_seed
       USE strings_mod,     ONLY : FoundError
@@ -46,6 +48,7 @@
       integer :: Itile, Jtile, Nghost, Ntiles, tile
       integer :: Imin, Imax, Jmin, Jmax
       integer :: Uoff, Voff
+      integer :: MaxHaloLenI, MaxHaloLenJ
       integer :: ibry, inp, out, i, ic, ifield, itrc, j, ng, npts
       integer :: io_err, sequence, varid
 !
@@ -67,12 +70,13 @@
 !  Set input units.
 !
       Lwrite=Master
-      inp=stdinp
+      inp=1
       out=stdout
 !
 !  Get current date.
 !
-      CALL get_date (date_str)
+      IF (Master) CALL get_date (date_str)
+      CALL mp_bcasts (1, model, date_str)
 !
 !-----------------------------------------------------------------------
 !  Read in physical model input parameters.
@@ -83,7 +87,32 @@
               ' Model Input Parameters:  ROMS/TOMS version ',a,/,       &
      &        26x,a,/,80('-'))
 !
+!  In distributed-memory configurations, the input physical parameters
+!  script is opened as a regular file.  It is read and processed by all
+!  parallel nodes.  This is to avoid a very complex broadcasting of the
+!  input parameters to all nodes.
+!
+      IF (Master) CALL my_getarg (1, Iname)
+      CALL mp_bcasts (1, model, Iname)
+      OPEN (inp, FILE=TRIM(Iname), FORM='formatted', STATUS='old',      &
+     &      IOSTAT=io_err, IOMSG=io_errmsg)
+      IF (io_err.ne.0) THEN
+        IF (Master) WRITE (stdout,30) TRIM(io_errmsg)
+        exit_flag=5
+        RETURN
+ 30     FORMAT (/,' INP_PAR - Unable to open ROMS/TOMS input script ',  &
+     &              'file.',/,11x,'ERROR: ',a,/,                        &
+     &          /,11x,'In distributed-memory applications, the input',  &
+     &          /,11x,'script file is processed in parallel. The Unix', &
+     &          /,11x,'routine GETARG is used to get script file name.',&
+     &          /,11x,'For example, in MPI applications make sure that',&
+     &          /,11x,'command line is something like:',/,              &
+     &          /,11x,'mpirun -np 4 romsM roms.in',/,/,11x,'and not',/, &
+     &          /,11x,'mpirun -np 4 romsM < roms.in',/)
+      END IF
+!
       CALL read_PhyPar (model, inp, out, Lwrite)
+      CALL mp_bcasti (1, model, exit_flag)
       IF (FoundError(exit_flag, NoError, 211, MyFile)) RETURN
 !
 !-----------------------------------------------------------------------
@@ -304,10 +333,20 @@
 !  Set RHO-points domain lower and upper bounds (integer).
 !
       DO ng=1,Ngrids
-        rILB(ng)=1
-        rIUB(ng)=Lm(ng)
-        rJLB(ng)=1
-        rJUB(ng)=Mm(ng)
+        CALL get_bounds (ng, MyRank, r2dvar, 0, Itile, Jtile,           &
+     &                   rILB(ng), rIUB(ng), rJLB(ng), rJUB(ng))
+        IF (Itile.eq.0) THEN
+          rILB(ng)=rILB(ng)+1
+        END IF
+        IF (Itile.eq.(NtileI(ng)-1)) THEN
+          rIUB(ng)=rIUB(ng)-1
+        END IF
+        IF (Jtile.eq.0) THEN
+          rJLB(ng)=rJLB(ng)+1
+        END IF
+        IF (Jtile.eq.(NtileJ(ng)-1)) THEN
+          rJUB(ng)=rJUB(ng)-1
+        END IF
 !
 !  Minimum and maximum fractional coordinates for RHO-points.
 !
@@ -319,10 +358,10 @@
      &                     DOMAIN(ng) % Ymin_rho(tile),                 &
      &                     DOMAIN(ng) % Ymax_rho(tile))
         END DO
-        rXmin(ng)=DOMAIN(ng)%Xmin_rho(0)
-        rXmax(ng)=DOMAIN(ng)%Xmax_rho(0)
-        rYmin(ng)=DOMAIN(ng)%Ymin_rho(0)
-        rYmax(ng)=DOMAIN(ng)%Ymax_rho(0)
+        rXmin(ng)=DOMAIN(ng)%Xmin_rho(MyRank)
+        rXmax(ng)=DOMAIN(ng)%Xmax_rho(MyRank)
+        rYmin(ng)=DOMAIN(ng)%Ymin_rho(MyRank)
+        rYmax(ng)=DOMAIN(ng)%Ymax_rho(MyRank)
       END DO
 !
 !  Set U-points domain lower and upper bounds (integer).
@@ -333,10 +372,20 @@
         ELSE
           Uoff=1
         END IF
-        uILB(ng)=1+Uoff
-        uIUB(ng)=Lm(ng)
-        uJLB(ng)=1
-        uJUB(ng)=Mm(ng)
+        CALL get_bounds (ng, MyRank, u2dvar, 0, Itile, Jtile,           &
+     &                   uILB(ng), uIUB(ng), uJLB(ng), uJUB(ng))
+        IF (Itile.eq.0) THEN
+          uILB(ng)=uILB(ng)+Uoff
+        END IF
+        IF (Itile.eq.(NtileI(ng)-1)) THEN
+          uIUB(ng)=uIUB(ng)-1
+        END IF
+        IF (Jtile.eq.0) THEN
+          uJLB(ng)=uJLB(ng)+1
+        END IF
+        IF (Jtile.eq.(NtileJ(ng)-1)) THEN
+          uJUB(ng)=uJUB(ng)-1
+        END IF
 !
 !  Minimum and maximum fractional coordinates for U-points.
 !
@@ -348,10 +397,10 @@
      &                     DOMAIN(ng) % Ymin_u(tile),                   &
      &                     DOMAIN(ng) % Ymax_u(tile))
         END DO
-        uXmin(ng)=DOMAIN(ng)%Xmin_u(0)
-        uXmax(ng)=DOMAIN(ng)%Xmax_u(0)
-        uYmin(ng)=DOMAIN(ng)%Ymin_u(0)
-        uYmax(ng)=DOMAIN(ng)%Ymax_u(0)
+        uXmin(ng)=DOMAIN(ng)%Xmin_u(MyRank)
+        uXmax(ng)=DOMAIN(ng)%Xmax_u(MyRank)
+        uYmin(ng)=DOMAIN(ng)%Ymin_u(MyRank)
+        uYmax(ng)=DOMAIN(ng)%Ymax_u(MyRank)
       END DO
 !
 !  Set V-points domain lower and upper bounds (integer).
@@ -362,10 +411,20 @@
         ELSE
           Voff=1
         END IF
-        vILB(ng)=1
-        vIUB(ng)=Lm(ng)
-        vJLB(ng)=1+Voff
-        vJUB(ng)=Mm(ng)
+        CALL get_bounds (ng, MyRank, v2dvar, 0, Itile, Jtile,           &
+     &                   vILB(ng), vIUB(ng), vJLB(ng), vJUB(ng))
+        IF (Itile.eq.0) THEN
+          vILB(ng)=vILB(ng)+1
+        END IF
+        IF (Itile.eq.(NtileI(ng)-1)) THEN
+          vIUB(ng)=vIUB(ng)-1
+        END IF
+        IF (Jtile.eq.0) THEN
+          vJLB(ng)=vJLB(ng)+Voff
+        END IF
+        IF (Jtile.eq.(NtileJ(ng)-1)) THEN
+          vJUB(ng)=vJUB(ng)-1
+        END IF
 !
 !  Minimum and maximum fractional coordinates for V-points.
 !
@@ -377,10 +436,10 @@
      &                     DOMAIN(ng) % Ymin_v(tile),                   &
      &                     DOMAIN(ng) % Ymax_v(tile))
         END DO
-        vXmin(ng)=DOMAIN(ng)%Xmin_v(0)
-        vXmax(ng)=DOMAIN(ng)%Xmax_v(0)
-        vYmin(ng)=DOMAIN(ng)%Ymin_v(0)
-        vYmax(ng)=DOMAIN(ng)%Ymax_v(0)
+        vXmin(ng)=DOMAIN(ng)%Xmin_v(MyRank)
+        vXmax(ng)=DOMAIN(ng)%Xmax_v(MyRank)
+        vYmin(ng)=DOMAIN(ng)%Ymin_v(MyRank)
+        vYmax(ng)=DOMAIN(ng)%Ymax_v(MyRank)
       END DO
 !
 !-----------------------------------------------------------------------
@@ -438,6 +497,7 @@
      &          /,11x,'because it yields too small tile, ',a,i0,a,i0,   &
      &          /,11x,'Decrease partition parameter: ',a)
       END IF
+      CALL mp_bcasti (1, model, exit_flag)
       IF (FoundError(exit_flag, NoError, 781, MyFile)) RETURN
 !
 !  Report tile minimum and maximum fractional grid coordinates.
@@ -474,6 +534,44 @@
      &            5x,'tile',5x,'Xmin',5x,'Xmax',5x,'Ymin',5x,'Ymax',    &
      &            5x,'grid',/)
  100      FORMAT (5x,i4,4f9.2,2x,a)
+        END IF
+      END DO
+!
+!-----------------------------------------------------------------------
+!  Determine the maximum tile lengths in XI and ETA directions for
+!  distributed-memory communications.  Notice that halo size are
+!  increased by few points to allow exchanging of private arrays.
+!-----------------------------------------------------------------------
+!
+      IF (ANY(EWperiodic).or.ANY(NSperiodic)) THEN
+        Nghost=NghostPoints+1
+      ELSE
+        Nghost=NghostPoints
+      END IF
+      DO ng=1,Ngrids
+        MaxHaloLenI=0
+        MaxHaloLenJ=0
+        HaloBry(ng)=Nghost
+        DO tile=0,NtileI(ng)*NtileJ(ng)-1
+          Imin=BOUNDS(ng)%LBi(tile)-1
+          Imax=BOUNDS(ng)%UBi(tile)+1
+          Jmin=BOUNDS(ng)%LBj(tile)-1
+          Jmax=BOUNDS(ng)%UBj(tile)+1
+          MaxHaloLenI=MAX(MaxHaloLenI,(Imax-Imin+1))
+          MaxHaloLenJ=MAX(MaxHaloLenJ,(Jmax-Jmin+1))
+        END DO
+        HaloSizeI(ng)=Nghost*MaxHaloLenI+6*Nghost
+        HaloSizeJ(ng)=Nghost*MaxHaloLenJ+6*Nghost
+        TileSide(ng)=MAX(MaxHaloLenI,MaxHaloLenJ)
+        TileSize(ng)=MaxHaloLenI*MaxHaloLenJ
+        IF (Master.and.Lwrite) THEN
+          WRITE (stdout,110) ng, HaloSizeI(ng), ng, HaloSizeJ(ng),      &
+     &                       ng, TileSide(ng),  ng, TileSize(ng)
+ 110      FORMAT (/,' Maximum halo size in XI and ETA directions:',/,   &
+     &            /,'               HaloSizeI(',i1,') = ',i7,           &
+     &            /,'               HaloSizeJ(',i1,') = ',i7,           &
+     &            /,'                TileSide(',i1,') = ',i7,           &
+     &            /,'                TileSize(',i1,') = ',i7,/)
         END IF
       END DO
 !
@@ -725,6 +823,8 @@
         CALL checkdefs
         CALL my_flush (out)
       END IF
+      CALL mp_bcasti (1, model, exit_flag)
+      CALL mp_bcasts (1, model, Coptions)
       IF (FoundError(exit_flag, NoError, 1284, MyFile)) RETURN
 !
 !-----------------------------------------------------------------------

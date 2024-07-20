@@ -141,6 +141,7 @@
       USE mod_sources
 !
       USE exchange_2d_mod
+      USE mp_exchange_mod, ONLY : mp_exchange2d
       USE obc_volcons_mod, ONLY : obc_flux_tile, set_DUV_bc_tile
       USE u2dbc_mod,       ONLY : u2dbc_tile
       USE v2dbc_mod,       ONLY : v2dbc_tile
@@ -300,25 +301,46 @@
 !  Compute total depth (m) and vertically integrated mass fluxes.
 !-----------------------------------------------------------------------
 !
-      DO j=JstrVm2-1,Jendp2
-        DO i=IstrUm2-1,Iendp2
+!  In distributed-memory, the I- and J-ranges are different and a
+!  special exchange is done to avoid having three ghost points for
+!  high order numerical stencils. Notice that a private array is
+!  passed below to the exchange routine. It also applies periodic
+!  boundary conditions, if appropriate and no partitions in I- or
+!  J-directions.
+!
+      DO j=JstrV-2,Jendp2
+        DO i=IstrU-2,Iendp2
           Drhs(i,j)=zeta(i,j,krhs)+h(i,j)
         END DO
       END DO
-      DO j=JstrVm2-1,Jendp2
-        DO i=IstrUm2,Iendp2
+      DO j=JstrV-2,Jendp2
+        DO i=IstrU-1,Iendp2
           cff=0.5_r8*on_u(i,j)
           cff1=cff*(Drhs(i,j)+Drhs(i-1,j))
           DUon(i,j)=ubar(i,j,krhs)*cff1
         END DO
       END DO
-      DO j=JstrVm2,Jendp2
-        DO i=IstrUm2-1,Iendp2
+      DO j=JstrV-1,Jendp2
+        DO i=IstrU-2,Iendp2
           cff=0.5_r8*om_v(i,j)
           cff1=cff*(Drhs(i,j)+Drhs(i,j-1))
           DVom(i,j)=vbar(i,j,krhs)*cff1
         END DO
       END DO
+!
+      IF (EWperiodic(ng).or.NSperiodic(ng)) THEN
+        CALL exchange_u2d_tile (ng, tile,                               &
+     &                          IminS, ImaxS, JminS, JmaxS,             &
+     &                          DUon)
+        CALL exchange_v2d_tile (ng, tile,                               &
+     &                          IminS, ImaxS, JminS, JmaxS,             &
+     &                          DVom)
+      END IF
+      CALL mp_exchange2d (ng, tile, iNLM, 2,                            &
+     &                    IminS, ImaxS, JminS, JmaxS,                   &
+     &                    NghostPoints,                                 &
+     &                    EWperiodic(ng), NSperiodic(ng),               &
+     &                    DUon, DVom)
 !
 !  Set vertically integrated mass fluxes DUon and DVom along the open
 !  boundaries in such a way that the integral volume is conserved.
@@ -416,6 +438,11 @@
      &                            LBi, UBi, LBj, UBj,                   &
      &                            DV_avg1)
         END IF
+        CALL mp_exchange2d (ng, tile, iNLM, 3,                          &
+     &                      LBi, UBi, LBj, UBj,                         &
+     &                      NghostPoints,                               &
+     &                      EWperiodic(ng), NSperiodic(ng),             &
+     &                      Zt_avg1, DU_avg1, DV_avg1)
       END IF
 !
 !  Do not perform the actual time stepping during the auxiliary
@@ -516,6 +543,11 @@
      &                            LBi, UBi, LBj, UBj,                   &
      &                            rzeta(:,:,krhs))
         END IF
+        CALL mp_exchange2d (ng, tile, iNLM, 1,                          &
+     &                      LBi, UBi, LBj, UBj,                         &
+     &                      NghostPoints,                               &
+     &                      EWperiodic(ng), NSperiodic(ng),             &
+     &                      rzeta(:,:,krhs))
       END IF
 !
 !  Apply mass point sources (volume vertical influx), if any.
@@ -549,6 +581,11 @@
      &                          LBi, UBi, LBj, UBj,                     &
      &                          zeta(:,:,knew))
       END IF
+      CALL mp_exchange2d (ng, tile, iNLM, 1,                            &
+     &                    LBi, UBi, LBj, UBj,                           &
+     &                    NghostPoints,                                 &
+     &                    EWperiodic(ng), NSperiodic(ng),               &
+     &                    zeta(:,:,knew))
 !
 !=======================================================================
 !  Compute right-hand-side for the 2D momentum equations.
@@ -1335,6 +1372,13 @@
      &                          LBi, UBi, LBj, UBj,                     &
      &                          vbar(:,:,knew))
       END IF
+!
+      CALL mp_exchange2d (ng, tile, iNLM, 2,                            &
+     &                    LBi, UBi, LBj, UBj,                           &
+     &                    NghostPoints,                                 &
+     &                    EWperiodic(ng), NSperiodic(ng),               &
+     &                    ubar(:,:,knew),                               &
+     &                    vbar(:,:,knew))
 !
       RETURN
       END SUBROUTINE step2d_tile

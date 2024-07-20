@@ -75,10 +75,8 @@
       Lsuccess=.TRUE.
       Derror=0
 !
-      IF (Master) THEN
-        IF (associated(Varray))                                         &
-     &    deallocate ( Varray, ERRMSG = Dmsg, STAT = Derror )
-      END IF
+      IF (associated(Varray))                                           &
+     &  deallocate ( Varray, ERRMSG = Dmsg, STAT = Derror )
 !
 !  Report if unsuccessful deallocation.
 !
@@ -124,10 +122,8 @@
       Lsuccess=.TRUE.
       Derror=0
 !
-      IF (Master) THEN
-        IF (associated(Varray))                                         &
-     &    deallocate ( Varray, ERRMSG = Dmsg, STAT = Derror )
-      END IF
+      IF (associated(Varray))                                           &
+     &  deallocate ( Varray, ERRMSG = Dmsg, STAT = Derror )
 !
 !  Report if unsuccessful deallocation.
 !
@@ -173,10 +169,8 @@
       Lsuccess=.TRUE.
       Derror=0
 !
-      IF (Master) THEN
-        IF (associated(Varray))                                         &
-     &    deallocate ( Varray, ERRMSG = Dmsg, STAT = Derror )
-      END IF
+      IF (associated(Varray))                                           &
+     &  deallocate ( Varray, ERRMSG = Dmsg, STAT = Derror )
 !
 !  Report if unsuccessful deallocation.
 !
@@ -222,10 +216,8 @@
       Lsuccess=.TRUE.
       Derror=0
 !
-      IF (Master) THEN
-        IF (associated(Varray))                                         &
-     &    deallocate ( Varray, ERRMSG = Dmsg, STAT = Derror )
-      END IF
+      IF (associated(Varray))                                           &
+     &  deallocate ( Varray, ERRMSG = Dmsg, STAT = Derror )
 !
 !  Report if unsuccessful deallocation.
 !
@@ -271,10 +263,8 @@
       Lsuccess=.TRUE.
       Derror=0
 !
-      IF (Master) THEN
-        IF (associated(Varray))                                         &
-     &    deallocate ( Varray, ERRMSG = Dmsg, STAT = Derror )
-      END IF
+      IF (associated(Varray))                                           &
+     &  deallocate ( Varray, ERRMSG = Dmsg, STAT = Derror )
 !
 !  Report if unsuccessful deallocation.
 !
@@ -320,10 +310,8 @@
       Lsuccess=.TRUE.
       Derror=0
 !
-      IF (Master) THEN
-        IF (associated(Varray))                                         &
-     &    deallocate ( Varray, ERRMSG = Dmsg, STAT = Derror )
-      END IF
+      IF (associated(Varray))                                           &
+     &  deallocate ( Varray, ERRMSG = Dmsg, STAT = Derror )
 !
 !  Report if unsuccessful deallocation.
 !
@@ -369,10 +357,8 @@
       Lsuccess=.TRUE.
       Derror=0
 !
-      IF (Master) THEN
-        IF (associated(Varray))                                         &
-     &    deallocate ( Varray, ERRMSG = Dmsg, STAT = Derror )
-      END IF
+      IF (associated(Varray))                                           &
+     &  deallocate ( Varray, ERRMSG = Dmsg, STAT = Derror )
 !
 !  Report if unsuccessful deallocation.
 !

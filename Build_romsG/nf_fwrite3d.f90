@@ -63,6 +63,9 @@
 !
       USE mod_netcdf
 !
+      USE distribute_mod, ONLY : mp_bcasti
+      USE distribute_mod, ONLY : mp_gather3d
+!
 !  Imported variable declarations.
 !
       logical, intent(in), optional :: SetFillVal
@@ -150,55 +153,53 @@
       Awrk=0.0_r8
 !
 !-----------------------------------------------------------------------
-!  If serial or shared-memory applications and serial output, pack data
-!  into a global 1D array in column-major order.
+!  If distributed-memory set-up, collect tile data from all spawned
+!  nodes and store it into a global scratch 1D array, packed in column-
+!  major order.
 !-----------------------------------------------------------------------
 !
-      IF (gtype.gt.0) THEN
-        ic=0
-        Npts=IJlen*Klen
-        DO k=LBk,UBk
-          DO j=Jmin,Jmax
-            DO i=Imin,Imax
-              ic=ic+1
-              Awrk(ic)=Adat(i,j,k)*Ascl
-            END DO
-          END DO
-        END DO
-      END IF
+        CALL mp_gather3d (ng, model, LBi, UBi, LBj, UBj, LBk, UBk,      &
+     &                    tindex, gtype, Ascl,                          &
+     &                    Adat, Npts, Awrk, SetFillVal)
 !
 !-----------------------------------------------------------------------
 !  If applicable, compute output field minimum and maximum values.
 !-----------------------------------------------------------------------
 !
-      IF (PRESENT(MinValue)) THEN
-        IF (OutThread) THEN
-          DO i=1,Npts
-            IF (ABS(Awrk(i)).lt.spval) THEN
-              MinValue=MIN(MinValue,Awrk(i))
-              MaxValue=MAX(MaxValue,Awrk(i))
-            END IF
-          END DO
+        IF (PRESENT(MinValue)) THEN
+          IF (OutThread) THEN
+            DO i=1,Npts
+              IF (ABS(Awrk(i)).lt.spval) THEN
+                MinValue=MIN(MinValue,Awrk(i))
+                MaxValue=MAX(MaxValue,Awrk(i))
+              END IF
+            END DO
+          END IF
         END IF
-      END IF
 !
 !-----------------------------------------------------------------------
 !  Write output buffer into NetCDF file.
 !-----------------------------------------------------------------------
 !
-      IF (OutThread) THEN
-        IF (gtype.gt.0) THEN
-          start(1)=1
-          total(1)=Ilen
-          start(2)=1
-          total(2)=Jlen
-          start(3)=1
-          total(3)=Klen
-          start(4)=tindex
-          total(4)=1
+        IF (OutThread) THEN
+          IF (gtype.gt.0) THEN
+            start(1)=1
+            total(1)=Ilen
+            start(2)=1
+            total(2)=Jlen
+            start(3)=1
+            total(3)=Klen
+            start(4)=tindex
+            total(4)=1
+          END IF
+          status=nf90_put_var(ncid, ncvarid, Awrk, start, total)
         END IF
-        status=nf90_put_var(ncid, ncvarid, Awrk, start, total)
-      END IF
+!
+!-----------------------------------------------------------------------
+!  Broadcast IO error flag to all nodes.
+!-----------------------------------------------------------------------
+!
+      CALL mp_bcasti (ng, model, status)
 !
       RETURN
       END FUNCTION nf90_fwrite3d

@@ -62,6 +62,8 @@
 !
       USE mod_netcdf
 !
+      USE distribute_mod, ONLY : mp_bcasti, mp_gather2d
+!
 !  Imported variable declarations.
 !
       logical, intent(in), optional :: SetFillVal
@@ -134,20 +136,14 @@
       Awrk=0.0_r8
 !
 !-----------------------------------------------------------------------
-!  If serial or shared-memory applications and serial output, pack data
-!  into a global 1D array in column-major order.
+!  If distributed-memory set-up, collect tile data from all spawned
+!  nodes and store it into a global scratch 1D array, packed in column-
+!  major order.
 !-----------------------------------------------------------------------
 !
-      IF (gtype.gt.0) THEN
-        ic=0
-        DO j=Jmin,Jmax
-          DO i=Imin,Imax
-            ic=ic+1
-            Awrk(ic)=Adat(i,j)*Ascl
-          END DO
-        END DO
-        Npts=IJlen
-      END IF
+      CALL mp_gather2d (ng, model, LBi, UBi, LBj, UBj,                  &
+     &                  tindex, gtype, Ascl,                            &
+     &                  Adat, Npts, Awrk, SetFillVal)
 !
 !-----------------------------------------------------------------------
 !  If applicable, compute output field minimum and maximum values.
@@ -181,6 +177,12 @@
         END IF
         status=nf90_put_var(ncid, ncvarid, Awrk, start, total)
       END IF
+!
+!-----------------------------------------------------------------------
+!  Broadcast IO error flag to all nodes.
+!-----------------------------------------------------------------------
+!
+      CALL mp_bcasti (ng, model, status)
 !
       RETURN
       END FUNCTION nf90_fwrite2d

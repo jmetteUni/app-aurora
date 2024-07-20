@@ -46,6 +46,7 @@
       USE mod_scalars
 !
       USE dateclock_mod,      ONLY : time_string
+      USE distribute_mod,     ONLY : mp_bcasti
       USE nf_fread2d_mod,     ONLY : nf_fread2d
       USE nf_fread3d_mod,     ONLY : nf_fread3d
       USE strings_mod,        ONLY : FoundError

@@ -70,6 +70,7 @@
       USE mod_ncparam
       USE mod_scalars
 !
+      USE distribute_mod, ONLY : mp_assemble
       USE mod_iounits,    ONLY : stdout
       USE strings_mod,    ONLY : FoundError
 !
@@ -1549,6 +1550,14 @@
      &               S%Istr_dst,  S%Iend_dst, S%Jstr_dst, S%Jend_dst,   &
      &               S%lon_dst,   S%lat_dst,  S%x_dst,    S%y_dst,      &
      &               S%spval,     S%rectangular)
+!
+!-----------------------------------------------------------------------
+!  Collect fractional coordinates.
+!-----------------------------------------------------------------------
+!
+      Npts=SIZE(S%x_dst)
+      CALL mp_assemble (S%ng, S%model, Npts, S%spval, S%x_dst)
+      CALL mp_assemble (S%ng, S%model, Npts, S%spval, S%y_dst)
 !
       RETURN
       END SUBROUTINE roms_interp_fractional

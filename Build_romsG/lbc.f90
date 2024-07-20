@@ -67,6 +67,7 @@
       USE mod_netcdf
       USE mod_scalars
 !
+      USE distribute_mod, ONLY : mp_bcasti, mp_bcasts
       USE strings_mod,    ONLY : FoundError
 !
       implicit none
@@ -82,6 +83,7 @@
 ! Local variable declarations
 !
       integer :: i, ibry, ie, ifield, is, ne, lstr, lvar, status
+      integer, dimension(2) :: ibuffer
 !
       character (len=   7) :: string(4)
       character (len=   8) :: B(4)
@@ -106,6 +108,17 @@
           exit_flag=3
           ioerror=status
         END IF
+      END IF
+!
+!  Broadcast error flags to all processors in the group.
+!
+      ibuffer(1)=exit_flag
+      ibuffer(2)=ioerror
+      CALL mp_bcasti (ng, model, ibuffer)
+      exit_flag=ibuffer(1)
+      ioerror=ibuffer(2)
+      IF (exit_flag.eq.NoError) THEN
+        CALL mp_bcasts (ng, model, lbc_att)
       END IF
 !
 !  Check keyword values from global attribute and compare against

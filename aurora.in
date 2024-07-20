@@ -106,8 +106,8 @@ GridsInLayer =  1
 ! shared-memory configurations used to determine tile horizontal range
 ! indices (Istr,Iend) and (Jstr,Jend), [1:Ngrids].
 
-      NtileI == 3                           ! I-direction partition
-      NtileJ == 3                           ! J-direction partition
+      NtileI == 1                           ! I-direction partition
+      NtileJ == 2                           ! J-direction partition
 
 ! Set horizontal and vertical advection schemes for active and inert
 ! tracers. A different advection scheme is allowed for each tracer.
@@ -1154,8 +1154,8 @@ PIO_I2C_Preq = 65                 ! Maximum pending I2C requests
      NFFILES == 1                          ! number of unique forcing files
 
 !     FRCNAME == roms_frc.nc
-!     FRCNAME == ../aurora/Data/Grid_Aurora_M55L55_bhflux_130MW_large_heat3_20230605T00.nc               ! forcing file 1, grid 1
-     FRCNAME == ../aurora/Data/Grid_Aurora_M64L64_bhflux_90000000MW__large_heat3_20220726T00.nc              ! forcing file 1, grid 1
+     FRCNAME == ../aurora/Data/Grid_Aurora_M64L64_bhflux_90000000MW_20220726T00.nc              ! forcing file 1, bottom heat flux, grid 1
+     FRCNAME == ../aurora/Data/Grid_Aurora_M64L64_bpflux_20220726T00.nc              ! forcing file 2, bottom tracer flux, grid 1
 
 ! Output NetCDF file names, [1:Ngrids].
 

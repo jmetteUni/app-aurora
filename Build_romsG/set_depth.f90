@@ -98,6 +98,7 @@
 !
       USE exchange_2d_mod
       USE exchange_3d_mod
+      USE mp_exchange_mod, ONLY : mp_exchange2d, mp_exchange3d
 !
 !  Imported variable declarations.
 !
@@ -262,6 +263,21 @@
      &                          LBi, UBi, LBj, UBj, 1, N(ng),           &
      &                          Hz)
       END IF
+      CALL mp_exchange2d (ng, tile, model, 1,                           &
+     &                    LBi, UBi, LBj, UBj,                           &
+     &                    NghostPoints,                                 &
+     &                    EWperiodic(ng), NSperiodic(ng),               &
+     &                    h)
+      CALL mp_exchange3d (ng, tile, model, 1,                           &
+     &                    LBi, UBi, LBj, UBj, 0, N(ng),                 &
+     &                    NghostPoints,                                 &
+     &                    EWperiodic(ng), NSperiodic(ng),               &
+     &                    z_w)
+      CALL mp_exchange3d (ng, tile, model, 2,                           &
+     &                    LBi, UBi, LBj, UBj, 1, N(ng),                 &
+     &                    NghostPoints,                                 &
+     &                    EWperiodic(ng), NSperiodic(ng),               &
+     &                    z_r, Hz)
 !
       RETURN
       END SUBROUTINE set_depth_tile
@@ -332,6 +348,7 @@
 !
       USE exchange_2d_mod
       USE exchange_3d_mod
+      USE mp_exchange_mod, ONLY : mp_exchange2d, mp_exchange3d
 !
 !  Imported variable declarations.
 !
@@ -490,6 +507,16 @@
      &                          LBi, UBi, LBj, UBj, 1, N(ng),           &
      &                          z_r)
       END IF
+      CALL mp_exchange3d (ng, tile, model, 1,                           &
+     &                    LBi, UBi, LBj, UBj, 0, N(ng),                 &
+     &                    NghostPoints,                                 &
+     &                    EWperiodic(ng), NSperiodic(ng),               &
+     &                    z_w)
+      CALL mp_exchange3d (ng, tile, model, 1,                           &
+     &                    LBi, UBi, LBj, UBj, 1, N(ng),                 &
+     &                    NghostPoints,                                 &
+     &                    EWperiodic(ng), NSperiodic(ng),               &
+     &                    z_r)
 !
       RETURN
       END SUBROUTINE set_depth0_tile

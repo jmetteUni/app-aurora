@@ -34,6 +34,8 @@
       USE mod_parallel
       USE mod_ncparam
 !
+      USE distribute_mod, ONLY : mp_reduce
+!
 !  Imported variable declarations.
 !
       integer, intent(in) :: ng, tile, model

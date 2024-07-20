@@ -67,6 +67,8 @@
       USE mod_iounits,  ONLY : Iname, SourceFile, stdinp, stdout
       USE mod_scalars,  ONLY : exit_flag
 !
+      USE distribute_mod, ONLY : mp_bcasts
+!
 !  Imported variable declarations.
 !
       logical, intent(out) :: GotFile
@@ -85,8 +87,24 @@
 !-----------------------------------------------------------------------
 !  Determine ROMS standard input unit.
 !-----------------------------------------------------------------------
-      InpUnit=stdinp
-      GotFile=.FALSE.
+!
+!  In distributed-memory configurations, the input physical parameters
+!  script is opened as a regular file.  It is read and processed by all
+!  parallel nodes.  This is to avoid very complex broadcasting of the
+!  input parameters to all nodes.
+!
+      InpUnit=1
+      IF (localPET.eq.0) CALL my_getarg (1, Iname)
+      CALL mp_bcasts (1, 1, Iname)
+      OPEN (InpUnit, FILE=TRIM(Iname), FORM='formatted', STATUS='old',  &
+     &      IOSTAT=io_err, IOMSG=io_errmsg)
+      IF (io_err.ne.0) THEN
+        IF (localPET.eq.0) WRITE (stdout,10) TRIM(io_errmsg)
+        exit_flag=2
+        RETURN
+      ELSE
+        GotFile=.TRUE.
+      END IF
 !
  10   FORMAT (/,' STDINP_UNIT - Unable to open ROMS/TOMS input script', &
      &                        ' file.',/,                               &

@@ -92,6 +92,7 @@
       USE mod_scalars
 !
       USE exchange_3d_mod
+      USE mp_exchange_mod, ONLY : mp_exchange3d
 !
 !  Imported variable declarations.
 !
@@ -202,6 +203,11 @@
      &                          LBi, UBi, LBj, UBj, 1, N(ng),           &
      &                          Hvom)
       END IF
+      CALL mp_exchange3d (ng, tile, model, 2,                           &
+     &                    LBi, UBi, LBj, UBj, 1, N(ng),                 &
+     &                    NghostPoints,                                 &
+     &                    EWperiodic(ng), NSperiodic(ng),               &
+     &                    Huon, Hvom)
       RETURN
       END SUBROUTINE set_massflux_tile
       END MODULE set_massflux_mod

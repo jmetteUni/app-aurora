@@ -47,44 +47,105 @@
 !  Local variable declarations.
 !
       integer :: Imin, Imax, Jmin, Jmax
+      integer :: Iend, Istr, Jend, Jstr
+      integer :: IstrM, IstrR, IstrU, IendR
+      integer :: JstrM, JstrR, JstrV, JendR
+      integer :: IstrB, IendB, IstrP, IendP, IstrT, IendT
+      integer :: JstrB, JendB, JstrP, JendP, JstrT, JendT
+      integer :: Istrm3, Istrm2, Istrm1, IstrUm2, IstrUm1
+      integer :: Iendp1, Iendp2, Iendp2i, Iendp3
+      integer :: Jstrm3, Jstrm2, Jstrm1, JstrVm2, JstrVm1
+      integer :: Jendp1, Jendp2, Jendp2i, Jendp3
+      integer :: MyType
 !
 !-----------------------------------------------------------------------
-!  Set array allocation bounds in the I- and J-direction for serial and
-!  shared-memory configurations.
+!  Set array bounds in the I- and J-direction for distributed-memory
+!  configurations.
 !-----------------------------------------------------------------------
 !
-      IF (tile.eq.-1) THEN
-        Itile=-1
-        Jtile=-1
+!  Set first and last grid-points according to staggered C-grid
+!  classification.  If gtype = 0, it returns the values needed for
+!  array allocation. Otherwise, it returns the values needed for IO
+!  processing.
+!
+      MyType=ABS(gtype)
+      IF (MyType.eq.0) THEN
+        IF (EWperiodic(ng)) THEN
+          IF (NSperiodic(ng)) THEN
+            Imin=-NghostPoints
+            Imax=Im(ng)+NghostPoints
+            Jmin=-NghostPoints
+            Jmax=Jm(ng)+NghostPoints
+          ELSE
+            Imin=-NghostPoints
+            Imax=Im(ng)+NghostPoints
+            Jmin=0
+            Jmax=Jm(ng)+1
+          END IF
+        ELSE
+          IF (NSperiodic(ng)) THEN
+            Imin=0
+            Imax=Im(ng)+1
+            Jmin=-NghostPoints
+            Jmax=Jm(ng)+NghostPoints
+          ELSE
+            Imin=0
+            Imax=Im(ng)+1
+            Jmin=0
+            Jmax=Jm(ng)+1
+          END IF
+        END IF
       ELSE
-        Jtile=tile/NtileI(ng)
-        Itile=tile-Jtile*NtileI(ng)
+        IF ((MyType.eq.p2dvar).or.(MyType.eq.u2dvar).or.                &
+     &      (MyType.eq.p3dvar).or.(MyType.eq.u3dvar)) THEN
+          Imin=1
+        ELSE
+          Imin=0
+        END IF
+        Imax=Lm(ng)+1
+        IF ((MyType.eq.p2dvar).or.(MyType.eq.v2dvar).or.                &
+     &      (MyType.eq.p3dvar).or.(MyType.eq.v3dvar)) THEN
+          Jmin=1
+        ELSE
+          Jmin=0
+        END IF
+        Jmax=Mm(ng)+1
       END IF
 !
-      IF (EWperiodic(ng)) THEN
-        IF (NSperiodic(ng)) THEN
-          LBi=-NghostPoints
-          UBi=Im(ng)+NghostPoints
-          LBj=-NghostPoints
-          UBj=Jm(ng)+NghostPoints
-        ELSE
-          LBi=-NghostPoints
-          UBi=Im(ng)+NghostPoints
-          LBj=0
-          UBj=Jm(ng)+1
-        END IF
+!  Set physical, overlapping (Nghost>0) or non-overlapping (Nghost=0)
+!  grid bounds according to tile rank.
+!
+      CALL get_tile (ng, tile,                                          &
+     &               Itile, Jtile,                                      &
+     &               Istr, Iend, Jstr, Jend,                            &
+     &               IstrM, IstrR, IstrU, IendR,                        &
+     &               JstrM, JstrR, JstrV, JendR,                        &
+     &               IstrB, IendB, IstrP, IendP, IstrT, IendT,          &
+     &               JstrB, JendB, JstrP, JendP, JstrT, JendT,          &
+     &               Istrm3, Istrm2, Istrm1, IstrUm2, IstrUm1,          &
+     &               Iendp1, Iendp2, Iendp2i, Iendp3,                   &
+     &               Jstrm3, Jstrm2, Jstrm1, JstrVm2, JstrVm1,          &
+     &               Jendp1, Jendp2, Jendp2i, Jendp3)
+!
+      IF ((Itile.eq.-1).or.(Itile.eq.0)) THEN
+        LBi=Imin
       ELSE
-        IF (NSperiodic(ng)) THEN
-          LBi=0
-          UBi=Im(ng)+1
-          LBj=-NghostPoints
-          UBj=Jm(ng)+NghostPoints
-        ELSE
-          LBi=0
-          UBi=Im(ng)+1
-          LBj=0
-          UBj=Jm(ng)+1
-        END IF
+        LBi=Istr-Nghost
+      END IF
+      IF ((Itile.eq.-1).or.(Itile.eq.(NtileI(ng)-1))) THEN
+        UBi=Imax
+      ELSE
+        UBi=Iend+Nghost
+      END IF
+      IF ((Jtile.eq.-1).or.(Jtile.eq.0)) THEN
+        LBj=Jmin
+      ELSE
+        LBj=Jstr-Nghost
+      END IF
+      IF ((Jtile.eq.-1).or.(Jtile.eq.(NtileJ(ng)-1))) THEN
+        UBj=Jmax
+      ELSE
+        UBj=Jend+Nghost
       END IF
       RETURN
       END SUBROUTINE get_bounds
@@ -381,7 +442,7 @@
           SouthWest_Test  =.TRUE.               ! (Jstr.eq.1)
         ELSE
           SouthWest_Corner=.FALSE.              ! elsewhere
-          SouthWest_Test  =.FALSE.
+          SouthWest_Test  =.TRUE.
         END IF
 !
 !  Is the tile adjacent to the southeastern domain corner?
@@ -392,7 +453,7 @@
           SouthEast_Test  =.TRUE.               ! (Jstr.eq.1)
         ELSE
           SouthEast_Corner=.FALSE.              ! elsewhere
-          SouthEast_Test  =.FALSE.
+          SouthEast_Test  =.TRUE.
         END IF
 !
 !  Is the tile adjacent to the northwestern domain corner?
@@ -403,7 +464,7 @@
           NorthWest_Test  =.TRUE.               ! (Jend.eq.Mm(ng))
         ELSE
           NorthWest_Corner=.FALSE.              ! elsewhere
-          NorthWest_Test  =.FALSE.
+          NorthWest_Test  =.TRUE.
         END IF
 !
 !  Is the tile adjacent to the northeastern domain corner?
@@ -414,7 +475,7 @@
           NorthEast_Test  =.TRUE.               ! (Jend.eq.Mm(ng))
         ELSE
           NorthEast_Corner=.FALSE.              ! elsewhere
-          NorthEast_Test  =.FALSE.
+          NorthEast_Test  =.TRUE.
         END IF
       END IF
       RETURN
@@ -957,7 +1018,7 @@
 !  tile is adjacent to the physical boundary (outlined above with +).
 !  Notice that IstrR, IendR, JstrR, JendR tile bounds computed here
 !  DO NOT COVER ghost points (outlined below with *) associated with
-!  periodic boundaries (if any) or the computational margins of MPI
+!  periodic boundaries (if any) or the computational margins of 1
 !  subdomains.
 !
 !           Left/Top Tile                        Right/Top Tile

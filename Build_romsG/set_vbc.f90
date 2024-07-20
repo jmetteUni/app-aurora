@@ -105,6 +105,7 @@
       USE mod_scalars
 !
       USE bc_2d_mod
+      USE mp_exchange_mod, ONLY : mp_exchange2d
 !
 !  Imported variable declarations.
 !
@@ -257,6 +258,11 @@
       CALL bc_v2d_tile (ng, tile,                                       &
      &                  LBi, UBi, LBj, UBj,                             &
      &                  bvstr)
+      CALL mp_exchange2d (ng, tile, iNLM, 2,                            &
+     &                    LBi, UBi, LBj, UBj,                           &
+     &                    NghostPoints,                                 &
+     &                    EWperiodic(ng), NSperiodic(ng),               &
+     &                    bustr, bvstr)
 !
       RETURN
       END SUBROUTINE set_vbc_tile

@@ -33,6 +33,7 @@
       USE mod_scalars
 !
       USE exchange_2d_mod, ONLY : exchange_r2d_tile
+      USE mp_exchange_mod, ONLY : mp_exchange2d
 !
 !  Imported variable declarations.
 !
@@ -151,6 +152,11 @@
           CALL exchange_r2d_tile (ng, tile,                             &
      &                            LBi, UBi, LBj, UBj,                   &
      &                            Vout)
+          CALL mp_exchange2d (ng, tile, iNLM, 2,                        &
+     &                        LBi, UBi, LBj, UBj,                       &
+     &                        NghostPoints,                             &
+     &                        EWperiodic(ng), NSperiodic(ng),           &
+     &                        Uout, Vout)
         END IF
       END IF
       RETURN
@@ -167,6 +173,7 @@
       USE mod_scalars
 !
       USE exchange_3d_mod, ONLY : exchange_r3d_tile
+      USE mp_exchange_mod, ONLY : mp_exchange3d
 !
 !  Imported variable declarations.
 !
@@ -289,6 +296,11 @@
           CALL exchange_r3d_tile (ng, tile,                             &
      &                            LBi, UBi, LBj, UBj, LBk, UBk,         &
      &                            Vout)
+          CALL mp_exchange3d (ng, tile, iNLM, 2,                        &
+     &                        LBi, UBi, LBj, UBj, LBk, UBk,             &
+     &                        NghostPoints,                             &
+     &                        EWperiodic(ng), NSperiodic(ng),           &
+     &                        Uout, Vout)
         END IF
       END IF
       RETURN

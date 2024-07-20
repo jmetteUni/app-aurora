@@ -88,6 +88,8 @@
       USE mod_iounits
       USE mod_scalars
 !
+      USE distribute_mod, ONLY : mp_reduce
+!
       implicit none
 !
 !  Imported variable declarations.
@@ -107,6 +109,8 @@
       real(r8) :: cff, ratio
       real(r8) :: my_rx0, my_rx1
       real(r8) :: my_volume0, my_volume1, my_volume2
+      real(r8), dimension(5) :: rbuffer
+      character (len=3), dimension(5) :: op_handle
 !
 !-----------------------------------------------------------------------
 !  Set lower and upper tile bounds and staggered variables bounds for
@@ -222,12 +226,7 @@
 !  Compute global values.
 !-----------------------------------------------------------------------
 !
-      IF (DOMAIN(ng)%SouthWest_Corner(tile).and.                        &
-     &    DOMAIN(ng)%NorthEast_Corner(tile)) THEN
-        NSUB=1                           ! non-tiled application
-      ELSE
-        NSUB=NtileX(ng)*NtileE(ng)       ! tiled application
-      END IF
+      NSUB=1                             ! distributed-memory
 !$OMP CRITICAL (R_FACTOR)
       TotVolume(ng)=TotVolume(ng)+my_volume0
       MinVolume(ng)=MIN(MinVolume(ng),my_volume1)
@@ -237,6 +236,22 @@
       tile_count=tile_count+1
       IF (tile_count.eq.NSUB) THEN
         tile_count=0
+        rbuffer(1)=TotVolume(ng)
+        rbuffer(2)=MinVolume(ng)
+        rbuffer(3)=MaxVolume(ng)
+        rbuffer(4)=rx0(ng)
+        rbuffer(5)=rx1(ng)
+        op_handle(1)='SUM'
+        op_handle(2)='MIN'
+        op_handle(3)='MAX'
+        op_handle(4)='MAX'
+        op_handle(5)='MAX'
+        CALL mp_reduce (ng, model, 5, rbuffer, op_handle)
+        TotVolume(ng)=rbuffer(1)
+        MinVolume(ng)=rbuffer(2)
+        MaxVolume(ng)=rbuffer(3)
+        rx0(ng)=rbuffer(4)
+        rx1(ng)=rbuffer(5)
         IF (Master.and.LwrtInfo(ng)) THEN
           WRITE (stdout,10) ng
   10      FORMAT (/,' Basin information for Grid ',i2.2,':',/)

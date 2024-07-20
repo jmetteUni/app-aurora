@@ -94,6 +94,8 @@
       USE mod_scalars
 !
       USE exchange_2d_mod
+      USE mp_exchange_mod, ONLY : mp_exchange2d
+      USE mp_exchange_mod, ONLY : mp_exchange3d
 !
 !  Imported variable declarations.
 !
@@ -275,6 +277,16 @@
      &                            diff2(:,:,itrc))
         END DO
       END IF
+      CALL mp_exchange2d (ng, tile, model, 2,                           &
+     &                    LBi, UBi, LBj, UBj,                           &
+     &                    NghostPoints,                                 &
+     &                    EWperiodic(ng), NSperiodic(ng),               &
+     &                    visc2_r, visc2_p)
+      CALL mp_exchange3d (ng, tile, model, 1,                           &
+     &                    LBi, UBi, LBj, UBj, 1, NT(ng),                &
+     &                    NghostPoints,                                 &
+     &                    EWperiodic(ng), NSperiodic(ng),               &
+     &                    diff2)
       RETURN
       END SUBROUTINE ini_hmixcoef_tile
       END MODULE ini_hmixcoef_mod

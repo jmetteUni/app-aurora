@@ -91,6 +91,7 @@
       USE mod_sources
 !
       USE bc_3d_mod, ONLY : bc_w3d_tile
+      USE mp_exchange_mod, ONLY : mp_exchange3d
 !
 !  Imported variable declarations.
 !
@@ -243,6 +244,11 @@
       CALL bc_w3d_tile (ng, tile,                                       &
      &                  LBi, UBi, LBj, UBj, 0, N(ng),                   &
      &                  W)
+      CALL mp_exchange3d (ng, tile, model, 1,                           &
+     &                    LBi, UBi, LBj, UBj, 0, N(ng),                 &
+     &                    NghostPoints,                                 &
+     &                    EWperiodic(ng), NSperiodic(ng),               &
+     &                    W)
 !
       RETURN
       END SUBROUTINE omega_tile
@@ -257,6 +263,7 @@
       USE mod_scalars
 !
       USE exchange_3d_mod, ONLY : exchange_w3d_tile
+      USE mp_exchange_mod, ONLY : mp_exchange3d
 !
 !  Imported variable declarations.
 !
@@ -350,6 +357,11 @@
      &                          LBi, UBi, LBj, UBj, LBk, UBk,           &
      &                          Wscl)
       END IF
+      CALL mp_exchange3d (ng, tile, iNLM, 1,                            &
+     &                    LBi, UBi, LBj, UBj, 0, N(ng),                 &
+     &                    NghostPoints,                                 &
+     &                    EWperiodic(ng), NSperiodic(ng),               &
+     &                    Wscl)
 !
       RETURN
       END SUBROUTINE scale_omega

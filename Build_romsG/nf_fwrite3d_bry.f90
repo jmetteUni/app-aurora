@@ -43,6 +43,8 @@
       USE mod_ncparam
       USE mod_scalars
 !
+      USE distribute_mod, ONLY : mp_bcasti, mp_collect
+!
       implicit none
 !
       INTERFACE nf_fwrite3d_bry
@@ -93,11 +95,34 @@
 !  Set starting and ending indices to process.
 !-----------------------------------------------------------------------
 !
-      tile=-1
-      Imin=LBij
-      Imax=UBij
-      Jmin=LBij
-      Jmax=UBij
+      tile=MyRank
+      SELECT CASE (gtype)
+        CASE (p2dvar, p3dvar)
+          Imin=BOUNDS(ng)%Istr (tile)
+          Imax=BOUNDS(ng)%Iend (tile)
+          Jmin=BOUNDS(ng)%Jstr (tile)
+          Jmax=BOUNDS(ng)%Jend (tile)
+        CASE (r2dvar, r3dvar)
+          Imin=BOUNDS(ng)%IstrR(tile)
+          Imax=BOUNDS(ng)%IendR(tile)
+          Jmin=BOUNDS(ng)%JstrR(tile)
+          Jmax=BOUNDS(ng)%JendR(tile)
+        CASE (u2dvar, u3dvar)
+          Imin=BOUNDS(ng)%Istr (tile)
+          Imax=BOUNDS(ng)%IendR(tile)
+          Jmin=BOUNDS(ng)%JstrR(tile)
+          Jmax=BOUNDS(ng)%JendR(tile)
+        CASE (v2dvar, v3dvar)
+          Imin=BOUNDS(ng)%IstrR(tile)
+          Imax=BOUNDS(ng)%IendR(tile)
+          Jmin=BOUNDS(ng)%Jstr (tile)
+          Jmax=BOUNDS(ng)%JendR(tile)
+        CASE DEFAULT
+          Imin=BOUNDS(ng)%IstrR(tile)
+          Imax=BOUNDS(ng)%IendR(tile)
+          Jmin=BOUNDS(ng)%JstrR(tile)
+          Jmax=BOUNDS(ng)%JendR(tile)
+      END SELECT
       IorJ=IOBOUNDS(ng)%IorJ
       Klen=UBk-LBk+1
       IJKlen=IorJ*Klen
@@ -162,6 +187,11 @@
         END DO
       END DO
 !
+!  If distributed-memory set-up, collect data from all spawned
+!  processes.
+!
+      CALL mp_collect (ng, model, Npts, Aspv, Awrk)
+!
 !-----------------------------------------------------------------------
 !  If applicable, compute output field minimum and maximum values.
 !-----------------------------------------------------------------------
@@ -187,6 +217,12 @@
       IF (OutThread) THEN
         status=nf90_put_var(ncid, ncvarid, Awrk, start, total)
       END IF
+!
+!-----------------------------------------------------------------------
+!  Broadcast IO error flag to all nodes.
+!-----------------------------------------------------------------------
+!
+      CALL mp_bcasti (ng, model, status)
 !
       RETURN
       END FUNCTION nf90_fwrite3d_bry

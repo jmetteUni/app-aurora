@@ -94,6 +94,7 @@
 !
       USE mod_netcdf
 !
+      USE distribute_mod, ONLY : mp_bcasti
 !
 !  Imported variable declarations.
 !
@@ -107,6 +108,7 @@
       integer, parameter :: Natt = 25
       integer :: brydim, i, ie, is, j, lstr, varid
       integer :: srdim, stadim, status, swdim, trcdim, usrdim
+      integer :: ibuffer(2)
       integer :: p2dgrd(2), tbrydim(2)
       integer :: t2dgrd(3), u2dgrd(3), v2dgrd(3)
 !
@@ -446,6 +448,15 @@
             END IF
           END IF
         END IF
+        IF (exit_flag.eq.NoError) THEN
+          status=nf90_put_att(ncid, nf90_global, 'script_file',         &
+     &                        TRIM(Iname))
+          IF (FoundError(status, nf90_noerr, 811, MyFile)) THEN
+            IF (Master) WRITE (stdout,20) 'script_file', TRIM(ncname)
+            exit_flag=3
+            ioerror=status
+          END IF
+        END IF
 !
 !  NLM tracer advection scheme.
 !
@@ -644,6 +655,11 @@
           END IF
         END IF
       END IF
+      ibuffer(1)=exit_flag
+      ibuffer(2)=ioerror
+      CALL mp_bcasti (ng, model, ibuffer)
+      exit_flag=ibuffer(1)
+      ioerror=ibuffer(2)
       IF (FoundError(exit_flag, NoError, 1148, MyFile)) RETURN
 !
 !-----------------------------------------------------------------------

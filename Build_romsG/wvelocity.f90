@@ -93,6 +93,7 @@
 !
       USE bc_3d_mod, ONLY : bc_w3d_tile
       USE exchange_2d_mod
+      USE mp_exchange_mod, ONLY : mp_exchange2d, mp_exchange3d
 !
 !  Imported variable declarations.
 !
@@ -204,6 +205,11 @@
      &                          LBi, UBi, LBj, UBj,                     &
      &                          DV_avg1)
       END IF
+      CALL mp_exchange2d (ng, tile, iNLM, 2,                            &
+     &                    LBi, UBi, LBj, UBj,                           &
+     &                    NghostPoints,                                 &
+     &                    EWperiodic(ng), NSperiodic(ng),               &
+     &                    DU_avg1, DV_avg1)
 !
 !  Compute contribution due to quasi-horizontal motions along
 !  S-coordinate surfaces:  (Ui + Vj)*GRADs(z).
@@ -302,6 +308,11 @@
       CALL bc_w3d_tile (ng, tile,                                       &
      &                  LBi, UBi, LBj, UBj, 0, N(ng),                   &
      &                  wvel)
+      CALL mp_exchange3d (ng, tile, iNLM, 1,                            &
+     &                    LBi, UBi, LBj, UBj, 0, N(ng),                 &
+     &                    NghostPoints,                                 &
+     &                    EWperiodic(ng), NSperiodic(ng),               &
+     &                    wvel)
       RETURN
       END SUBROUTINE wvelocity_tile
       END MODULE wvelocity_mod

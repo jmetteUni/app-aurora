@@ -102,6 +102,9 @@
       USE mod_iounits
       USE mod_scalars
 !
+      USE distribute_mod, ONLY : mp_reduce
+      USE distribute_mod, ONLY : mp_reduce2
+!
       implicit none
 !
 !  Imported variable declarations.
@@ -130,7 +133,12 @@
       integer :: NSUB, i, ispace, j, k, trd
       integer :: idia, istep
       integer :: my_max_Ci, my_max_Cj, my_max_Ck
-      integer :: my_threadnum
+      integer, parameter :: Nreduce = 5
+      integer, parameter :: Ncourant = 7
+      real(r8), dimension(Nreduce) :: rbuffer
+      real(r8), dimension(Ncourant) :: Courant
+      character (len=3), dimension(Nreduce) :: op_handle
+      character (len=6), dimension(Nreduce) :: C_handle
 !
       real(r8) :: cff, my_avgke, my_avgpe, my_volume
       real(r8) :: my_C , my_max_C
@@ -304,12 +312,7 @@
 !  critical region, finalizes the computation of diagnostics and prints
 !  them out.
 !
-        IF (DOMAIN(ng)%SouthWest_Corner(tile).and.                      &
-     &      DOMAIN(ng)%NorthEast_Corner(tile)) THEN
-          NSUB=1                         ! non-tiled application
-        ELSE
-          NSUB=NtileX(ng)*NtileE(ng)     ! tiled application
-        END IF
+        NSUB=1                           ! distributed-memory
 !$OMP CRITICAL (NL_DIAGNOSTICS)
         volume=volume+my_volume
         avgke=avgke+my_avgke
@@ -332,7 +335,41 @@
         tile_count=tile_count+1
         IF (tile_count.eq.NSUB) THEN
           tile_count=0
-          trd=my_threadnum()
+          rbuffer(1)=volume
+          rbuffer(2)=avgke
+          rbuffer(3)=avgpe
+          rbuffer(4)=maxspeed(ng)
+          rbuffer(5)=maxrho(ng)
+          op_handle(1)='SUM'
+          op_handle(2)='SUM'
+          op_handle(3)='SUM'
+          op_handle(4)='MAX'
+          op_handle(5)='MAX'
+          CALL mp_reduce (ng, iNLM, Nreduce, rbuffer, op_handle)
+          volume=rbuffer(1)
+          avgke=rbuffer(2)
+          avgpe=rbuffer(3)
+          maxspeed(ng)=rbuffer(4)
+          maxrho(ng)=rbuffer(5)
+!
+          Courant(1)=max_C
+          Courant(2)=max_Cu
+          Courant(3)=max_Cv
+          Courant(4)=REAL(max_Ci,r8)
+          Courant(5)=REAL(max_Cj,r8)
+          Courant(6)=max_Cw
+          Courant(7)=REAL(max_Ck,r8)
+          C_handle(1)='MAXLOC'
+          CALL mp_reduce2 (ng, iNLM, Ncourant, 1, Courant, C_handle)
+          max_C =Courant(1)
+          max_Cu=Courant(2)
+          max_Cv=Courant(3)
+          max_Ci=INT(Courant(4))
+          max_Cj=INT(Courant(5))
+          max_Cw=Courant(6)
+          max_Ck=INT(Courant(7))
+!
+          trd=MyMaster
           avgke=avgke/volume
           avgpe=avgpe/volume
           avgkp=avgke+avgpe

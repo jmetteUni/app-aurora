@@ -98,7 +98,9 @@
       USE mod_ncparam
       USE mod_scalars
 !
+      USE distribute_mod, ONLY : mp_boundary
       USE exchange_2d_mod
+      USE mp_exchange_mod, ONLY : mp_exchange2d
 !
 !  Imported variables declarations.
 !
@@ -119,6 +121,7 @@
 !  Local variables declarations.
 !
       logical :: update
+      integer :: ILB, IUB, JLB, JUB
       integer :: i, itide, j
       real(r8) :: Cangle, Cphase, Sangle, Sphase
       real(r8) :: angle, cff, phase, omega, ramp
@@ -188,6 +191,13 @@
       Jendp2i=BOUNDS(ng) % Jendp2i(tile)            ! Jend+2 interior
       Jendp3 =BOUNDS(ng) % Jendp3 (tile)            ! Jend+3
 !
+!  Lower and upper bounds for nontiled (global values) boundary arrays.
+!
+      ILB=BOUNDS(ng)%LBi(-1)
+      IUB=BOUNDS(ng)%UBi(-1)
+      JLB=BOUNDS(ng)%LBj(-1)
+      JUB=BOUNDS(ng)%UBj(-1)
+!
 !=======================================================================
 !  Process tidal forcing used at the lateral boundaries.
 !=======================================================================
@@ -233,6 +243,11 @@
      &                              LBi, UBi, LBj, UBj,                 &
      &                              CLIMA(ng)%ssh)
           END IF
+          CALL mp_exchange2d (ng, tile, iNLM, 1,                        &
+     &                        LBi, UBi, LBj, UBj,                       &
+     &                        NghostPoints,                             &
+     &                        EWperiodic(ng), NSperiodic(ng),           &
+     &                        CLIMA(ng)%ssh)
         END IF
 !
 !  If appropriate, load tidal forcing into boundary arrays.  The "zeta"
@@ -257,6 +272,9 @@
             END DO
             update=.TRUE.
           END IF
+          CALL mp_boundary (ng, iNLM, JstrR, JendR,                     &
+     &                      JLB, JUB, 1, 1, update,                     &
+     &                      BOUNDARY(ng)%zeta_west)
         END IF
 !
         IF (LBC(ieast,isFsur,ng)%acquire.or.                            &
@@ -271,6 +289,9 @@
             END DO
             update=.TRUE.
           END IF
+          CALL mp_boundary (ng, iNLM, JstrR, JendR,                     &
+     &                      JLB, JUB, 1, 1, update,                     &
+     &                      BOUNDARY(ng)%zeta_east)
         END IF
 !
         IF (LBC(isouth,isFsur,ng)%acquire.or.                           &
@@ -285,6 +306,9 @@
             END DO
             update=.TRUE.
           END IF
+          CALL mp_boundary (ng, iNLM, IstrR, IendR,                     &
+     &                      ILB, IUB, 1, 1, update,                     &
+     &                      BOUNDARY(ng)%zeta_south)
         END IF
 !
         IF (LBC(inorth,isFsur,ng)%acquire.or.                           &
@@ -299,6 +323,9 @@
             END DO
             update=.TRUE.
           END IF
+          CALL mp_boundary (ng, iNLM, IstrR, IendR,                     &
+     &                      ILB, IUB, 1, 1, update,                     &
+     &                      BOUNDARY(ng)%zeta_north)
         END IF
 !
 !-----------------------------------------------------------------------
@@ -361,6 +388,12 @@
      &                              LBi, UBi, LBj, UBj,                 &
      &                              CLIMA(ng)%vbarclm)
           END IF
+          CALL mp_exchange2d (ng, tile, iNLM, 2,                        &
+     &                        LBi, UBi, LBj, UBj,                       &
+     &                        NghostPoints,                             &
+     &                        EWperiodic(ng), NSperiodic(ng),           &
+     &                        CLIMA(ng)%ubarclm,                        &
+     &                        CLIMA(ng)%vbarclm)
         END IF
 !
 !  If appropriate, load tidal forcing into boundary arrays.
@@ -379,6 +412,12 @@
             END DO
             update=.TRUE.
           END IF
+          CALL mp_boundary (ng, iNLM, JstrR, JendR,                     &
+     &                      JLB, JUB, 1, 1, update,                     &
+     &                      BOUNDARY(ng)%ubar_west)
+          CALL mp_boundary (ng, iNLM, Jstr,  JendR,                     &
+     &                      JLB, JUB, 1, 1, update,                     &
+     &                      BOUNDARY(ng)%vbar_west)
         END IF
 !
         IF (LBC(ieast,isUbar,ng)%acquire.and.                           &
@@ -395,6 +434,12 @@
             END DO
             update=.TRUE.
           END IF
+          CALL mp_boundary (ng, iNLM, JstrR, JendR,                     &
+     &                      JLB, JUB, 1, 1, update,                     &
+     &                      BOUNDARY(ng)%ubar_east)
+          CALL mp_boundary (ng, iNLM, Jstr,  JendR,                     &
+     &                      JLB, JUB, 1, 1, update,                     &
+     &                      BOUNDARY(ng)%vbar_east)
         END IF
 !
         IF (LBC(isouth,isUbar,ng)%acquire.and.                          &
@@ -411,6 +456,12 @@
             END DO
             update=.TRUE.
           END IF
+          CALL mp_boundary (ng, iNLM, Istr,  IendR,                     &
+     &                      ILB, IUB, 1, 1, update,                     &
+     &                      BOUNDARY(ng)%ubar_south)
+          CALL mp_boundary (ng, iNLM, IstrR, IendR,                     &
+     &                      ILB, IUB, 1, 1, update,                     &
+     &                      BOUNDARY(ng)%vbar_south)
         END IF
 !
         IF (LBC(inorth,isUbar,ng)%acquire.and.                          &
@@ -427,6 +478,12 @@
             END DO
             update=.TRUE.
           END IF
+          CALL mp_boundary (ng, iNLM, Istr,  IendR,                     &
+     &                      ILB, IUB, 1, 1, update,                     &
+     &                      BOUNDARY(ng)%ubar_north)
+          CALL mp_boundary (ng, iNLM, IstrR, IendR,                     &
+     &                      ILB, IUB, 1, 1, update,                     &
+     &                      BOUNDARY(ng)%vbar_north)
         END IF
       END IF NEEDED
 !

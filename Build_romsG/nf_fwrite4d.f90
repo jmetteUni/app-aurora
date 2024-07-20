@@ -66,6 +66,9 @@
 !
       USE mod_netcdf
 !
+      USE distribute_mod, ONLY : mp_bcasti
+      USE distribute_mod, ONLY : mp_gather3d
+!
 !  Imported variable declarations.
 !
       logical, intent(in), optional :: SetFillVal
@@ -159,25 +162,18 @@
       Awrk=0.0_r8
 !
 !-----------------------------------------------------------------------
-!  If serial or shared-memory applications and serial output, pack data
-!  into a global 1D array in column-major order.
+!  If distributed-memory set-up, collect tile data from all spawned
+!  nodes and store it into a global scratch 1D array, packed in column-
+!  major order.
 !-----------------------------------------------------------------------
 !
-!  Process data as 3D slices.
-!
       DO fourth=LBt,UBt
-        IF (gtype.gt.0) THEN
-          ic=0
-          Npts=IJlen*Klen
-          DO k=LBk,UBk
-            DO j=Jmin,Jmax
-              DO i=Imin,Imax
-                ic=ic+1
-                Awrk(ic)=Adat(i,j,k,fourth)*Ascl
-              END DO
-            END DO
-          END DO
-        END IF
+!
+!  Process the data as 3D slices.
+!
+        CALL mp_gather3d (ng, model, LBi, UBi, LBj, UBj, LBk, UBk,      &
+     &                    tindex, gtype, Ascl,                          &
+     &                    Adat(:,:,:,fourth), Npts, Awrk, SetFillVal)
 !
 !-----------------------------------------------------------------------
 !  If applicable, compute output field minimum and maximum values.
@@ -214,6 +210,12 @@
           status=nf90_put_var(ncid, ncvarid, Awrk, start, total)
         END IF
       END DO
+!
+!-----------------------------------------------------------------------
+!  Broadcast IO error flag to all nodes.
+!-----------------------------------------------------------------------
+!
+      CALL mp_bcasti (ng, model, status)
 !
       RETURN
       END FUNCTION nf90_fwrite4d
