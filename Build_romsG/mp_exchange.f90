@@ -1028,7 +1028,7 @@
 !  Turn on time clocks.
 !-----------------------------------------------------------------------
 !
-      CALL wclock_on (ng, model, 63, 978,  MyFile)
+      CALL wclock_on (ng, model, 63, 1598,  MyFile)
 !
 !-----------------------------------------------------------------------
 !  Determine rank of tile neighbors and number of ghost-points to
@@ -1442,7 +1442,7 @@
 !  Turn off time clocks.
 !-----------------------------------------------------------------------
 !
-      CALL wclock_off (ng, model, 63, 1407, MyFile)
+      CALL wclock_off (ng, model, 63, 2027, MyFile)
 !
       RETURN
       END SUBROUTINE mp_exchange2d_bry
@@ -1564,7 +1564,7 @@
 !  Turn on time clocks.
 !-----------------------------------------------------------------------
 !
-      CALL wclock_on (ng, model, 61, 1490, MyFile)
+      CALL wclock_on (ng, model, 61, 2110, MyFile)
 !
 !-----------------------------------------------------------------------
 !  Determine rank of tile neighbors and number of ghost-points to
@@ -2184,7 +2184,7 @@
 !  Turn off time clocks.
 !-----------------------------------------------------------------------
 !
-      CALL wclock_off (ng, model, 61, 2125, MyFile)
+      CALL wclock_off (ng, model, 61, 2745, MyFile)
 !
       RETURN
       END SUBROUTINE mp_exchange3d
@@ -2303,7 +2303,7 @@
 !  Turn on time clocks.
 !-----------------------------------------------------------------------
 !
-      CALL wclock_on (ng, model, 63, 2204, MyFile)
+      CALL wclock_on (ng, model, 63, 2824, MyFile)
 !
 !-----------------------------------------------------------------------
 !  Determine rank of tile neighbors and number of ghost-points to
@@ -2830,7 +2830,7 @@
 !  Turn off time clocks.
 !-----------------------------------------------------------------------
 !
-      CALL wclock_off (ng, model, 63, 2746, MyFile)
+      CALL wclock_off (ng, model, 63, 3366, MyFile)
 !
       RETURN
       END SUBROUTINE mp_exchange3d_bry
@@ -2953,7 +2953,7 @@
 !  Turn on time clocks.
 !-----------------------------------------------------------------------
 !
-      CALL wclock_on (ng, model, 62, 2832, MyFile)
+      CALL wclock_on (ng, model, 62, 3452, MyFile)
 !
 !-----------------------------------------------------------------------
 !  Determine rank of tile neighbors and number of ghost-points to
@@ -3532,7 +3532,7 @@
 !  Turn off time clocks.
 !-----------------------------------------------------------------------
 !
-      CALL wclock_off (ng, model, 62, 3426, MyFile)
+      CALL wclock_off (ng, model, 62, 4046, MyFile)
 !
       RETURN
       END SUBROUTINE mp_exchange4d

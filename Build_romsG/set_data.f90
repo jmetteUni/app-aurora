@@ -237,6 +237,23 @@
 !
       CALL ana_btflux (ng, tile, iNLM, isalt)
 !
+!  Set kinematic surface and bottom passive tracer fluxes (T m/s).
+!
+      DO itrc=NAT+1,NT(ng)
+        CALL set_2dfld_tile (ng, tile, iNLM, idTsur(itrc),              &
+     &                       LBi, UBi, LBj, UBj,                        &
+     &                       FORCES(ng)%stfluxG(:,:,:,itrc),            &
+     &                       FORCES(ng)%stflux (:,:,itrc),              &
+     &                       update)
+        IF (FoundError(exit_flag, NoError, 544, MyFile)) RETURN
+        CALL set_2dfld_tile (ng, tile, iNLM, idTbot(itrc),              &
+     &                       LBi, UBi, LBj, UBj,                        &
+     &                       FORCES(ng)%btfluxG(:,:,:,itrc),            &
+     &                       FORCES(ng)%btflux (:,:,itrc),              &
+     &                       update)
+        IF (FoundError(exit_flag, NoError, 554, MyFile)) RETURN
+      END DO
+!
 !  Set kinematic surface momentum flux (m2/s2).
 !
       CALL ana_smflux (ng, tile, iNLM)

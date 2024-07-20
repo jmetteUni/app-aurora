@@ -77,7 +77,7 @@
           CALL mp_barrier (ng, model, MyCOMM)
           WRITE (stdout,10) ' Node #', PETrank,                         &
      &                      ' (pid=',proc(0,MyModel,ng),') is active.'
-          CALL my_flush (stdout)
+          FLUSH (stdout)
         END IF
  10     FORMAT (a,i5,a,i8,a)
         thread_count=thread_count+1
@@ -194,7 +194,7 @@
           TendMax=MAXVAL(Tend)
           WRITE (stdout,10) ' Node   #', PETrank,                       &
      &                      ' CPU:', Tend(PETrank+1)
-          CALL my_flush (stdout)
+          FLUSH (stdout)
  10       FORMAT (a,i5,a,f12.3)
         END IF
 !

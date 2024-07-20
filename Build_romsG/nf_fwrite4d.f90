@@ -33,6 +33,10 @@
 !     Adat         Field to write out (real)                           !
 !     SetFillVal   Logical switch to set fill value in land areas      !
 !                    (OPTIONAL)                                        !
+!     ExtractField Field extraction flag (integer, OPTIONAL)           !
+!                    ExtractField = 0   no extraction                  !
+!                    ExtractField = 1   extraction by intrpolation     !
+!                    ExtractField > 1   extraction by decimation       !
 !                                                                      !
 !  On Output:                                                          !
 !                                                                      !
@@ -47,6 +51,8 @@
       USE mod_ncparam
       USE mod_scalars
 !
+      USE pack_field_mod,  ONLY : pack_field4d
+!
       implicit none
 !
       INTERFACE nf_fwrite4d
@@ -60,7 +66,9 @@
      &                        ncvarid, tindex, gtype,                   &
      &                        LBi, UBi, LBj, UBj, LBk, UBk, LBt, UBt,   &
      &                        Ascl,                                     &
-     &                        Adat, SetFillVal,                         &
+     &                        Adat,                                     &
+     &                        SetFillVal,                               &
+     &                        ExtractField,                             &
      &                        MinValue, MaxValue) RESULT (status)
 !***********************************************************************
 !
@@ -77,6 +85,8 @@
       integer, intent(in) :: ifield
       integer, intent(in) :: LBi, UBi, LBj, UBj, LBk, UBk, LBt, UBt
 !
+      integer, intent(in), optional :: ExtractField
+!
       real(dp), intent(in) :: Ascl
 !
       real(r8), intent(in) :: Adat(LBi:,LBj:,LBk:,LBt:)
@@ -85,9 +95,10 @@
 !
 !  Local variable declarations.
 !
-      integer :: i, j, k, ic, fourth, Npts, tile
-      integer :: Imin, Imax, Jmin, Jmax, Kmin, Kmax, Koff, Loff
-      integer :: Ilen, Jlen, Klen, IJlen, MyType
+      logical :: LandFill
+!
+      integer :: Extract_Flag
+      integer :: i, fourth, Npts, tile
       integer :: status
       integer, dimension(5) :: start, total
 !
@@ -99,54 +110,21 @@
 !
       status=nf90_noerr
 !
-!  Set first and last grid point according to staggered C-grid
-!  classification. Set loops offsets.
+!  Set parallel tile.
 !
-      MyType=gtype
+      tile=MyRank
 !
-      SELECT CASE (ABS(MyType))
-        CASE (p2dvar, p3dvar)
-          Imin=IOBOUNDS(ng)%ILB_psi
-          Imax=IOBOUNDS(ng)%IUB_psi
-          Jmin=IOBOUNDS(ng)%JLB_psi
-          Jmax=IOBOUNDS(ng)%JUB_psi
-        CASE (r2dvar, r3dvar)
-          Imin=IOBOUNDS(ng)%ILB_rho
-          Imax=IOBOUNDS(ng)%IUB_rho
-          Jmin=IOBOUNDS(ng)%JLB_rho
-          Jmax=IOBOUNDS(ng)%JUB_rho
-        CASE (u2dvar, u3dvar)
-          Imin=IOBOUNDS(ng)%ILB_u
-          Imax=IOBOUNDS(ng)%IUB_u
-          Jmin=IOBOUNDS(ng)%JLB_u
-          Jmax=IOBOUNDS(ng)%JUB_u
-        CASE (v2dvar, v3dvar)
-          Imin=IOBOUNDS(ng)%ILB_v
-          Imax=IOBOUNDS(ng)%IUB_v
-          Jmin=IOBOUNDS(ng)%JLB_v
-          Jmax=IOBOUNDS(ng)%JUB_v
-        CASE DEFAULT
-          Imin=IOBOUNDS(ng)%ILB_rho
-          Imax=IOBOUNDS(ng)%IUB_rho
-          Jmin=IOBOUNDS(ng)%JLB_rho
-          Jmax=IOBOUNDS(ng)%JUB_rho
-      END SELECT
+!  Set switch to replace land areas with fill value, spval.
 !
-      Ilen=Imax-Imin+1
-      Jlen=Jmax-Jmin+1
-      Klen=UBk-LBk+1
-      IJlen=Ilen*Jlen
+      LandFill=.FALSE.
 !
-      IF (LBk.eq.0) THEN
-        Koff=0
+!  If appropriate, set the field extraction flag to the provided grid
+!  geometry through interpolation or decimation.
+!
+      IF (PRESENT(ExtractField)) THEN
+        Extract_Flag=ExtractField
       ELSE
-        Koff=1
-      END IF
-!
-      IF (LBt.eq.0) THEN
-        Loff=1
-      ELSE
-        Loff=0
+        Extract_Flag=0
       END IF
 !
 !  If appropriate, initialize minimum and maximum processed values.
@@ -162,18 +140,18 @@
       Awrk=0.0_r8
 !
 !-----------------------------------------------------------------------
-!  If distributed-memory set-up, collect tile data from all spawned
-!  nodes and store it into a global scratch 1D array, packed in column-
-!  major order.
+!  Pack 4D field data into 1D array. Proccess fourth dimension record
+!  by record.
 !-----------------------------------------------------------------------
 !
-      DO fourth=LBt,UBt
-!
-!  Process the data as 3D slices.
-!
-        CALL mp_gather3d (ng, model, LBi, UBi, LBj, UBj, LBk, UBk,      &
-     &                    tindex, gtype, Ascl,                          &
-     &                    Adat(:,:,:,fourth), Npts, Awrk, SetFillVal)
+      DIM4_LOOP : DO fourth=LBt,UBt
+        CALL pack_field4d (ng, model, tile,                             &
+     &                     gtype, ifield, tindex,                       &
+     &                     LandFill, Extract_Flag,                      &
+     &                     LBi, UBi, LBj, UBj, LBk, UBk, LBt, UBt,      &
+     &                     fourth,                                      &
+     &                     Ascl, Adat,                                  &
+     &                     start, total, Npts, Awrk)
 !
 !-----------------------------------------------------------------------
 !  If applicable, compute output field minimum and maximum values.
@@ -195,21 +173,9 @@
 !-----------------------------------------------------------------------
 !
         IF (OutThread) THEN
-          IF (gtype.gt.0) THEN
-            start(1)=1
-            total(1)=Ilen
-            start(2)=1
-            total(2)=Jlen
-            start(3)=1
-            total(3)=Klen
-            start(4)=fourth+Loff
-            total(4)=1
-            start(5)=tindex
-            total(5)=1
-          END IF
           status=nf90_put_var(ncid, ncvarid, Awrk, start, total)
         END IF
-      END DO
+      END DO DIM4_LOOP
 !
 !-----------------------------------------------------------------------
 !  Broadcast IO error flag to all nodes.

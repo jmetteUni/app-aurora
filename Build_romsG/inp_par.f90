@@ -14,13 +14,6 @@
 !=======================================================================
 !
       USE mod_kinds
-!
-      CONTAINS
-!
-!***********************************************************************
-      SUBROUTINE inp_par (model)
-!***********************************************************************
-!
       USE mod_param
       USE mod_parallel
       USE mod_iounits
@@ -28,14 +21,24 @@
       USE mod_scalars
       USE mod_strings
 !
-      USE dateclock_mod,   ONLY : get_date
-      USE distribute_mod,  ONLY : mp_bcasti, mp_bcasts
-      USE lbc_mod,         ONLY : lbc_report
-      USE ran_state,       ONLY : ran_seed
-      USE strings_mod,     ONLY : FoundError
-      USE tadv_mod,        ONLY : tadv_report
+      USE dateclock_mod,    ONLY : get_date
+      USE distribute_mod,   ONLY : mp_bcasti, mp_bcasts
+      USE lbc_mod,          ONLY : lbc_report
+      USE ran_state,        ONLY : ran_seed
+      USE stdinp_mod,       ONLY : stdinp_unit
+      USE strings_mod,      ONLY : FoundError
+      USE tadv_mod,         ONLY : tadv_report
+      USE tile_indices_mod, ONLY : tile_indices, tile_obs_bounds
 !
       implicit none
+!
+      PUBLIC  :: inp_par
+!
+      CONTAINS
+!
+!***********************************************************************
+      SUBROUTINE inp_par (model)
+!***********************************************************************
 !
 !  Imported variable declarations.
 !
@@ -43,21 +46,17 @@
 !
 !  Local variable declarations.
 !
-      logical :: Lwrite
+      logical :: GotFile, Lwrite
 !
-      integer :: Itile, Jtile, Nghost, Ntiles, tile
+      integer :: Nghost, tile
       integer :: Imin, Imax, Jmin, Jmax
-      integer :: Uoff, Voff
       integer :: MaxHaloLenI, MaxHaloLenJ
       integer :: ibry, inp, out, i, ic, ifield, itrc, j, ng, npts
-      integer :: io_err, sequence, varid
+      integer :: sequence, varid
 !
       real(r8) :: cff
-      real(r8), parameter :: epsilon = 1.0E-8_r8
       real(r8), parameter :: spv = 0.0_r8
 !
-      character (len=10 ) :: stdout_file
-      character (len=256) :: io_errmsg
       character (len=*), parameter :: MyFile =                          &
      &  "ROMS/Utility/inp_par.F"
 !
@@ -67,11 +66,22 @@
 !  Read in and report input model parameters.
 !-----------------------------------------------------------------------
 !
-!  Set input units.
 !
-      Lwrite=Master
-      inp=1
+!  Get in ROMS standard input script filename (Iname) and and open it
+!  as a regular formatted file in distributed-memory configurations.
+!
+      inp=stdinp_unit(Master, GotFile)
       out=stdout
+      Lwrite=Master
+!
+      IF (.not.GotFile) THEN
+        IF (Master) WRITE (out,10)
+ 10     FORMAT (/,' INP_PAR - Unable to ROMS standard input file, ',    &
+
+                'Iname')
+        exit_flag=2
+      END IF
+      IF (FoundError(exit_flag, NoError, 105, MyFile)) RETURN
 !
 !  Get current date.
 !
@@ -87,37 +97,14 @@
               ' Model Input Parameters:  ROMS/TOMS version ',a,/,       &
      &        26x,a,/,80('-'))
 !
-!  In distributed-memory configurations, the input physical parameters
-!  script is opened as a regular file.  It is read and processed by all
-!  parallel nodes.  This is to avoid a very complex broadcasting of the
-!  input parameters to all nodes.
-!
-      IF (Master) CALL my_getarg (1, Iname)
-      CALL mp_bcasts (1, model, Iname)
-      OPEN (inp, FILE=TRIM(Iname), FORM='formatted', STATUS='old',      &
-     &      IOSTAT=io_err, IOMSG=io_errmsg)
-      IF (io_err.ne.0) THEN
-        IF (Master) WRITE (stdout,30) TRIM(io_errmsg)
-        exit_flag=5
-        RETURN
- 30     FORMAT (/,' INP_PAR - Unable to open ROMS/TOMS input script ',  &
-     &              'file.',/,11x,'ERROR: ',a,/,                        &
-     &          /,11x,'In distributed-memory applications, the input',  &
-     &          /,11x,'script file is processed in parallel. The Unix', &
-     &          /,11x,'routine GETARG is used to get script file name.',&
-     &          /,11x,'For example, in MPI applications make sure that',&
-     &          /,11x,'command line is something like:',/,              &
-     &          /,11x,'mpirun -np 4 romsM roms.in',/,/,11x,'and not',/, &
-     &          /,11x,'mpirun -np 4 romsM < roms.in',/)
-      END IF
+!  Process ROMS standard input Iname script.
 !
       CALL read_PhyPar (model, inp, out, Lwrite)
       CALL mp_bcasti (1, model, exit_flag)
-      IF (FoundError(exit_flag, NoError, 211, MyFile)) RETURN
+      IF (FoundError(exit_flag, NoError, 148, MyFile)) RETURN
 !
 !-----------------------------------------------------------------------
-!  Set lower and upper bounds indices per domain partition for all
-!  nested grids.
+!  Set application domain parameters and switches.
 !-----------------------------------------------------------------------
 !
 !  Set switch for three ghost-points in the halo region.
@@ -158,289 +145,16 @@
           LprocessTides(ng)=.TRUE.
         END IF
       END DO
-!
-!  Set boundary edge I- or J-indices for each variable type.
-!
-      DO ng=1,Ngrids
-        BOUNDS(ng) % edge(iwest ,p2dvar) = 1
-        BOUNDS(ng) % edge(iwest ,r2dvar) = 0
-        BOUNDS(ng) % edge(iwest ,u2dvar) = 1
-        BOUNDS(ng) % edge(iwest ,v2dvar) = 0
-        BOUNDS(ng) % edge(ieast ,p2dvar) = Lm(ng)+1
-        BOUNDS(ng) % edge(ieast ,r2dvar) = Lm(ng)+1
-        BOUNDS(ng) % edge(ieast ,u2dvar) = Lm(ng)+1
-        BOUNDS(ng) % edge(ieast ,v2dvar) = Lm(ng)+1
-        BOUNDS(ng) % edge(isouth,p2dvar) = 1
-        BOUNDS(ng) % edge(isouth,u2dvar) = 0
-        BOUNDS(ng) % edge(isouth,r2dvar) = 0
-        BOUNDS(ng) % edge(isouth,v2dvar) = 1
-        BOUNDS(ng) % edge(inorth,p2dvar) = Mm(ng)+1
-        BOUNDS(ng) % edge(inorth,r2dvar) = Mm(ng)+1
-        BOUNDS(ng) % edge(inorth,u2dvar) = Mm(ng)+1
-        BOUNDS(ng) % edge(inorth,v2dvar) = Mm(ng)+1
-      END DO
-!
-!  Set logical switches needed when processing variables in tiles
-!  adjacent to the domain boundary edges or corners.  This needs to
-!  be computed first since these switches are used in "get_tile".
-!
-      DO ng=1,Ngrids
-        DO tile=-1,NtileI(ng)*NtileJ(ng)-1
-          CALL get_domain_edges (ng, tile,                              &
-     &                           DOMAIN(ng) % Eastern_Edge    (tile),   &
-     &                           DOMAIN(ng) % Western_Edge    (tile),   &
-     &                           DOMAIN(ng) % Northern_Edge   (tile),   &
-     &                           DOMAIN(ng) % Southern_Edge   (tile),   &
-     &                           DOMAIN(ng) % NorthEast_Corner(tile),   &
-     &                           DOMAIN(ng) % NorthWest_Corner(tile),   &
-     &                           DOMAIN(ng) % SouthEast_Corner(tile),   &
-     &                           DOMAIN(ng) % SouthWest_Corner(tile),   &
-     &                           DOMAIN(ng) % NorthEast_Test  (tile),   &
-     &                           DOMAIN(ng) % NorthWest_Test  (tile),   &
-     &                           DOMAIN(ng) % SouthEast_Test  (tile),   &
-     &                           DOMAIN(ng) % SouthWest_Test  (tile))
-        END DO
-      END DO
-!
-!  Set tile computational indices and arrays allocation bounds
-!
-      Nghost=NghostPoints
-      DO ng=1,Ngrids
-        BOUNDS(ng) % LBij = 0
-        BOUNDS(ng) % UBij = MAX(Lm(ng)+1,Mm(ng)+1)
-        DO tile=-1,NtileI(ng)*NtileJ(ng)-1
-          BOUNDS(ng) % tile(tile) = tile
-          CALL get_tile (ng, tile, Itile, Jtile,                        &
-     &                   BOUNDS(ng) % Istr   (tile),                    &
-     &                   BOUNDS(ng) % Iend   (tile),                    &
-     &                   BOUNDS(ng) % Jstr   (tile),                    &
-     &                   BOUNDS(ng) % Jend   (tile),                    &
-     &                   BOUNDS(ng) % IstrM  (tile),                    &
-     &                   BOUNDS(ng) % IstrR  (tile),                    &
-     &                   BOUNDS(ng) % IstrU  (tile),                    &
-     &                   BOUNDS(ng) % IendR  (tile),                    &
-     &                   BOUNDS(ng) % JstrM  (tile),                    &
-     &                   BOUNDS(ng) % JstrR  (tile),                    &
-     &                   BOUNDS(ng) % JstrV  (tile),                    &
-     &                   BOUNDS(ng) % JendR  (tile),                    &
-     &                   BOUNDS(ng) % IstrB  (tile),                    &
-     &                   BOUNDS(ng) % IendB  (tile),                    &
-     &                   BOUNDS(ng) % IstrP  (tile),                    &
-     &                   BOUNDS(ng) % IendP  (tile),                    &
-     &                   BOUNDS(ng) % IstrT  (tile),                    &
-     &                   BOUNDS(ng) % IendT  (tile),                    &
-     &                   BOUNDS(ng) % JstrB  (tile),                    &
-     &                   BOUNDS(ng) % JendB  (tile),                    &
-     &                   BOUNDS(ng) % JstrP  (tile),                    &
-     &                   BOUNDS(ng) % JendP  (tile),                    &
-     &                   BOUNDS(ng) % JstrT  (tile),                    &
-     &                   BOUNDS(ng) % JendT  (tile),                    &
-     &                   BOUNDS(ng) % Istrm3 (tile),                    &
-     &                   BOUNDS(ng) % Istrm2 (tile),                    &
-     &                   BOUNDS(ng) % Istrm1 (tile),                    &
-     &                   BOUNDS(ng) % IstrUm2(tile),                    &
-     &                   BOUNDS(ng) % IstrUm1(tile),                    &
-     &                   BOUNDS(ng) % Iendp1 (tile),                    &
-     &                   BOUNDS(ng) % Iendp2 (tile),                    &
-     &                   BOUNDS(ng) % Iendp2i(tile),                    &
-     &                   BOUNDS(ng) % Iendp3 (tile),                    &
-     &                   BOUNDS(ng) % Jstrm3 (tile),                    &
-     &                   BOUNDS(ng) % Jstrm2 (tile),                    &
-     &                   BOUNDS(ng) % Jstrm1 (tile),                    &
-     &                   BOUNDS(ng) % JstrVm2(tile),                    &
-     &                   BOUNDS(ng) % JstrVm1(tile),                    &
-     &                   BOUNDS(ng) % Jendp1 (tile),                    &
-     &                   BOUNDS(ng) % Jendp2 (tile),                    &
-     &                   BOUNDS(ng) % Jendp2i(tile),                    &
-     &                   BOUNDS(ng) % Jendp3 (tile))
-          CALL get_bounds (ng, tile, 0, Nghost, Itile, Jtile,           &
-     &                     BOUNDS(ng) % LBi(tile),                      &
-     &                     BOUNDS(ng) % UBi(tile),                      &
-     &                     BOUNDS(ng) % LBj(tile),                      &
-     &                     BOUNDS(ng) % UBj(tile))
-        END DO
-      END DO
-!
-!  Set I/O processing minimum (Imin, Jmax) and maximum (Imax, Jmax)
-!  indices for non-overlapping (Nghost=0) and overlapping (Nghost>0)
-!  tiles for each C-grid type variable.
-!
-      Nghost=NghostPoints
-      DO ng=1,Ngrids
-        DO tile=0,NtileI(ng)*NtileJ(ng)-1
-          CALL get_bounds (ng, tile, p2dvar, 0     , Itile, Jtile,      &
-     &                     BOUNDS(ng) % Imin(1,0,tile),                 &
-     &                     BOUNDS(ng) % Imax(1,0,tile),                 &
-     &                     BOUNDS(ng) % Jmin(1,0,tile),                 &
-     &                     BOUNDS(ng) % Jmax(1,0,tile))
-          CALL get_bounds (ng, tile, p2dvar, Nghost, Itile, Jtile,      &
-     &                     BOUNDS(ng) % Imin(1,1,tile),                 &
-     &                     BOUNDS(ng) % Imax(1,1,tile),                 &
-     &                     BOUNDS(ng) % Jmin(1,1,tile),                 &
-     &                     BOUNDS(ng) % Jmax(1,1,tile))
-          CALL get_bounds (ng, tile, r2dvar, 0     , Itile, Jtile,      &
-     &                     BOUNDS(ng) % Imin(2,0,tile),                 &
-     &                     BOUNDS(ng) % Imax(2,0,tile),                 &
-     &                     BOUNDS(ng) % Jmin(2,0,tile),                 &
-     &                     BOUNDS(ng) % Jmax(2,0,tile))
-          CALL get_bounds (ng, tile, r2dvar, Nghost, Itile, Jtile,      &
-     &                     BOUNDS(ng) % Imin(2,1,tile),                 &
-     &                     BOUNDS(ng) % Imax(2,1,tile),                 &
-     &                     BOUNDS(ng) % Jmin(2,1,tile),                 &
-     &                     BOUNDS(ng) % Jmax(2,1,tile))
-          CALL get_bounds (ng, tile, u2dvar, 0     , Itile, Jtile,      &
-     &                     BOUNDS(ng) % Imin(3,0,tile),                 &
-     &                     BOUNDS(ng) % Imax(3,0,tile),                 &
-     &                     BOUNDS(ng) % Jmin(3,0,tile),                 &
-     &                     BOUNDS(ng) % Jmax(3,0,tile))
-          CALL get_bounds (ng, tile, u2dvar, Nghost, Itile, Jtile,      &
-     &                     BOUNDS(ng) % Imin(3,1,tile),                 &
-     &                     BOUNDS(ng) % Imax(3,1,tile),                 &
-     &                     BOUNDS(ng) % Jmin(3,1,tile),                 &
-     &                     BOUNDS(ng) % Jmax(3,1,tile))
-          CALL get_bounds (ng, tile, v2dvar, 0     , Itile, Jtile,      &
-     &                     BOUNDS(ng) % Imin(4,0,tile),                 &
-     &                     BOUNDS(ng) % Imax(4,0,tile),                 &
-     &                     BOUNDS(ng) % Jmin(4,0,tile),                 &
-     &                     BOUNDS(ng) % Jmax(4,0,tile))
-          CALL get_bounds (ng, tile, v2dvar, Nghost, Itile, Jtile,      &
-     &                     BOUNDS(ng) % Imin(4,1,tile),                 &
-     &                     BOUNDS(ng) % Imax(4,1,tile),                 &
-     &                     BOUNDS(ng) % Jmin(4,1,tile),                 &
-     &                     BOUNDS(ng) % Jmax(4,1,tile))
-        END DO
-      END DO
-!
-!  Set NetCDF IO bounds.
-!
-      DO ng=1,Ngrids
-        CALL get_iobounds (ng)
-      END DO
+      CALL tile_indices (model, Im, Jm, Lm, Mm,                         &
+     &                   BOUNDS, DOMAIN, IOBOUNDS)
 !
 !-----------------------------------------------------------------------
 !  Set minimum and maximum fractional coordinates for processing
-!  observations. Either the full grid or only interior points will
-!  be considered.  The strategy here is to add a small value (epsilon)
-!  to the eastern and northern boundary values of Xmax and Ymax so
-!  observations at such boundaries locations are processed. This
-!  is needed because the .lt. operator in the following conditional:
-!
-!     IF (...
-!    &    ((Xmin.le.Xobs(iobs)).and.(Xobs(iobs).lt.Xmax)).and.          &
-!    &    ((Ymin.le.Yobs(iobs)).and.(Yobs(iobs).lt.Ymax))) THEN
+!  observations.
 !-----------------------------------------------------------------------
 !
-!  Set RHO-points domain lower and upper bounds (integer).
-!
-      DO ng=1,Ngrids
-        CALL get_bounds (ng, MyRank, r2dvar, 0, Itile, Jtile,           &
-     &                   rILB(ng), rIUB(ng), rJLB(ng), rJUB(ng))
-        IF (Itile.eq.0) THEN
-          rILB(ng)=rILB(ng)+1
-        END IF
-        IF (Itile.eq.(NtileI(ng)-1)) THEN
-          rIUB(ng)=rIUB(ng)-1
-        END IF
-        IF (Jtile.eq.0) THEN
-          rJLB(ng)=rJLB(ng)+1
-        END IF
-        IF (Jtile.eq.(NtileJ(ng)-1)) THEN
-          rJUB(ng)=rJUB(ng)-1
-        END IF
-!
-!  Minimum and maximum fractional coordinates for RHO-points.
-!
-        DO tile=0,NtileI(ng)*NtileJ(ng)-1
-          CALL get_domain (ng, tile, r2dvar, 0, epsilon,                &
-     &                     .FALSE.,                                     &
-     &                     DOMAIN(ng) % Xmin_rho(tile),                 &
-     &                     DOMAIN(ng) % Xmax_rho(tile),                 &
-     &                     DOMAIN(ng) % Ymin_rho(tile),                 &
-     &                     DOMAIN(ng) % Ymax_rho(tile))
-        END DO
-        rXmin(ng)=DOMAIN(ng)%Xmin_rho(MyRank)
-        rXmax(ng)=DOMAIN(ng)%Xmax_rho(MyRank)
-        rYmin(ng)=DOMAIN(ng)%Ymin_rho(MyRank)
-        rYmax(ng)=DOMAIN(ng)%Ymax_rho(MyRank)
-      END DO
-!
-!  Set U-points domain lower and upper bounds (integer).
-!
-      DO ng=1,Ngrids
-        IF (EWperiodic(ng)) THEN
-          Uoff=0
-        ELSE
-          Uoff=1
-        END IF
-        CALL get_bounds (ng, MyRank, u2dvar, 0, Itile, Jtile,           &
-     &                   uILB(ng), uIUB(ng), uJLB(ng), uJUB(ng))
-        IF (Itile.eq.0) THEN
-          uILB(ng)=uILB(ng)+Uoff
-        END IF
-        IF (Itile.eq.(NtileI(ng)-1)) THEN
-          uIUB(ng)=uIUB(ng)-1
-        END IF
-        IF (Jtile.eq.0) THEN
-          uJLB(ng)=uJLB(ng)+1
-        END IF
-        IF (Jtile.eq.(NtileJ(ng)-1)) THEN
-          uJUB(ng)=uJUB(ng)-1
-        END IF
-!
-!  Minimum and maximum fractional coordinates for U-points.
-!
-        DO tile=0,NtileI(ng)*NtileJ(ng)-1
-          CALL get_domain (ng, tile, u2dvar, 0, epsilon,                &
-     &                     .FALSE.,                                     &
-     &                     DOMAIN(ng) % Xmin_u(tile),                   &
-     &                     DOMAIN(ng) % Xmax_u(tile),                   &
-     &                     DOMAIN(ng) % Ymin_u(tile),                   &
-     &                     DOMAIN(ng) % Ymax_u(tile))
-        END DO
-        uXmin(ng)=DOMAIN(ng)%Xmin_u(MyRank)
-        uXmax(ng)=DOMAIN(ng)%Xmax_u(MyRank)
-        uYmin(ng)=DOMAIN(ng)%Ymin_u(MyRank)
-        uYmax(ng)=DOMAIN(ng)%Ymax_u(MyRank)
-      END DO
-!
-!  Set V-points domain lower and upper bounds (integer).
-!
-      DO ng=1,Ngrids
-        IF (NSperiodic(ng)) THEN
-          Voff=0
-        ELSE
-          Voff=1
-        END IF
-        CALL get_bounds (ng, MyRank, v2dvar, 0, Itile, Jtile,           &
-     &                   vILB(ng), vIUB(ng), vJLB(ng), vJUB(ng))
-        IF (Itile.eq.0) THEN
-          vILB(ng)=vILB(ng)+1
-        END IF
-        IF (Itile.eq.(NtileI(ng)-1)) THEN
-          vIUB(ng)=vIUB(ng)-1
-        END IF
-        IF (Jtile.eq.0) THEN
-          vJLB(ng)=vJLB(ng)+Voff
-        END IF
-        IF (Jtile.eq.(NtileJ(ng)-1)) THEN
-          vJUB(ng)=vJUB(ng)-1
-        END IF
-!
-!  Minimum and maximum fractional coordinates for V-points.
-!
-        DO tile=0,NtileI(ng)*NtileJ(ng)-1
-          CALL get_domain (ng, tile, v2dvar, 0, epsilon,                &
-     &                     .FALSE.,                                     &
-     &                     DOMAIN(ng) % Xmin_v(tile),                   &
-     &                     DOMAIN(ng) % Xmax_v(tile),                   &
-     &                     DOMAIN(ng) % Ymin_v(tile),                   &
-     &                     DOMAIN(ng) % Ymax_v(tile))
-        END DO
-        vXmin(ng)=DOMAIN(ng)%Xmin_v(MyRank)
-        vXmax(ng)=DOMAIN(ng)%Xmax_v(MyRank)
-        vYmin(ng)=DOMAIN(ng)%Ymin_v(MyRank)
-        vYmax(ng)=DOMAIN(ng)%Ymax_v(MyRank)
-      END DO
+      CALL tile_obs_bounds (model, Im, Jm, Lm, Mm,                      &
+     &                      DOMAIN)
 !
 !-----------------------------------------------------------------------
 !  Check tile partition starting and ending (I,J) indices for illegal
@@ -498,7 +212,7 @@
      &          /,11x,'Decrease partition parameter: ',a)
       END IF
       CALL mp_bcasti (1, model, exit_flag)
-      IF (FoundError(exit_flag, NoError, 781, MyFile)) RETURN
+      IF (FoundError(exit_flag, NoError, 414, MyFile)) RETURN
 !
 !  Report tile minimum and maximum fractional grid coordinates.
 !
@@ -587,7 +301,7 @@
      &          t31,2('------------',7x))
       END IF
       CALL tadv_report (out, iNLM, Hadvection, Vadvection, Lwrite)
-      IF (FoundError(exit_flag, NoError, 924, MyFile)) RETURN
+      IF (FoundError(exit_flag, NoError, 557, MyFile)) RETURN
 !
 !-----------------------------------------------------------------------
 !  Report lateral boundary conditions.
@@ -605,7 +319,7 @@
           END IF
         END DO
       END IF
-      IF (FoundError(exit_flag, NoError, 989, MyFile)) RETURN
+      IF (FoundError(exit_flag, NoError, 622, MyFile)) RETURN
 !
 !-----------------------------------------------------------------------
 !  Compute various constants.
@@ -821,11 +535,11 @@
 !
       IF (Master.and.Lwrite) THEN
         CALL checkdefs
-        CALL my_flush (out)
+        FLUSH (out)
       END IF
       CALL mp_bcasti (1, model, exit_flag)
       CALL mp_bcasts (1, model, Coptions)
-      IF (FoundError(exit_flag, NoError, 1284, MyFile)) RETURN
+      IF (FoundError(exit_flag, NoError, 917, MyFile)) RETURN
 !
 !-----------------------------------------------------------------------
 !  Initialize random number sequence so we can get identical results

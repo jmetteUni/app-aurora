@@ -39,6 +39,9 @@
 #define DIAGNOSTICS_TS
 #define DIAGNOSTICS_UV
 
+#define T_PASSIVE
+#undef ANA_PASSIVE
+
 #undef ANA_GRID
 #undef ANA_INITIAL
 #undef ANA_BTFLUX

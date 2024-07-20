@@ -330,7 +330,7 @@
             status=nf90_put_att(ncid, nf90_global, 'avg_file',          &
      &                          TRIM(AVG(ng)%name))
           END IF
-          IF (FoundError(status, nf90_noerr, 454, MyFile)) THEN
+          IF (FoundError(status, nf90_noerr, 483, MyFile)) THEN
             IF (Master) WRITE (stdout,20) 'avg_file', TRIM(ncname)
             exit_flag=3
             ioerror=status
@@ -344,7 +344,7 @@
             status=nf90_put_att(ncid, nf90_global, 'dia_file',          &
      &                          TRIM(DIA(ng)%name))
           END IF
-          IF (FoundError(status, nf90_noerr, 484, MyFile)) THEN
+          IF (FoundError(status, nf90_noerr, 513, MyFile)) THEN
             IF (Master) WRITE (stdout,20) 'dia_file', TRIM(ncname)
             exit_flag=3
             ioerror=status
@@ -353,7 +353,7 @@
         IF (exit_flag.eq.NoError) THEN
           status=nf90_put_att(ncid, nf90_global, 'grd_file',            &
      &                        TRIM(GRD(ng)%name))
-          IF (FoundError(status, nf90_noerr, 533, MyFile)) THEN
+          IF (FoundError(status, nf90_noerr, 562, MyFile)) THEN
             IF (Master) WRITE (stdout,20) 'grd_file', TRIM(ncname)
             exit_flag=3
             ioerror=status
@@ -362,7 +362,7 @@
         IF (exit_flag.eq.NoError) THEN
           status=nf90_put_att(ncid, nf90_global, 'ini_file',            &
      &                        TRIM(INI(ng)%name))
-          IF (FoundError(status, nf90_noerr, 546, MyFile)) THEN
+          IF (FoundError(status, nf90_noerr, 575, MyFile)) THEN
             IF (Master) WRITE (stdout,20) 'ini_file', TRIM(ncname)
             exit_flag=3
             ioerror=status
@@ -372,7 +372,7 @@
           IF (LuvSrc(ng).or.LwSrc(ng).or.(ANY(LtracerSrc(:,ng)))) THEN
             status=nf90_put_att(ncid, nf90_global, 'river_file',        &
      &                          TRIM(SSF(ng)%name))
-            IF (FoundError(status, nf90_noerr, 689, MyFile)) THEN
+            IF (FoundError(status, nf90_noerr, 718, MyFile)) THEN
               IF (Master) WRITE (stdout,20) 'river_file', TRIM(ncname)
               exit_flag=3
               ioerror=status
@@ -383,7 +383,7 @@
           IF (LprocessTides(ng)) THEN
             status=nf90_put_att(ncid, nf90_global, 'tide_file',         &
      &                          TRIM(TIDE(ng)%name))
-            IF (FoundError(status, nf90_noerr, 703, MyFile)) THEN
+            IF (FoundError(status, nf90_noerr, 732, MyFile)) THEN
               IF (Master) WRITE (stdout,20) 'tide_file', TRIM(ncname)
               exit_flag=3
               ioerror=status
@@ -397,7 +397,7 @@
             WRITE (frcatt,30) 'frc_file_', i
             status=nf90_put_att(ncid, nf90_global, frcatt,              &
      &                          string(1:lstr))
-            IF (FoundError(status, nf90_noerr, 720, MyFile)) THEN
+            IF (FoundError(status, nf90_noerr, 749, MyFile)) THEN
               IF (Master) WRITE (stdout,20) TRIM(frcatt), TRIM(ncname)
               exit_flag=3
               ioerror=status
@@ -413,7 +413,7 @@
               WRITE (bryatt,30) 'bry_file_', i
               status=nf90_put_att(ncid, nf90_global, bryatt,            &
      &                            string(1:lstr))
-              IF (FoundError(status, nf90_noerr, 738, MyFile)) THEN
+              IF (FoundError(status, nf90_noerr, 767, MyFile)) THEN
                 IF (Master) WRITE (stdout,20) TRIM(bryatt), TRIM(ncname)
                 exit_flag=3
                 ioerror=status
@@ -429,7 +429,7 @@
               WRITE (clmatt,30) 'clm_file_', i
               status=nf90_put_att(ncid, nf90_global, clmatt,            &
      &                            string(1:lstr))
-              IF (FoundError(status, nf90_noerr, 757, MyFile)) THEN
+              IF (FoundError(status, nf90_noerr, 786, MyFile)) THEN
                 IF (Master) WRITE (stdout,20) TRIM(clmatt), TRIM(ncname)
                 exit_flag=3
                 ioerror=status
@@ -441,7 +441,7 @@
           IF (exit_flag.eq.NoError) THEN
             status=nf90_put_att(ncid, nf90_global, 'nud_file',          &
      &                        TRIM(NUD(ng)%name))
-            IF (FoundError(status, nf90_noerr, 772, MyFile)) THEN
+            IF (FoundError(status, nf90_noerr, 801, MyFile)) THEN
               IF (Master) WRITE (stdout,20) 'nud_file', TRIM(ncname)
               exit_flag=3
               ioerror=status
@@ -451,7 +451,7 @@
         IF (exit_flag.eq.NoError) THEN
           status=nf90_put_att(ncid, nf90_global, 'script_file',         &
      &                        TRIM(Iname))
-          IF (FoundError(status, nf90_noerr, 811, MyFile)) THEN
+          IF (FoundError(status, nf90_noerr, 840, MyFile)) THEN
             IF (Master) WRITE (stdout,20) 'script_file', TRIM(ncname)
             exit_flag=3
             ioerror=status
@@ -463,7 +463,7 @@
         IF (exit_flag.eq.NoError) THEN
           CALL tadv_putatt (ng, ncid, ncname, 'NLM_TADV',               &
      &                      Hadvection, Vadvection, status)
-          IF (FoundError(status, nf90_noerr, 875, MyFile)) THEN
+          IF (FoundError(status, nf90_noerr, 904, MyFile)) THEN
             IF (Master) WRITE (stdout,20) 'NLM_TADV', TRIM(ncname)
             exit_flag=3
             ioerror=status
@@ -474,7 +474,7 @@
 !
         IF (exit_flag.eq.NoError) THEN
           CALL lbc_putatt (ng, ncid, ncname, 'NLM_LBC', LBC, status)
-          IF (FoundError(status, nf90_noerr, 899, MyFile)) THEN
+          IF (FoundError(status, nf90_noerr, 928, MyFile)) THEN
             IF (Master) WRITE (stdout,20) 'NLM_LBC', TRIM(ncname)
             exit_flag=3
             ioerror=status
@@ -486,7 +486,7 @@
         IF (exit_flag.eq.NoError) THEN
           status=nf90_put_att(ncid, nf90_global, 'git_url',             &
      &                        TRIM(git_url))
-          IF (FoundError(status, nf90_noerr, 927, MyFile)) THEN
+          IF (FoundError(status, nf90_noerr, 956, MyFile)) THEN
             IF (Master) WRITE (stdout,20) 'git_url', TRIM(ncname)
             exit_flag=3
             ioerror=status
@@ -495,7 +495,7 @@
         IF (exit_flag.eq.NoError) THEN
           status=nf90_put_att(ncid, nf90_global, 'git_rev',             &
      &                        TRIM(git_rev))
-          IF (FoundError(status, nf90_noerr, 938, MyFile)) THEN
+          IF (FoundError(status, nf90_noerr, 967, MyFile)) THEN
             IF (Master) WRITE (stdout,20) 'git_rev', TRIM(ncname)
             exit_flag=3
             ioerror=status
@@ -507,7 +507,7 @@
         IF (exit_flag.eq.NoError) THEN
           status=nf90_put_att(ncid, nf90_global, 'svn_url',             &
      &                        TRIM(svn_url))
-          IF (FoundError(status, nf90_noerr, 951, MyFile)) THEN
+          IF (FoundError(status, nf90_noerr, 980, MyFile)) THEN
             IF (Master) WRITE (stdout,20) 'svn_url', TRIM(ncname)
             exit_flag=3
             ioerror=status
@@ -516,7 +516,7 @@
         IF (exit_flag.eq.NoError) THEN
           status=nf90_put_att(ncid, nf90_global, 'svn_rev',             &
      &                        TRIM(svn_rev))
-          IF (FoundError(status, nf90_noerr, 962, MyFile)) THEN
+          IF (FoundError(status, nf90_noerr, 991, MyFile)) THEN
             IF (Master) WRITE (stdout,20) 'svn_rev', TRIM(ncname)
             exit_flag=3
             ioerror=status
@@ -529,7 +529,7 @@
         IF (exit_flag.eq.NoError) THEN
           status=nf90_put_att(ncid, nf90_global, 'code_dir',            &
      &                        TRIM(Rdir))
-          IF (FoundError(status, nf90_noerr, 978, MyFile)) THEN
+          IF (FoundError(status, nf90_noerr, 1007, MyFile)) THEN
             IF (Master) WRITE (stdout,20) 'code_dir', TRIM(ncname)
             exit_flag=3
             ioerror=status
@@ -538,7 +538,7 @@
         IF (exit_flag.eq.NoError) THEN
           status=nf90_put_att(ncid, nf90_global, 'header_dir',          &
      &                        TRIM(Hdir))
-          IF (FoundError(status, nf90_noerr, 990, MyFile)) THEN
+          IF (FoundError(status, nf90_noerr, 1019, MyFile)) THEN
             IF (Master) WRITE (stdout,20) 'header_dir', TRIM(ncname)
             exit_flag=3
             ioerror=status
@@ -547,7 +547,7 @@
         IF (exit_flag.eq.NoError) THEN
           status=nf90_put_att(ncid, nf90_global, 'header_file',         &
      &                        TRIM(Hfile))
-          IF (FoundError(status, nf90_noerr, 1002, MyFile)) THEN
+          IF (FoundError(status, nf90_noerr, 1031, MyFile)) THEN
             IF (Master) WRITE (stdout,20) 'header_file', TRIM(ncname)
             exit_flag=3
             ioerror=status
@@ -559,7 +559,7 @@
         IF (exit_flag.eq.NoError) THEN
           status=nf90_put_att(ncid, nf90_global, 'os',                  &
      &                        TRIM(my_os))
-          IF (FoundError(status, nf90_noerr, 1017, MyFile)) THEN
+          IF (FoundError(status, nf90_noerr, 1046, MyFile)) THEN
             IF (Master) WRITE (stdout,20) 'os', TRIM(ncname)
             exit_flag=3
             ioerror=status
@@ -568,7 +568,7 @@
         IF (exit_flag.eq.NoError) THEN
           status=nf90_put_att(ncid, nf90_global, 'cpu',                 &
      &                        TRIM(my_cpu))
-          IF (FoundError(status, nf90_noerr, 1027, MyFile)) THEN
+          IF (FoundError(status, nf90_noerr, 1056, MyFile)) THEN
             IF (Master) WRITE (stdout,20) 'cpu', TRIM(ncname)
             exit_flag=3
             ioerror=status
@@ -577,7 +577,7 @@
         IF (exit_flag.eq.NoError) THEN
           status=nf90_put_att(ncid, nf90_global, 'compiler_system',     &
      &                        TRIM(my_fort))
-          IF (FoundError(status, nf90_noerr, 1037, MyFile)) THEN
+          IF (FoundError(status, nf90_noerr, 1066, MyFile)) THEN
             IF (Master) WRITE (stdout,20) 'compiler_system',            &
      &                                    TRIM(ncname)
             exit_flag=3
@@ -587,7 +587,7 @@
         IF (exit_flag.eq.NoError) THEN
           status=nf90_put_att(ncid, nf90_global, 'compiler_command',    &
      &                        TRIM(my_fc))
-          IF (FoundError(status, nf90_noerr, 1048, MyFile)) THEN
+          IF (FoundError(status, nf90_noerr, 1077, MyFile)) THEN
             IF (Master) WRITE (stdout,20) 'compiler_command',           &
      &                                    TRIM(ncname)
             exit_flag=3
@@ -599,7 +599,7 @@
           IF (lstr.le.0) lstr=LEN_TRIM(my_fflags)
           status=nf90_put_att(ncid, nf90_global, 'compiler_flags',      &
      &                        my_fflags(1:lstr))
-          IF (FoundError(status, nf90_noerr, 1061, MyFile)) THEN
+          IF (FoundError(status, nf90_noerr, 1090, MyFile)) THEN
             IF (Master) WRITE (stdout,20) 'compiler_flags', TRIM(ncname)
             exit_flag=3
             ioerror=status
@@ -611,7 +611,7 @@
         IF (exit_flag.eq.NoError) THEN
           status=nf90_put_att(ncid, nf90_global, 'tiling',              &
      &                        TRIM(tiling))
-          IF (FoundError(status, nf90_noerr, 1073, MyFile)) THEN
+          IF (FoundError(status, nf90_noerr, 1102, MyFile)) THEN
             IF (Master) WRITE (stdout,20) 'tiling', TRIM(ncname)
             exit_flag=3
             ioerror=status
@@ -620,7 +620,7 @@
         IF (exit_flag.eq.NoError) THEN
           status=nf90_put_att(ncid, nf90_global, 'history',             &
      &                        TRIM(history))
-          IF (FoundError(status, nf90_noerr, 1083, MyFile)) THEN
+          IF (FoundError(status, nf90_noerr, 1112, MyFile)) THEN
             IF (Master) WRITE (stdout,20) 'history', TRIM(ncname)
             exit_flag=3
             ioerror=status
@@ -634,7 +634,7 @@
           IF (lstr.gt.0) THEN
             status=nf90_put_att(ncid, nf90_global, 'ana_file',          &
      &                          string(1:lstr))
-            IF (FoundError(status, nf90_noerr, 1097, MyFile)) THEN
+            IF (FoundError(status, nf90_noerr, 1126, MyFile)) THEN
               IF (Master) WRITE (stdout,20) 'ana_file', TRIM(ncname)
               exit_flag=3
               ioerror=status
@@ -648,7 +648,7 @@
           lstr=LEN_TRIM(Coptions)-1
           status=nf90_put_att(ncid, nf90_global, 'CPP_options',         &
      &                        TRIM(Coptions(1:lstr)))
-          IF (FoundError(status, nf90_noerr, 1132, MyFile)) THEN
+          IF (FoundError(status, nf90_noerr, 1161, MyFile)) THEN
             IF (Master) WRITE (stdout,20) 'CPP_options', TRIM(ncname)
             exit_flag=3
             ioerror=status
@@ -660,7 +660,7 @@
       CALL mp_bcasti (ng, model, ibuffer)
       exit_flag=ibuffer(1)
       ioerror=ibuffer(2)
-      IF (FoundError(exit_flag, NoError, 1148, MyFile)) RETURN
+      IF (FoundError(exit_flag, NoError, 1177, MyFile)) RETURN
 !
 !-----------------------------------------------------------------------
 !  Define running parameters.
@@ -673,27 +673,27 @@
       status=def_var(ng, model, ncid, varid, nf90_int,                  &
      &               1, (/0/), Aval, Vinfo, ncname,                     &
      &               SetParAccess = .FALSE.)
-      IF (FoundError(exit_flag, NoError, 1169, MyFile)) RETURN
+      IF (FoundError(exit_flag, NoError, 1198, MyFile)) RETURN
       Vinfo( 1)='ndtfast'
       Vinfo( 2)='number of short time-steps'
       status=def_var(ng, model, ncid, varid, nf90_int,                  &
      &               1, (/0/), Aval, Vinfo, ncname,                     &
      &               SetParAccess = .FALSE.)
-      IF (FoundError(exit_flag, NoError, 1176, MyFile)) RETURN
+      IF (FoundError(exit_flag, NoError, 1205, MyFile)) RETURN
       Vinfo( 1)='dt'
       Vinfo( 2)='size of long time-steps'
       Vinfo( 3)='second'
       status=def_var(ng, model, ncid, varid, NF_TOUT,                   &
      &               1, (/0/), Aval, Vinfo, ncname,                     &
      &               SetParAccess = .FALSE.)
-      IF (FoundError(exit_flag, NoError, 1184, MyFile)) RETURN
+      IF (FoundError(exit_flag, NoError, 1213, MyFile)) RETURN
       Vinfo( 1)='dtfast'
       Vinfo( 2)='size of short time-steps'
       Vinfo( 3)='second'
       status=def_var(ng, model, ncid, varid, NF_TOUT,                   &
      &               1, (/0/), Aval, Vinfo, ncname,                     &
      &               SetParAccess = .FALSE.)
-      IF (FoundError(exit_flag, NoError, 1192, MyFile)) RETURN
+      IF (FoundError(exit_flag, NoError, 1221, MyFile)) RETURN
       Vinfo( 1)='dstart'
       Vinfo( 2)='time stamp assigned to model initilization'
       WRITE (Vinfo( 3),'(a,a)') 'days since ', TRIM(Rclock%string)
@@ -701,20 +701,20 @@
       status=def_var(ng, model, ncid, varid, NF_TOUT,                   &
      &               1, (/0/), Aval, Vinfo, ncname,                     &
      &               SetParAccess = .FALSE.)
-      IF (FoundError(exit_flag, NoError, 1201, MyFile)) RETURN
+      IF (FoundError(exit_flag, NoError, 1230, MyFile)) RETURN
       Vinfo( 1)='nHIS'
       Vinfo( 2)='number of time-steps between history records'
       status=def_var(ng, model, ncid, varid, nf90_int,                  &
      &               1, (/0/), Aval, Vinfo, ncname,                     &
      &               SetParAccess = .FALSE.)
-      IF (FoundError(exit_flag, NoError, 1249, MyFile)) RETURN
+      IF (FoundError(exit_flag, NoError, 1278, MyFile)) RETURN
       Vinfo( 1)='ndefHIS'
       Vinfo( 2)=                                                        &
      &    'number of time-steps between the creation of history files'
       status=def_var(ng, model, ncid, varid, nf90_int,                  &
      &               1, (/0/), Aval, Vinfo, ncname,                     &
      &               SetParAccess = .FALSE.)
-      IF (FoundError(exit_flag, NoError, 1257, MyFile)) RETURN
+      IF (FoundError(exit_flag, NoError, 1286, MyFile)) RETURN
       Vinfo( 1)='nRST'
       Vinfo( 2)='number of time-steps between restart records'
       IF (LcycleRST(ng)) THEN
@@ -723,47 +723,47 @@
       status=def_var(ng, model, ncid, varid, nf90_int,                  &
      &               1, (/0/), Aval, Vinfo, ncname,                     &
      &               SetParAccess = .FALSE.)
-      IF (FoundError(exit_flag, NoError, 1267, MyFile)) RETURN
+      IF (FoundError(exit_flag, NoError, 1320, MyFile)) RETURN
       Vinfo( 1)='ntsAVG'
       Vinfo( 2)=                                                        &
      &   'starting time-step for accumulation of time-averaged fields'
       status=def_var(ng, model, ncid, varid, nf90_int,                  &
      &               1, (/0/), Aval, Vinfo, ncname,                     &
      &               SetParAccess = .FALSE.)
-      IF (FoundError(exit_flag, NoError, 1279, MyFile)) RETURN
+      IF (FoundError(exit_flag, NoError, 1332, MyFile)) RETURN
       Vinfo( 1)='nAVG'
       Vinfo( 2)='number of time-steps between time-averaged records'
       status=def_var(ng, model, ncid, varid, nf90_int,                  &
      &               1, (/0/), Aval, Vinfo, ncname,                     &
      &               SetParAccess = .FALSE.)
-      IF (FoundError(exit_flag, NoError, 1286, MyFile)) RETURN
+      IF (FoundError(exit_flag, NoError, 1339, MyFile)) RETURN
       Vinfo( 1)='ndefAVG'
       Vinfo( 2)=                                                        &
      &    'number of time-steps between the creation of average files'
       status=def_var(ng, model, ncid, varid, nf90_int,                  &
      &               1, (/0/), Aval, Vinfo, ncname,                     &
      &               SetParAccess = .FALSE.)
-      IF (FoundError(exit_flag, NoError, 1294, MyFile)) RETURN
+      IF (FoundError(exit_flag, NoError, 1347, MyFile)) RETURN
       Vinfo( 1)='ntsDIA'
       Vinfo( 2)=                                                        &
      &   'starting time-step for accumulation of diagnostic fields'
       status=def_var(ng, model, ncid, varid, nf90_int,                  &
      &               1, (/0/), Aval, Vinfo, ncname,                     &
      &               SetParAccess = .FALSE.)
-      IF (FoundError(exit_flag, NoError, 1413, MyFile)) RETURN
+      IF (FoundError(exit_flag, NoError, 1466, MyFile)) RETURN
       Vinfo( 1)='nDIA'
       Vinfo( 2)='number of time-steps between diagnostic records'
       status=def_var(ng, model, ncid, varid, nf90_int,                  &
      &               1, (/0/), Aval, Vinfo, ncname,                     &
      &               SetParAccess = .FALSE.)
-      IF (FoundError(exit_flag, NoError, 1420, MyFile)) RETURN
+      IF (FoundError(exit_flag, NoError, 1473, MyFile)) RETURN
       Vinfo( 1)='ndefDIA'
       Vinfo( 2)=                                                        &
      &   'number of time-steps between the creation of diagnostic files'
       status=def_var(ng, model, ncid, varid, nf90_int,                  &
      &               1, (/0/), Aval, Vinfo, ncname,                     &
      &               SetParAccess = .FALSE.)
-      IF (FoundError(exit_flag, NoError, 1428, MyFile)) RETURN
+      IF (FoundError(exit_flag, NoError, 1481, MyFile)) RETURN
 !
 !  Power-law shape filter parameters for time-averaging of barotropic
 !  fields.
@@ -773,19 +773,19 @@
       status=def_var(ng, model, ncid, varid, NF_TOUT,                   &
      &               1, (/0/), Aval, Vinfo, ncname,                     &
      &               SetParAccess = .FALSE.)
-      IF (FoundError(exit_flag, NoError, 1466, MyFile)) RETURN
+      IF (FoundError(exit_flag, NoError, 1519, MyFile)) RETURN
       Vinfo( 1)='Fbeta'
       Vinfo( 2)='Power-law shape barotropic filter parameter'
       status=def_var(ng, model, ncid, varid, NF_TOUT,                   &
      &               1, (/0/), Aval, Vinfo, ncname,                     &
      &               SetParAccess = .FALSE.)
-      IF (FoundError(exit_flag, NoError, 1473, MyFile)) RETURN
+      IF (FoundError(exit_flag, NoError, 1526, MyFile)) RETURN
       Vinfo( 1)='Fgamma'
       Vinfo( 2)='Power-law shape barotropic filter parameter'
       status=def_var(ng, model, ncid, varid, NF_TOUT,                   &
      &               1, (/0/), Aval, Vinfo, ncname,                     &
      &               SetParAccess = .FALSE.)
-      IF (FoundError(exit_flag, NoError, 1480, MyFile)) RETURN
+      IF (FoundError(exit_flag, NoError, 1533, MyFile)) RETURN
 !
 !  Horizontal mixing coefficients.
 !
@@ -796,7 +796,7 @@
       status=def_var(ng, model, ncid, varid, NF_TYPE,                   &
      &               1, (/trcdim/), Aval, Vinfo, ncname,                &
      &               SetParAccess = .FALSE.)
-      IF (FoundError(exit_flag, NoError, 1493, MyFile)) RETURN
+      IF (FoundError(exit_flag, NoError, 1546, MyFile)) RETURN
       Vinfo( 1)='nl_visc2'
       Vinfo( 2)='nonlinear model Laplacian mixing coefficient '//       &
      &          'for momentum'
@@ -804,7 +804,7 @@
       status=def_var(ng, model, ncid, varid, NF_TYPE,                   &
      &               1, (/0/), Aval, Vinfo, ncname,                     &
      &               SetParAccess = .FALSE.)
-      IF (FoundError(exit_flag, NoError, 1559, MyFile)) RETURN
+      IF (FoundError(exit_flag, NoError, 1612, MyFile)) RETURN
       Vinfo( 1)='LuvSponge'
       Vinfo( 2)='horizontal viscosity sponge activation switch'
       Vinfo( 9)='.FALSE.'
@@ -812,7 +812,7 @@
       status=def_var(ng, model, ncid, varid, nf90_int,                  &
      &               1, (/0/), Aval, Vinfo, ncname,                     &
      &               SetParAccess = .FALSE.)
-      IF (FoundError(exit_flag, NoError, 1645, MyFile)) RETURN
+      IF (FoundError(exit_flag, NoError, 1698, MyFile)) RETURN
       Vinfo( 1)='LtracerSponge'
       Vinfo( 2)='horizontal diffusivity sponge activation switch'
       Vinfo( 9)='.FALSE.'
@@ -820,7 +820,7 @@
       status=def_var(ng, model, ncid, varid, nf90_int,                  &
      &               1, (/trcdim/), Aval, Vinfo, ncname,                &
      &               SetParAccess = .FALSE.)
-      IF (FoundError(exit_flag, NoError, 1655, MyFile)) RETURN
+      IF (FoundError(exit_flag, NoError, 1708, MyFile)) RETURN
 !
 !  Background vertical mixing coefficients.
 !
@@ -830,14 +830,14 @@
       status=def_var(ng, model, ncid, varid, NF_TYPE,                   &
      &               1, (/trcdim/), Aval, Vinfo, ncname,                &
      &               SetParAccess = .FALSE.)
-      IF (FoundError(exit_flag, NoError, 1667, MyFile)) RETURN
+      IF (FoundError(exit_flag, NoError, 1720, MyFile)) RETURN
       Vinfo( 1)='Akv_bak'
       Vinfo( 2)='background vertical mixing coefficient for momentum'
       Vinfo( 3)='meter2 second-1'
       status=def_var(ng, model, ncid, varid, NF_TYPE,                   &
      &               1, (/0/), Aval, Vinfo, ncname,                     &
      &               SetParAccess = .FALSE.)
-      IF (FoundError(exit_flag, NoError, 1675, MyFile)) RETURN
+      IF (FoundError(exit_flag, NoError, 1728, MyFile)) RETURN
 !
 !  Drag coefficients.
 !
@@ -847,27 +847,27 @@
       status=def_var(ng, model, ncid, varid, NF_TYPE,                   &
      &               1, (/0/), Aval, Vinfo, ncname,                     &
      &               SetParAccess = .FALSE.)
-      IF (FoundError(exit_flag, NoError, 1751, MyFile)) RETURN
+      IF (FoundError(exit_flag, NoError, 1804, MyFile)) RETURN
       Vinfo( 1)='rdrg2'
       Vinfo( 2)='quadratic drag coefficient'
       status=def_var(ng, model, ncid, varid, NF_TYPE,                   &
      &               1, (/0/), Aval, Vinfo ,ncname,                     &
      &               SetParAccess = .FALSE.)
-      IF (FoundError(exit_flag, NoError, 1758, MyFile)) RETURN
+      IF (FoundError(exit_flag, NoError, 1811, MyFile)) RETURN
       Vinfo( 1)='Zob'
       Vinfo( 2)='bottom roughness'
       Vinfo( 3)='meter'
       status=def_var(ng, model, ncid, varid, NF_TYPE,                   &
      &               1, (/0/), Aval, Vinfo, ncname,                     &
      &               SetParAccess = .FALSE.)
-      IF (FoundError(exit_flag, NoError, 1767, MyFile)) RETURN
+      IF (FoundError(exit_flag, NoError, 1820, MyFile)) RETURN
       Vinfo( 1)='Zos'
       Vinfo( 2)='surface roughness'
       Vinfo( 3)='meter'
       status=def_var(ng, model, ncid, varid, NF_TYPE,                   &
      &               1, (/0/), Aval, Vinfo, ncname,                     &
      &               SetParAccess = .FALSE.)
-      IF (FoundError(exit_flag, NoError, 1775, MyFile)) RETURN
+      IF (FoundError(exit_flag, NoError, 1828, MyFile)) RETURN
 !
 !  Nudging inverse time scales used in various tasks.
 !
@@ -877,28 +877,28 @@
       status=def_var(ng, model, ncid, varid, NF_TOUT,                   &
      &               1, (/0/), Aval, Vinfo, ncname,                     &
      &               SetParAccess = .FALSE.)
-      IF (FoundError(exit_flag, NoError, 1912, MyFile)) RETURN
+      IF (FoundError(exit_flag, NoError, 1965, MyFile)) RETURN
       Vinfo( 1)='M2nudg'
       Vinfo( 2)='2D momentum nudging/relaxation inverse time scale'
       Vinfo( 3)='day-1'
       status=def_var(ng, model, ncid, varid, NF_TOUT,                   &
      &               1, (/0/), Aval, Vinfo, ncname,                     &
      &               SetParAccess = .FALSE.)
-      IF (FoundError(exit_flag, NoError, 1920, MyFile)) RETURN
+      IF (FoundError(exit_flag, NoError, 1973, MyFile)) RETURN
       Vinfo( 1)='M3nudg'
       Vinfo( 2)='3D momentum nudging/relaxation inverse time scale'
       Vinfo( 3)='day-1'
       status=def_var(ng, model, ncid, varid, NF_TOUT,                   &
      &               1, (/0/), Aval, Vinfo, ncname,                     &
      &               SetParAccess = .FALSE.)
-      IF (FoundError(exit_flag, NoError, 1929, MyFile)) RETURN
+      IF (FoundError(exit_flag, NoError, 1982, MyFile)) RETURN
       Vinfo( 1)='Tnudg'
       Vinfo( 2)='Tracers nudging/relaxation inverse time scale'
       Vinfo( 3)='day-1'
       status=def_var(ng, model, ncid, varid, NF_TOUT,                   &
      &               1, (/trcdim/), Aval, Vinfo, ncname,                &
      &               SetParAccess = .FALSE.)
-      IF (FoundError(exit_flag, NoError, 1937, MyFile)) RETURN
+      IF (FoundError(exit_flag, NoError, 1990, MyFile)) RETURN
 !
 !  Open boundary nudging, inverse time scales.
 !
@@ -909,56 +909,56 @@
         status=def_var(ng, model, ncid, varid, NF_TOUT,                 &
      &                 1, (/brydim/), Aval, Vinfo, ncname,              &
      &                 SetParAccess = .FALSE.)
-        IF (FoundError(exit_flag, NoError, 1951, MyFile)) RETURN
+        IF (FoundError(exit_flag, NoError, 2004, MyFile)) RETURN
         Vinfo( 1)='FSobc_out'
         Vinfo( 2)='free-surface outflow, nudging inverse time scale'
         Vinfo( 3)='second-1'
         status=def_var(ng, model, ncid, varid, NF_TOUT,                 &
      &                 1, (/brydim/), Aval, Vinfo, ncname,              &
      &                 SetParAccess = .FALSE.)
-        IF (FoundError(exit_flag, NoError, 1959, MyFile)) RETURN
+        IF (FoundError(exit_flag, NoError, 2012, MyFile)) RETURN
         Vinfo( 1)='M2obc_in'
         Vinfo( 2)='2D momentum inflow, nudging inverse time scale'
         Vinfo( 3)='second-1'
         status=def_var(ng, model, ncid, varid, NF_TOUT,                 &
      &                 1, (/brydim/), Aval, Vinfo, ncname,              &
      &                 SetParAccess = .FALSE.)
-        IF (FoundError(exit_flag, NoError, 1967, MyFile)) RETURN
+        IF (FoundError(exit_flag, NoError, 2020, MyFile)) RETURN
         Vinfo( 1)='M2obc_out'
         Vinfo( 2)='2D momentum outflow, nudging inverse time scale'
         Vinfo( 3)='second-1'
         status=def_var(ng, model, ncid, varid, NF_TOUT,                 &
      &                 1, (/brydim/), Aval, Vinfo, ncname,              &
      &                 SetParAccess = .FALSE.)
-        IF (FoundError(exit_flag, NoError, 1975, MyFile)) RETURN
+        IF (FoundError(exit_flag, NoError, 2028, MyFile)) RETURN
         Vinfo( 1)='Tobc_in'
         Vinfo( 2)='tracers inflow, nudging inverse time scale'
         Vinfo( 3)='second-1'
         status=def_var(ng, model, ncid, varid, NF_TOUT,                 &
      &                 2, tbrydim, Aval, Vinfo, ncname,                 &
      &                 SetParAccess = .FALSE.)
-        IF (FoundError(exit_flag, NoError, 1984, MyFile)) RETURN
+        IF (FoundError(exit_flag, NoError, 2037, MyFile)) RETURN
         Vinfo( 1)='Tobc_out'
         Vinfo( 2)='tracers outflow, nudging inverse time scale'
         Vinfo( 3)='second-1'
         status=def_var(ng, model, ncid, varid, NF_TOUT,                 &
      &                 2, tbrydim, Aval, Vinfo, ncname,                 &
      &                 SetParAccess = .FALSE.)
-        IF (FoundError(exit_flag, NoError, 1992, MyFile)) RETURN
+        IF (FoundError(exit_flag, NoError, 2045, MyFile)) RETURN
         Vinfo( 1)='M3obc_in'
         Vinfo( 2)='3D momentum inflow, nudging inverse time scale'
         Vinfo( 3)='second-1'
         status=def_var(ng, model, ncid, varid, NF_TOUT,                 &
      &                 1, (/brydim/), Aval, Vinfo, ncname,              &
      &                 SetParAccess = .FALSE.)
-        IF (FoundError(exit_flag, NoError, 2000, MyFile)) RETURN
+        IF (FoundError(exit_flag, NoError, 2053, MyFile)) RETURN
         Vinfo( 1)='M3obc_out'
         Vinfo( 2)='3D momentum outflow, nudging inverse time scale'
         Vinfo( 3)='second-1'
         status=def_var(ng, model, ncid, varid, NF_TOUT,                 &
      &                 1, (/brydim/), Aval, Vinfo, ncname,              &
      &                 SetParAccess = .FALSE.)
-        IF (FoundError(exit_flag, NoError, 2008, MyFile)) RETURN
+        IF (FoundError(exit_flag, NoError, 2061, MyFile)) RETURN
       END IF
 !
 !  Equation of State parameters.
@@ -969,7 +969,7 @@
       status=def_var(ng, model, ncid, varid, NF_TYPE,                   &
      &               1, (/0/), Aval, Vinfo, ncname,                     &
      &               SetParAccess = .FALSE.)
-      IF (FoundError(exit_flag, NoError, 2021, MyFile)) RETURN
+      IF (FoundError(exit_flag, NoError, 2074, MyFile)) RETURN
 !
 !  Various parameters.
 !
@@ -981,7 +981,7 @@
       status=def_var(ng, model, ncid, varid, NF_TYPE,                   &
      &               1, (/0/), Aval, Vinfo, ncname,                     &
      &               SetParAccess = .FALSE.)
-      IF (FoundError(exit_flag, NoError, 2086, MyFile)) RETURN
+      IF (FoundError(exit_flag, NoError, 2139, MyFile)) RETURN
 !
 ! Logical switches to activate horizontal momentum transport
 ! point Sources/Sinks (like river runoff transport) and mass point
@@ -994,7 +994,7 @@
       status=def_var(ng, model, ncid, varid, nf90_int,                  &
      &               1, (/0/), Aval, Vinfo, ncname,                     &
      &               SetParAccess = .FALSE.)
-      IF (FoundError(exit_flag, NoError, 2099, MyFile)) RETURN
+      IF (FoundError(exit_flag, NoError, 2152, MyFile)) RETURN
       Vinfo( 1)='LwSrc'
       Vinfo( 2)='mass point sources and sink activation switch'
       Vinfo( 9)='.FALSE.'
@@ -1002,7 +1002,7 @@
       status=def_var(ng, model, ncid, varid, nf90_int,                  &
      &               1, (/0/), Aval, Vinfo, ncname,                     &
      &               SetParAccess = .FALSE.)
-      IF (FoundError(exit_flag, NoError, 2108, MyFile)) RETURN
+      IF (FoundError(exit_flag, NoError, 2161, MyFile)) RETURN
 !
 !  Logical switches indicating which tracer variables are processed
 !  during point Sources/Sinks.
@@ -1014,7 +1014,7 @@
       status=def_var(ng, model, ncid, varid, nf90_int,                  &
      &               1, (/trcdim/), Aval, Vinfo, ncname,                &
      &               SetParAccess = .FALSE.)
-      IF (FoundError(exit_flag, NoError, 2122, MyFile)) RETURN
+      IF (FoundError(exit_flag, NoError, 2175, MyFile)) RETURN
 !
 !  Logical switches to process climatology fields.
 !
@@ -1025,7 +1025,7 @@
       status=def_var(ng, model, ncid, varid, nf90_int,                  &
      &               1, (/0/), Aval, Vinfo, ncname,                     &
      &               SetParAccess = .FALSE.)
-      IF (FoundError(exit_flag, NoError, 2134, MyFile)) RETURN
+      IF (FoundError(exit_flag, NoError, 2187, MyFile)) RETURN
       Vinfo( 1)='Lm2CLM'
       Vinfo( 2)='2D momentum climatology processing switch'
       Vinfo( 9)='.FALSE.'
@@ -1033,7 +1033,7 @@
       status=def_var(ng, model, ncid, varid, nf90_int,                  &
      &               1, (/0/), Aval, Vinfo, ncname,                     &
      &               SetParAccess = .FALSE.)
-      IF (FoundError(exit_flag, NoError, 2143, MyFile)) RETURN
+      IF (FoundError(exit_flag, NoError, 2196, MyFile)) RETURN
       Vinfo( 1)='Lm3CLM'
       Vinfo( 2)='3D momentum climatology processing switch'
       Vinfo( 9)='.FALSE.'
@@ -1041,7 +1041,7 @@
       status=def_var(ng, model, ncid, varid, nf90_int,                  &
      &               1, (/0/), Aval, Vinfo, ncname,                     &
      &               SetParAccess = .FALSE.)
-      IF (FoundError(exit_flag, NoError, 2153, MyFile)) RETURN
+      IF (FoundError(exit_flag, NoError, 2206, MyFile)) RETURN
       Vinfo( 1)='LtracerCLM'
       Vinfo( 2)='tracer climatology processing switch'
       Vinfo( 9)='.FALSE.'
@@ -1049,7 +1049,7 @@
       status=def_var(ng, model, ncid, varid, nf90_int,                  &
      &               1, (/trcdim/), Aval, Vinfo, ncname,                &
      &               SetParAccess = .FALSE.)
-      IF (FoundError(exit_flag, NoError, 2162, MyFile)) RETURN
+      IF (FoundError(exit_flag, NoError, 2215, MyFile)) RETURN
 !
 !  Logical switches for nudging of climatology fields.
 !
@@ -1060,7 +1060,7 @@
       status=def_var(ng, model, ncid, varid, nf90_int,                  &
      &               1, (/0/), Aval, Vinfo, ncname,                     &
      &               SetParAccess = .FALSE.)
-      IF (FoundError(exit_flag, NoError, 2174, MyFile)) RETURN
+      IF (FoundError(exit_flag, NoError, 2227, MyFile)) RETURN
 !
       Vinfo( 1)='LnudgeM3CLM'
       Vinfo( 2)='3D momentum climatology nudging activation switch'
@@ -1069,7 +1069,7 @@
       status=def_var(ng, model, ncid, varid, nf90_int,                  &
      &               1, (/0/), Aval, Vinfo, ncname,                     &
      &               SetParAccess = .FALSE.)
-      IF (FoundError(exit_flag, NoError, 2184, MyFile)) RETURN
+      IF (FoundError(exit_flag, NoError, 2237, MyFile)) RETURN
 !
       Vinfo( 1)='LnudgeTCLM'
       Vinfo( 2)='tracer climatology nudging activation switch'
@@ -1078,7 +1078,7 @@
       status=def_var(ng, model, ncid, varid, nf90_int,                  &
      &               1, (/trcdim/), Aval, Vinfo, ncname,                &
      &               SetParAccess = .FALSE.)
-      IF (FoundError(exit_flag, NoError, 2193, MyFile)) RETURN
+      IF (FoundError(exit_flag, NoError, 2246, MyFile)) RETURN
 !
 !-----------------------------------------------------------------------
 !  Define grid variables.
@@ -1095,7 +1095,7 @@
       status=def_var(ng, model, ncid, varid, nf90_int,                  &
      &               1, (/0/), Aval, Vinfo, ncname,                     &
      &               SetParAccess = .FALSE.)
-      IF (FoundError(exit_flag, NoError, 2937, MyFile)) RETURN
+      IF (FoundError(exit_flag, NoError, 2990, MyFile)) RETURN
 !
 !  Domain Length.
 !
@@ -1105,14 +1105,14 @@
       status=def_var(ng, model, ncid, varid, NF_TYPE,                   &
      &               1, (/0/), Aval, Vinfo, ncname,                     &
      &               SetParAccess = .FALSE.)
-      IF (FoundError(exit_flag, NoError, 2947, MyFile)) RETURN
+      IF (FoundError(exit_flag, NoError, 3000, MyFile)) RETURN
       Vinfo( 1)='el'
       Vinfo( 2)='domain length in the ETA-direction'
       Vinfo( 3)='meter'
       status=def_var(ng, model, ncid, varid, NF_TYPE,                   &
      &               1, (/0/), Aval, Vinfo, ncname,                     &
      &               SetParAccess = .FALSE.)
-      IF (FoundError(exit_flag, NoError, 2955, MyFile)) RETURN
+      IF (FoundError(exit_flag, NoError, 3008, MyFile)) RETURN
 !
 !  S-coordinate parameters.
 !
@@ -1121,39 +1121,39 @@
       status=def_var(ng, model, ncid, varid, nf90_int,                  &
      &               1, (/0/), Aval, Vinfo, ncname,                     &
      &               SetParAccess = .FALSE.)
-      IF (FoundError(exit_flag, NoError, 2965, MyFile)) RETURN
+      IF (FoundError(exit_flag, NoError, 3018, MyFile)) RETURN
       Vinfo( 1)='Vstretching'
       Vinfo( 2)='vertical terrain-following stretching function'
       status=def_var(ng, model, ncid, varid, nf90_int,                  &
      &               1, (/0/), Aval, Vinfo, ncname,                     &
      &               SetParAccess = .FALSE.)
-      IF (FoundError(exit_flag, NoError, 2972, MyFile)) RETURN
+      IF (FoundError(exit_flag, NoError, 3025, MyFile)) RETURN
       Vinfo( 1)='theta_s'
       Vinfo( 2)='S-coordinate surface control parameter'
       status=def_var(ng, model, ncid, varid, NF_TOUT,                   &
      &               1, (/0/), Aval, Vinfo, ncname,                     &
      &               SetParAccess = .FALSE.)
-      IF (FoundError(exit_flag, NoError, 2979, MyFile)) RETURN
+      IF (FoundError(exit_flag, NoError, 3032, MyFile)) RETURN
       Vinfo( 1)='theta_b'
       Vinfo( 2)='S-coordinate bottom control parameter'
       status=def_var(ng, model, ncid, varid, NF_TOUT,                   &
      &               1, (/0/), Aval, Vinfo, ncname,                     &
      &               SetParAccess = .FALSE.)
-      IF (FoundError(exit_flag, NoError, 2986, MyFile)) RETURN
+      IF (FoundError(exit_flag, NoError, 3039, MyFile)) RETURN
       Vinfo( 1)='Tcline'
       Vinfo( 2)='S-coordinate surface/bottom layer width'
       Vinfo( 3)='meter'
       status=def_var(ng, model, ncid, varid, NF_TOUT,                   &
      &               1, (/0/), Aval, Vinfo, ncname,                     &
      &               SetParAccess = .FALSE.)
-      IF (FoundError(exit_flag, NoError, 2994, MyFile)) RETURN
+      IF (FoundError(exit_flag, NoError, 3047, MyFile)) RETURN
       Vinfo( 1)='hc'
       Vinfo( 2)='S-coordinate parameter, critical depth'
       Vinfo( 3)='meter'
       status=def_var(ng, model, ncid, varid, NF_TOUT,                   &
      &               1, (/0/), Aval, Vinfo, ncname,                     &
      &               SetParAccess = .FALSE.)
-      IF (FoundError(exit_flag, NoError, 3002, MyFile)) RETURN
+      IF (FoundError(exit_flag, NoError, 3055, MyFile)) RETURN
 !
 !  SGRID conventions for staggered data on structured grids.
 !
@@ -1161,7 +1161,7 @@
       status=def_var(ng, model, ncid, varid, nf90_int,                  &
      &               1, (/0/), Aval, Vinfo, ncname,                     &
      &               SetParAccess = .FALSE.)
-      IF (FoundError(exit_flag, NoError, 3010, MyFile)) RETURN
+      IF (FoundError(exit_flag, NoError, 3063, MyFile)) RETURN
 !
 !  S-coordinate non-dimensional independent variable at RHO-points.
 !
@@ -1181,7 +1181,7 @@
       status=def_var(ng, model, ncid, varid, NF_TOUT,                   &
      &               1, (/srdim/), Aval, Vinfo, ncname,                 &
      &               SetParAccess = .FALSE.)
-      IF (FoundError(exit_flag, NoError, 3034, MyFile)) RETURN
+      IF (FoundError(exit_flag, NoError, 3087, MyFile)) RETURN
 !
 !  S-coordinate non-dimensional independent variable at W-points.
 !
@@ -1202,7 +1202,7 @@
       status=def_var(ng, model, ncid, varid, NF_TOUT,                   &
      &               1, (/swdim/), Aval, Vinfo, ncname,                 &
      &               SetParAccess = .FALSE.)
-      IF (FoundError(exit_flag, NoError, 3059, MyFile)) RETURN
+      IF (FoundError(exit_flag, NoError, 3112, MyFile)) RETURN
 !
 !  S-coordinate non-dimensional stretching curves at RHO-points.
 !
@@ -1215,7 +1215,7 @@
       status=def_var(ng, model, ncid, varid, NF_TOUT,                   &
      &               1, (/srdim/), Aval, Vinfo, ncname,                 &
      &               SetParAccess = .FALSE.)
-      IF (FoundError(exit_flag, NoError, 3072, MyFile)) RETURN
+      IF (FoundError(exit_flag, NoError, 3125, MyFile)) RETURN
 !
 !  S-coordinate non-dimensional stretching curves at W-points.
 !
@@ -1228,7 +1228,7 @@
       status=def_var(ng, model, ncid, varid, NF_TOUT,                   &
      &               1, (/swdim/), Aval, Vinfo, ncname,                 &
      &               SetParAccess = .FALSE.)
-      IF (FoundError(exit_flag, NoError, 3085, MyFile)) RETURN
+      IF (FoundError(exit_flag, NoError, 3138, MyFile)) RETURN
 !
 !  User generic parameters.
 !
@@ -1240,7 +1240,7 @@
         status=def_var(ng, model, ncid, varid, NF_TYPE,                 &
      &                 1, (/usrdim/), Aval, Vinfo, ncname,              &
      &               SetParAccess = .FALSE.)
-        IF (FoundError(exit_flag, NoError, 3098, MyFile)) RETURN
+        IF (FoundError(exit_flag, NoError, 3151, MyFile)) RETURN
       END IF
       IF (ncid.ne.FLT(ng)%ncid) THEN
 !
@@ -1256,11 +1256,11 @@
         IF (ncid.eq.STA(ng)%ncid) THEN
           status=def_var(ng, model, ncid, varid, NF_TYPE,               &
      &                   1, (/stadim/), Aval, Vinfo, ncname)
-          IF (FoundError(exit_flag, NoError, 3139, MyFile)) RETURN
+          IF (FoundError(exit_flag, NoError, 3192, MyFile)) RETURN
         ELSE
           status=def_var(ng, model, ncid, varid, NF_TYPE,               &
      &                   2, t2dgrd, Aval, Vinfo, ncname)
-          IF (FoundError(exit_flag, NoError, 3143, MyFile)) RETURN
+          IF (FoundError(exit_flag, NoError, 3196, MyFile)) RETURN
         END IF
 !
 !  Coriolis Parameter.
@@ -1275,7 +1275,7 @@
           Aval(5)=REAL(Iinfo(1,idfcor,ng),r8)
           status=def_var(ng, model, ncid, varid, NF_TYPE,               &
      &                   2, t2dgrd, Aval, Vinfo, ncname)
-          IF (FoundError(exit_flag, NoError, 3159, MyFile)) RETURN
+          IF (FoundError(exit_flag, NoError, 3212, MyFile)) RETURN
         END IF
 !
 !  Curvilinear coordinate metrics.
@@ -1290,7 +1290,7 @@
           Aval(5)=REAL(Iinfo(1,idpmdx,ng),r8)
           status=def_var(ng, model, ncid, varid, NF_TYPE,               &
      &                   2, t2dgrd, Aval, Vinfo, ncname)
-          IF (FoundError(exit_flag, NoError, 3174, MyFile)) RETURN
+          IF (FoundError(exit_flag, NoError, 3227, MyFile)) RETURN
 !
           Vinfo( 1)=Vname(1,idpndy)
           Vinfo( 2)=Vname(2,idpndy)
@@ -1301,7 +1301,7 @@
           Aval(5)=REAL(Iinfo(1,idpndy,ng),r8)
           status=def_var(ng, model, ncid, varid, NF_TYPE,               &
      &                   2, t2dgrd, Aval, Vinfo, ncname)
-          IF (FoundError(exit_flag, NoError, 3185, MyFile)) RETURN
+          IF (FoundError(exit_flag, NoError, 3238, MyFile)) RETURN
         END IF
 !
 !  Grid coordinates of RHO-points.
@@ -1315,11 +1315,11 @@
           IF (ncid.eq.STA(ng)%ncid) THEN
             status=def_var(ng, model, ncid, varid, NF_TYPE,             &
      &                     1, (/stadim/), Aval, Vinfo, ncname)
-            IF (FoundError(exit_flag, NoError, 3199, MyFile)) RETURN
+            IF (FoundError(exit_flag, NoError, 3252, MyFile)) RETURN
           ELSE
             status=def_var(ng, model, ncid, varid, NF_TYPE,             &
      &                     2, t2dgrd, Aval, Vinfo, ncname)
-            IF (FoundError(exit_flag, NoError, 3203, MyFile)) RETURN
+            IF (FoundError(exit_flag, NoError, 3256, MyFile)) RETURN
           END IF
 !
           Vinfo( 1)=Vname(1,idLatR)
@@ -1330,11 +1330,11 @@
           IF (ncid.eq.STA(ng)%ncid) THEN
             status=def_var(ng, model, ncid, varid, NF_TYPE,             &
      &                     1, (/stadim/), Aval, Vinfo,  ncname)
-            IF (FoundError(exit_flag, NoError, 3214, MyFile)) RETURN
+            IF (FoundError(exit_flag, NoError, 3267, MyFile)) RETURN
           ELSE
             status=def_var(ng, model, ncid, varid, NF_TYPE,             &
      &                     2, t2dgrd, Aval, Vinfo, ncname)
-            IF (FoundError(exit_flag, NoError, 3218, MyFile)) RETURN
+            IF (FoundError(exit_flag, NoError, 3271, MyFile)) RETURN
           END IF
         ELSE
           Vinfo( 1)=Vname(1,idXgrR)
@@ -1345,11 +1345,11 @@
           IF (ncid.eq.STA(ng)%ncid) THEN
             status=def_var(ng, model, ncid, varid, NF_TYPE,             &
      &                     1, (/stadim/), Aval, Vinfo, ncname)
-            IF (FoundError(exit_flag, NoError, 3229, MyFile)) RETURN
+            IF (FoundError(exit_flag, NoError, 3282, MyFile)) RETURN
           ELSE
             status=def_var(ng, model, ncid, varid, NF_TYPE,             &
      &                     2, t2dgrd, Aval, Vinfo, ncname)
-            IF (FoundError(exit_flag, NoError, 3233, MyFile)) RETURN
+            IF (FoundError(exit_flag, NoError, 3286, MyFile)) RETURN
           END IF
 !
           Vinfo( 1)=Vname(1,idYgrR)
@@ -1360,11 +1360,11 @@
           IF (ncid.eq.STA(ng)%ncid) THEN
             status=def_var(ng, model, ncid, varid, NF_TYPE,             &
      &                     1, (/stadim/), Aval, Vinfo, ncname)
-            IF (FoundError(exit_flag, NoError, 3244, MyFile)) RETURN
+            IF (FoundError(exit_flag, NoError, 3297, MyFile)) RETURN
           ELSE
             status=def_var(ng, model, ncid, varid, NF_TYPE,             &
      &                     2, t2dgrd, Aval, Vinfo, ncname)
-            IF (FoundError(exit_flag, NoError, 3248, MyFile)) RETURN
+            IF (FoundError(exit_flag, NoError, 3301, MyFile)) RETURN
           END IF
         END IF
 !
@@ -1379,7 +1379,7 @@
           IF (ncid.ne.STA(ng)%ncid) THEN
             status=def_var(ng, model, ncid, varid, NF_TYPE,             &
      &                     2, u2dgrd, Aval, Vinfo, ncname)
-            IF (FoundError(exit_flag, NoError, 3263, MyFile)) RETURN
+            IF (FoundError(exit_flag, NoError, 3316, MyFile)) RETURN
           END IF
 !
           Vinfo( 1)=Vname(1,idLatU)
@@ -1390,7 +1390,7 @@
           IF (ncid.ne.STA(ng)%ncid) THEN
             status=def_var(ng, model, ncid, varid, NF_TYPE,             &
      &                     2, u2dgrd, Aval, Vinfo, ncname)
-            IF (FoundError(exit_flag, NoError, 3274, MyFile)) RETURN
+            IF (FoundError(exit_flag, NoError, 3327, MyFile)) RETURN
           END IF
         ELSE
           Vinfo( 1)=Vname(1,idXgrU)
@@ -1401,7 +1401,7 @@
           IF (ncid.ne.STA(ng)%ncid) THEN
             status=def_var(ng, model, ncid, varid, NF_TYPE,             &
      &                     2, u2dgrd, Aval, Vinfo, ncname)
-            IF (FoundError(exit_flag, NoError, 3285, MyFile)) RETURN
+            IF (FoundError(exit_flag, NoError, 3338, MyFile)) RETURN
           END IF
 !
           Vinfo( 1)=Vname(1,idYgrU)
@@ -1412,7 +1412,7 @@
           IF (ncid.ne.STA(ng)%ncid) THEN
             status=def_var(ng, model, ncid, varid, NF_TYPE,             &
      &                     2, u2dgrd, Aval, Vinfo, ncname)
-            IF (FoundError(exit_flag, NoError, 3296, MyFile)) RETURN
+            IF (FoundError(exit_flag, NoError, 3349, MyFile)) RETURN
           END IF
         END IF
 !
@@ -1427,7 +1427,7 @@
           IF (ncid.ne.STA(ng)%ncid) THEN
             status=def_var(ng, model, ncid, varid, NF_TYPE,             &
      &                     2, v2dgrd, Aval, Vinfo, ncname)
-            IF (FoundError(exit_flag, NoError, 3311, MyFile)) RETURN
+            IF (FoundError(exit_flag, NoError, 3364, MyFile)) RETURN
           END IF
 !
           Vinfo( 1)=Vname(1,idLatV)
@@ -1438,7 +1438,7 @@
           IF (ncid.ne.STA(ng)%ncid) THEN
             status=def_var(ng, model, ncid, varid, NF_TYPE,             &
      &                     2, v2dgrd, Aval, Vinfo, ncname)
-            IF (FoundError(exit_flag, NoError, 3322, MyFile)) RETURN
+            IF (FoundError(exit_flag, NoError, 3375, MyFile)) RETURN
           END IF
         ELSE
           Vinfo( 1)=Vname(1,idXgrV)
@@ -1449,7 +1449,7 @@
           IF (ncid.ne.STA(ng)%ncid) THEN
             status=def_var(ng, model, ncid, varid, NF_TYPE,             &
      &                     2, v2dgrd, Aval, Vinfo, ncname)
-            IF (FoundError(exit_flag, NoError, 3333, MyFile)) RETURN
+            IF (FoundError(exit_flag, NoError, 3386, MyFile)) RETURN
           END IF
 !
           Vinfo( 1)=Vname(1,idYgrV)
@@ -1460,7 +1460,7 @@
           IF (ncid.ne.STA(ng)%ncid) THEN
             status=def_var(ng, model, ncid, varid, NF_TYPE,             &
      &                     2, v2dgrd, Aval, Vinfo, ncname)
-            IF (FoundError(exit_flag, NoError, 3344, MyFile)) RETURN
+            IF (FoundError(exit_flag, NoError, 3397, MyFile)) RETURN
           END IF
         END IF
 !
@@ -1475,7 +1475,7 @@
           IF (ncid.ne.STA(ng)%ncid) THEN
             status=def_var(ng, model, ncid, varid, NF_TYPE,             &
      &                     2, p2dgrd, Aval, Vinfo, ncname)
-            IF (FoundError(exit_flag, NoError, 3359, MyFile)) RETURN
+            IF (FoundError(exit_flag, NoError, 3412, MyFile)) RETURN
           END IF
 !
           Vinfo( 1)=Vname(1,idLatP)
@@ -1486,7 +1486,7 @@
           IF (ncid.ne.STA(ng)%ncid) THEN
             status=def_var(ng, model, ncid, varid, NF_TYPE,             &
      &                     2, p2dgrd, Aval, Vinfo, ncname)
-            IF (FoundError(exit_flag, NoError, 3370, MyFile)) RETURN
+            IF (FoundError(exit_flag, NoError, 3423, MyFile)) RETURN
           END IF
         ELSE
           Vinfo( 1)=Vname(1,idXgrP)
@@ -1497,7 +1497,7 @@
           IF (ncid.ne.STA(ng)%ncid) THEN
             status=def_var(ng, model, ncid, varid, NF_TYPE,             &
      &                     2, p2dgrd, Aval, Vinfo, ncname)
-            IF (FoundError(exit_flag, NoError, 3381, MyFile)) RETURN
+            IF (FoundError(exit_flag, NoError, 3434, MyFile)) RETURN
           END IF
 !
           Vinfo( 1)=Vname(1,idYgrP)
@@ -1508,7 +1508,7 @@
           IF (ncid.ne.STA(ng)%ncid) THEN
             status=def_var(ng, model, ncid, varid, NF_TYPE,             &
      &                     2, p2dgrd, Aval, Vinfo, ncname)
-            IF (FoundError(exit_flag, NoError, 3392, MyFile)) RETURN
+            IF (FoundError(exit_flag, NoError, 3445, MyFile)) RETURN
           END IF
         END IF
       END IF

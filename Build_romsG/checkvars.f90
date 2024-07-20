@@ -131,6 +131,9 @@
         DO itrc=1,NAT
           get_var(idTvar(itrc))=.TRUE.
         END DO
+        DO itrc=1,NPT
+          get_var(idTvar(inert(itrc)))=.TRUE.
+        END DO
       END IF
 !
 !  Scan variable list from input NetCDF and activate switches for

@@ -26,6 +26,7 @@
 !    FRC       Input forcing data                                      !
 !    FWD       Input basic state forward solution                      !
 !    GRD       Input grid data                                         !
+!    GRX       Input grid for extracted history data                   !
 !    GST       Input/output GST analysis check pointing data           !
 !    HAR       Output detiding least-squares harmonics coefficients    !
 !    HIS       Output nonlinear model history data                     !
@@ -56,6 +57,7 @@
 !                STD(3,ng)  lateral open boundary conditions           !
 !                STD(4,ng)  surface forcing                            !
 !                STD(5,ng)  computed from background (output)          !
+!    XTR       Output extracted history fields                         !
 !                                                                      !
 !  Input/output information files:                                     !
 !                                                                      !
@@ -138,7 +140,7 @@
 !  I/O units.
 !
       integer :: stdinp = 5                 ! standard input
-      integer :: stdout = 6                 ! standard output
+      integer :: stdout                     ! standard output, usually 6
       integer :: usrout = 10                ! generic user unit
 !
 !  I/O files management, derived type structures.
@@ -153,7 +155,8 @@
       TYPE(T_IO), allocatable :: ERR(:)     ! 4D-Var posterior error
       TYPE(T_IO), allocatable :: FLT(:)     ! Lagrangian trajectories
       TYPE(T_IO), allocatable :: FWD(:)     ! forward solution
-      TYPE(T_IO), allocatable :: GRD(:)     ! grid data
+      TYPE(T_IO), allocatable :: GRD(:)     ! grid geometry data
+      TYPE(T_IO), allocatable :: GRX(:)     ! grid for extrated fields
       TYPE(T_IO), allocatable :: GST(:)     ! generalized stability
       TYPE(T_IO), allocatable :: HAR(:)     ! detiding harmonics
       TYPE(T_IO), allocatable :: HIS(:)     ! NLM history fields
@@ -175,6 +178,7 @@
       TYPE(T_IO), allocatable :: TIDE(:)    ! tidal forcing
       TYPE(T_IO), allocatable :: TLF(:)     ! TLM impulse fields
       TYPE(T_IO), allocatable :: TLM(:)     ! TLM history fields
+      TYPE(T_IO), allocatable :: XTR(:)     ! extracted history fields
 !
 !  Input boundary condition data.
 !
@@ -290,6 +294,9 @@
       IF (.not.allocated(GRD)) THEN
         allocate ( GRD(Ngrids) )
       END IF
+      IF (.not.allocated(GRX)) THEN
+        allocate ( GRX(Ngrids) )
+      END IF
       IF (.not.allocated(GST)) THEN
         allocate ( GST(Ngrids) )
       END IF
@@ -347,6 +354,9 @@
       IF (.not.allocated(TLM)) THEN
         allocate ( TLM(Ngrids) )
       END IF
+      IF (.not.allocated(XTR)) THEN
+        allocate ( XTR(Ngrids) )
+      END IF
       IF (.not.allocated(NRM)) THEN
         allocate ( NRM(4,Ngrids) )
       END IF
@@ -384,6 +394,7 @@
         FLT(ng)%ncid=-1
         FWD(ng)%ncid=-1
         GRD(ng)%ncid=-1
+        GRX(ng)%ncid=-1
         GST(ng)%ncid=-1
         HAR(ng)%ncid=-1
         HIS(ng)%ncid=-1
@@ -403,6 +414,7 @@
         TLF(ng)%ncid=-1
         TLM(ng)%ncid=-1
         TIDE(ng)%ncid=-1
+        XTR(ng)%ncid=-1
         NRM(1:4,ng)%ncid=-1
         STD(1:5,ng)%ncid=-1
         nBCfiles(ng)=-1
@@ -450,6 +462,9 @@
           GRD(ng)%head(i:i)=blank
           GRD(ng)%base(i:i)=blank
           GRD(ng)%name(i:i)=blank
+          GRX(ng)%head(i:i)=blank
+          GRX(ng)%base(i:i)=blank
+          GRX(ng)%name(i:i)=blank
           GST(ng)%head(i:i)=blank
           GST(ng)%base(i:i)=blank
           GST(ng)%name(i:i)=blank
@@ -507,6 +522,9 @@
           TIDE(ng)%head(i:i)=blank
           TIDE(ng)%base(i:i)=blank
           TIDE(ng)%name(i:i)=blank
+          XTR(ng)%head(i:i)=blank
+          XTR(ng)%base(i:i)=blank
+          XTR(ng)%name(i:i)=blank
           NRM(1:4,ng)%head(i:i)=blank
           NRM(1:4,ng)%base(i:i)=blank
           NRM(1:4,ng)%name(i:i)=blank
@@ -557,6 +575,7 @@
       IF (allocated(FRC))       deallocate ( FRC )
       IF (allocated(FWD))       deallocate ( FWD )
       IF (allocated(GRD))       deallocate ( GRD )
+      IF (allocated(GRX))       deallocate ( GRX )
       IF (allocated(GST))       deallocate ( GST )
       IF (allocated(HAR))       deallocate ( HAR )
       IF (allocated(HIS))       deallocate ( HIS )
@@ -576,6 +595,7 @@
       IF (allocated(TIDE))      deallocate ( TIDE )
       IF (allocated(TLF))       deallocate ( TLF )
       IF (allocated(TLM))       deallocate ( TLM )
+      IF (allocated(XTR))       deallocate ( XTR )
       IF (allocated(NRM))       deallocate ( NRM )
       IF (allocated(STD))       deallocate ( STD )
 !

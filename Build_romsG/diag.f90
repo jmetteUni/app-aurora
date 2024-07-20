@@ -400,7 +400,7 @@
             WRITE (stdout,frmt) max_Ci, max_Cj,                         &
      &                          max_Ck, max_Cu, max_Cv, max_Cw,         &
      &                          maxspeed(ng)
-            CALL my_flush (stdout)
+            FLUSH (stdout)
  30         FORMAT (i10,1x,a,4(1pe14.6))
  40         FORMAT ('(',i2.2,'x,',a,',i',i1,'.',i1,',',                 &
      &                            a,',i',i1,'.',i1,',',                 &

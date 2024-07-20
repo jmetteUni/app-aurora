@@ -40,6 +40,7 @@
       logical :: obc_data
       logical :: Lvalue(1)
       logical, allocatable :: Lswitch(:)
+      logical, allocatable :: Linert(:,:)
       logical, allocatable :: Ltracer(:,:)
 !
       integer :: Npts, Nval, i, itrc, ivar, k, lstr, ng, nl, status
@@ -228,6 +229,15 @@
                 exit_flag=5
                 RETURN
               END IF
+            CASE ('NPT')
+              Npts=load_i(Nval, Rval, 1, Ivalue)
+              NPT=Ivalue(1)
+              IF (NPT.le.0) THEN
+                IF (Master) WRITE (out,290) 'NPT = ', NPT,              &
+     &            'must be greater than zero.'
+                exit_flag=5
+                RETURN
+              END IF
             CASE ('NtileI')
               Npts=load_i(Nval, Rval, Ngrids, NtileI)
               NtileX(1:Ngrids)=NtileI(1:Ngrids)
@@ -241,6 +251,14 @@
               CALL initialize_ncparam
               IF (.not.allocated(Ltracer)) THEN
                 allocate (Ltracer(NAT+NPT,Ngrids))
+              END IF
+              IF (.not.allocated(Linert)) THEN
+                allocate (Linert(NPT,Ngrids))
+              END IF
+              IF (MAXVAL(inert).eq.0) THEN
+                IF (Master) WRITE (out,280) 'inert'
+                exit_flag=5
+                RETURN
               END IF
               IF (.not.allocated(Dtracer)) THEN
                 allocate (Dtracer(NAT+NPT,Ngrids))
@@ -371,6 +389,10 @@
               Npts=load_i(Nval, Rval, Ngrids, nHIS)
             CASE ('NDEFHIS')
               Npts=load_i(Nval, Rval, Ngrids, ndefHIS)
+            CASE ('NXTR')
+              Npts=load_i(Nval, Rval, Ngrids, nXTR)
+            CASE ('NDEFXTR')
+              Npts=load_i(Nval, Rval, Ngrids, ndefXTR)
             CASE ('NQCK')
               Npts=load_i(Nval, Rval, Ngrids, nQCK)
             CASE ('NDEFQCK')
@@ -421,12 +443,20 @@
                 DO itrc=1,NAT
                   nl_tnu2(itrc,ng)=Rtracer(itrc,ng)
                 END DO
+                DO i=1,NPT
+                  itrc=inert(i)
+                  nl_tnu2(itrc,ng)=Rtracer(NAT+i,ng)
+                END DO
               END DO
             CASE ('TNU4')
               Npts=load_r(Nval, Rval, NAT+NPT, Ngrids, Rtracer)
               DO ng=1,Ngrids
                 DO itrc=1,NAT
                   nl_tnu4(itrc,ng)=Rtracer(itrc,ng)
+                END DO
+                DO i=1,NPT
+                  itrc=inert(i)
+                  nl_tnu4(itrc,ng)=Rtracer(NAT+i,ng)
                 END DO
               END DO
             CASE ('ad_TNU2')
@@ -436,6 +466,11 @@
                   ad_tnu2(itrc,ng)=Rtracer(itrc,ng)
                   tl_tnu2(itrc,ng)=Rtracer(itrc,ng)
                 END DO
+                DO i=1,NPT
+                  itrc=inert(i)
+                  ad_tnu2(itrc,ng)=Rtracer(NAT+i,ng)
+                  tl_tnu2(itrc,ng)=Rtracer(NAT+i,ng)
+                END DO
               END DO
             CASE ('ad_TNU4')
               Npts=load_r(Nval, Rval, NAT+NPT, Ngrids, Rtracer)
@@ -443,6 +478,11 @@
                 DO itrc=1,NAT
                   ad_tnu4(itrc,ng)=Rtracer(itrc,ng)
                   tl_tnu4(itrc,ng)=Rtracer(itrc,ng)
+                END DO
+                DO i=1,NPT
+                  itrc=inert(i)
+                  ad_tnu4(itrc,ng)=Rtracer(NAT+i,ng)
+                  tl_tnu4(itrc,ng)=Rtracer(NAT+i,ng)
                 END DO
               END DO
             CASE ('VISC2')
@@ -467,12 +507,20 @@
                 DO itrc=1,NAT
                   LtracerSponge(itrc,ng)=Ltracer(itrc,ng)
                 END DO
+                DO i=1,NPT
+                  itrc=inert(i)
+                  LtracerSponge(itrc,ng)=Ltracer(NAT+i,ng)
+                END DO
               END DO
             CASE ('AKT_BAK')
               Npts=load_r(Nval, Rval, NAT+NPT, Ngrids, Rtracer)
               DO ng=1,Ngrids
                 DO itrc=1,NAT
                   Akt_bak(itrc,ng)=Rtracer(itrc,ng)
+                END DO
+                DO i=1,NPT
+                  itrc=inert(i)
+                  Akt_bak(itrc,ng)=Rtracer(NAT+i,ng)
                 END DO
               END DO
             CASE ('AKT_LIMIT')
@@ -488,6 +536,11 @@
                 DO itrc=1,NAT
                   ad_Akt_fac(itrc,ng)=Rtracer(itrc,ng)
                   tl_Akt_fac(itrc,ng)=Rtracer(itrc,ng)
+                END DO
+                DO i=1,NPT
+                  itrc=inert(i)
+                  ad_Akt_fac(itrc,ng)=Rtracer(NAT+i,ng)
+                  tl_Akt_fac(itrc,ng)=Rtracer(NAT+i,ng)
                 END DO
               END DO
             CASE ('AKV_BAK')
@@ -615,6 +668,10 @@
                 DO itrc=1,NAT
                   Tnudg(itrc,ng)=Dtracer(itrc,ng)
                 END DO
+                DO i=1,NPT
+                  itrc=inert(i)
+                  Tnudg(itrc,ng)=Dtracer(NAT+i,ng)
+                END DO
               END DO
             CASE ('ZNUDG')
               Npts=load_r(Nval, Rval, Ngrids, Znudg)
@@ -655,6 +712,10 @@
                 DO itrc=1,NAT
                   LtracerSrc(itrc,ng)=Ltracer(itrc,ng)
                 END DO
+                DO i=1,NPT
+                  itrc=inert(i)
+                  LtracerSrc(itrc,ng)=Ltracer(NAT+i,ng)
+                END DO
               END DO
             CASE ('LsshCLM')
               Npts=load_l(Nval, Cval, Ngrids, LsshCLM)
@@ -668,6 +729,10 @@
                 DO itrc=1,NAT
                   LtracerCLM(itrc,ng)=Ltracer(itrc,ng)
                 END DO
+                DO i=1,NPT
+                  itrc=inert(i)
+                  LtracerCLM(itrc,ng)=Ltracer(NAT+i,ng)
+                END DO
               END DO
             CASE ('LnudgeM2CLM')
               Npts=load_l(Nval, Cval, Ngrids, LnudgeM2CLM)
@@ -678,6 +743,10 @@
               DO ng=1,Ngrids
                 DO itrc=1,NAT
                   LnudgeTCLM(itrc,ng)=Ltracer(itrc,ng)
+                END DO
+                DO i=1,NPT
+                  itrc=inert(i)
+                  LnudgeTCLM(itrc,ng)=Ltracer(NAT+i,ng)
                 END DO
               END DO
             CASE ('Hout(idUvel)')
@@ -978,6 +1047,14 @@
               END IF
               Npts=load_l(Nval, Cval, Ngrids, Lswitch)
               Hout(idMtls,1:Ngrids)=Lswitch(1:Ngrids)
+            CASE ('Hout(inert)')
+              Npts=load_l(Nval, Cval, NPT, Ngrids, Linert)
+              DO ng=1,Ngrids
+                DO i=1,NPT
+                  itrc=idTvar(inert(i))
+                  Hout(itrc,ng)=Linert(i,ng)
+                END DO
+              END DO
             CASE ('Qout(idUvel)')
               Npts=load_l(Nval, Cval, Ngrids, Lswitch)
               Qout(idUvel,1:Ngrids)=Lswitch(1:Ngrids)
@@ -1141,6 +1218,22 @@
             CASE ('Qout(idMtls)')
               Npts=load_l(Nval, Cval, Ngrids, Lswitch)
               Qout(idMtls,1:Ngrids)=Lswitch(1:Ngrids)
+            CASE ('Qout(inert)')
+              Npts=load_l(Nval, Cval, NPT, Ngrids, Linert)
+              DO ng=1,Ngrids
+                DO i=1,NPT
+                  itrc=idTvar(inert(i))
+                  Qout(itrc,ng)=Linert(i,ng)
+                END DO
+              END DO
+            CASE ('Qout(Snert)')
+              Npts=load_l(Nval, Cval, NPT, Ngrids, Linert)
+              DO ng=1,Ngrids
+                DO i=1,NPT
+                  itrc=idsurT(inert(i))
+                  Qout(itrc,ng)=Linert(i,ng)
+                END DO
+              END DO
             CASE ('Aout(idUvel)')
               Npts=load_l(Nval, Cval, Ngrids, Lswitch)
               Aout(idUvel,1:Ngrids)=Lswitch(1:Ngrids)
@@ -1399,6 +1492,14 @@
                   Aout(i,ng)=Ltracer(itrc,ng)
                 END DO
               END DO
+            CASE ('Aout(inert)')
+              Npts=load_l(Nval, Cval, NPT, Ngrids, Linert)
+              DO ng=1,Ngrids
+                DO i=1,NPT
+                  itrc=idTvar(inert(i))
+                  Aout(itrc,ng)=Linert(i,ng)
+                END DO
+              END DO
             CASE ('Dout(M2rate)')
               IF (M2rate.le.0) THEN
                 IF (Master) WRITE (out,280) 'M2rate'
@@ -1652,6 +1753,10 @@
                 DO itrc=1,NAT
                   Dout(idDtrc(itrc,iTrate),ng)=Ltracer(itrc,ng)
                 END DO
+                DO i=1,NPT
+                  itrc=inert(i)
+                  Dout(idDtrc(itrc,iTrate),ng)=Ltracer(NAT+i,ng)
+                END DO
               END DO
             CASE ('Dout(iThadv)')
               IF (iThadv.le.0) THEN
@@ -1663,6 +1768,10 @@
               DO ng=1,Ngrids
                 DO itrc=1,NAT
                   Dout(idDtrc(itrc,iThadv),ng)=Ltracer(itrc,ng)
+                END DO
+                DO i=1,NPT
+                  itrc=inert(i)
+                  Dout(idDtrc(itrc,iThadv),ng)=Ltracer(NAT+i,ng)
                 END DO
               END DO
             CASE ('Dout(iTxadv)')
@@ -1676,6 +1785,10 @@
                 DO itrc=1,NAT
                   Dout(idDtrc(itrc,iTxadv),ng)=Ltracer(itrc,ng)
                 END DO
+                DO i=1,NPT
+                  itrc=inert(i)
+                  Dout(idDtrc(itrc,iTxadv),ng)=Ltracer(NAT+i,ng)
+                END DO
               END DO
             CASE ('Dout(iTyadv)')
               IF (iTyadv.le.0) THEN
@@ -1687,6 +1800,10 @@
               DO ng=1,Ngrids
                 DO itrc=1,NAT
                   Dout(idDtrc(itrc,iTyadv),ng)=Ltracer(itrc,ng)
+                END DO
+                DO i=1,NPT
+                  itrc=inert(i)
+                  Dout(idDtrc(itrc,iTyadv),ng)=Ltracer(NAT+i,ng)
                 END DO
               END DO
             CASE ('Dout(iTvadv)')
@@ -1700,6 +1817,10 @@
                 DO itrc=1,NAT
                   Dout(idDtrc(itrc,iTvadv),ng)=Ltracer(itrc,ng)
                 END DO
+                DO i=1,NPT
+                  itrc=inert(i)
+                  Dout(idDtrc(itrc,iTvadv),ng)=Ltracer(NAT+i,ng)
+                END DO
               END DO
             CASE ('Dout(iThdif)')
               IF (iThdif.le.0) THEN
@@ -1711,6 +1832,10 @@
               DO ng=1,Ngrids
                 DO itrc=1,NAT
                   Dout(idDtrc(itrc,iThdif),ng)=Ltracer(itrc,ng)
+                END DO
+                DO i=1,NPT
+                  itrc=inert(i)
+                  Dout(idDtrc(itrc,iThdif),ng)=Ltracer(NAT+i,ng)
                 END DO
               END DO
             CASE ('Dout(iTxdif)')
@@ -1724,6 +1849,10 @@
                 DO itrc=1,NAT
                   Dout(idDtrc(itrc,iTxdif),ng)=Ltracer(itrc,ng)
                 END DO
+                DO i=1,NPT
+                  itrc=inert(i)
+                  Dout(idDtrc(itrc,iTxdif),ng)=Ltracer(NAT+i,ng)
+                END DO
               END DO
             CASE ('Dout(iTydif)')
               IF (iTydif.le.0) THEN
@@ -1735,6 +1864,10 @@
               DO ng=1,Ngrids
                 DO itrc=1,NAT
                   Dout(idDtrc(itrc,iTydif),ng)=Ltracer(itrc,ng)
+                END DO
+                DO i=1,NPT
+                  itrc=inert(i)
+                  Dout(idDtrc(itrc,iTydif),ng)=Ltracer(NAT+i,ng)
                 END DO
               END DO
             CASE ('Dout(iTsdif)')
@@ -1748,6 +1881,10 @@
                 DO itrc=1,NAT
                   Dout(idDtrc(itrc,iTsdif),ng)=Ltracer(itrc,ng)
                 END DO
+                DO i=1,NPT
+                  itrc=inert(i)
+                  Dout(idDtrc(itrc,iTsdif),ng)=Ltracer(NAT+i,ng)
+                END DO
               END DO
             CASE ('Dout(iTvdif)')
               IF (iTvdif.le.0) THEN
@@ -1759,6 +1896,10 @@
               DO ng=1,Ngrids
                 DO itrc=1,NAT
                   Dout(idDtrc(itrc,iTvdif),ng)=Ltracer(itrc,ng)
+                END DO
+                DO i=1,NPT
+                  itrc=inert(i)
+                  Dout(idDtrc(itrc,iTvdif),ng)=Ltracer(NAT+i,ng)
                 END DO
               END DO
             CASE ('NUSER')
@@ -1779,6 +1920,8 @@
             CASE ('OUT_LIB')
               Npts=load_i(Nval, Rval, 1, Ivalue)
               out_lib=1
+            CASE ('ExtractFlag')
+              Npts=load_i(Nval, Rval, Ngrids, ExtractFlag)
             CASE ('NC_SHUFFLE')
               Npts=load_i(Nval, Rval, 1, Ivalue)
               shuffle=Ivalue(1)
@@ -1804,6 +1947,10 @@
               label='HIS - nonlinear model history fields'
               Npts=load_s1d(Nval, Cval, Cdim, line, label, igrid,       &
      &                      Ngrids, Nfiles, out_lib, HIS)
+            CASE ('XTRNAME')
+              label='XTR - nonlinear model extraction history fields'
+              Npts=load_s1d(Nval, Cval, Cdim, line, label, igrid,       &
+     &                      Ngrids, Nfiles, out_lib, XTR)
             CASE ('QCKNAME')
               label='QCK - nonlinear model quicksave fields'
               Npts=load_s1d(Nval, Cval, Cdim, line, label, igrid,       &
@@ -1843,7 +1990,11 @@
             CASE ('GRDNAME')
               label='GRD - application grid'
               Npts=load_s1d(Nval, Cval, Cdim, line, label, igrid,       &
-     &                      Ngrids, Nfiles, inp_lib, GRD)
+     &                      Ngrids, Nfiles, inp_lib, GRD) 
+            CASE ('GRXNAME')
+              label='GRX - I/O histrory extract grid'
+              Npts=load_s1d(Nval, Cval, Cdim, line, label, igrid,       &
+     &                      Ngrids, Nfiles, inp_lib, GRX)
             CASE ('ININAME')
               label='INI - nonlinear model initial conditions'
               Npts=load_s1d(Nval, Cval, Cdim, line, label, igrid,       &
@@ -2015,7 +2166,7 @@
               END DO
               USRname=TRIM(ADJUSTL(Cval(Nval)))
           END SELECT
-          IF (FoundError(exit_flag, NoError, 4280, MyFile)) RETURN
+          IF (FoundError(exit_flag, NoError, 4295, MyFile)) RETURN
         END IF
       END DO
   10  IF (Master) WRITE (out,50) line
@@ -2183,8 +2334,7 @@
 !-----------------------------------------------------------------------
 !
       IF (Master.and.Lwrite) THEN
-        lstr=INDEX(my_fflags, 'free')-2
-        IF (lstr.le.0) lstr=LEN_TRIM(my_fflags)
+        lstr=LEN_TRIM(my_fflags)
         WRITE (out,60) TRIM(title), TRIM(my_os), TRIM(my_cpu),          &
      &                 TRIM(my_fort), TRIM(my_fc), my_fflags(1:lstr),   &
      &                 OCN_COMM_WORLD, numthreads,                      &
@@ -2241,7 +2391,7 @@
      &          'into history file.'
           IF (ndefHIS(ng).gt.0) THEN
             WRITE (out,130) ndefHIS(ng), 'ndefHIS',                     &
-     &            'Number of timesteps between creation of new',        &
+     &            'Number of timesteps between the creation of new',    &
      &            'history files.'
           END IF
           WRITE (out,130) nQCK(ng), 'nQCK',                             &
@@ -2249,8 +2399,8 @@
      &          'into quicksave file.'
           IF (ndefQCK(ng).gt.0) THEN
             WRITE (out,130) ndefQCK(ng), 'ndefQCK',                     &
-     &            'Number of timesteps between creation of new',        &
-     &            'brief snpashots files.'
+     &            'Number of timesteps between the creation of new',    &
+     &            'quicksave files.'
           END IF
           WRITE (out,130) ntsAVG(ng), 'ntsAVG',                         &
      &          'Starting timestep for the accumulation of output',     &
@@ -2260,8 +2410,8 @@
      &          'time-averaged data into averages file.'
           IF (ndefAVG(ng).gt.0) THEN
             WRITE (out,130) ndefAVG(ng), 'ndefAVG',                     &
-     &            'Number of timesteps between creation of new',        &
-     &            'time-averaged file.'
+     &            'Number of timesteps between the creation of new',    &
+     &            'time-averaged files.'
           END IF
           WRITE (out,130) ntsDIA(ng), 'ntsDIA',                         &
      &          'Starting timestep for the accumulation of output',     &
@@ -2271,11 +2421,12 @@
      &          'time-averaged data into diagnostics file.'
           IF (ndefDIA(ng).gt.0) THEN
             WRITE (out,130) ndefDIA(ng), 'ndefDIA',                     &
-     &            'Number of timesteps between creation of new',        &
-     &            'diagnostic file.'
+     &            'Number of timesteps between the creation of new',    &
+     &            'diagnostic files.'
           END IF
           DO i=1,NAT+NPT
             itrc=i
+            IF (i.gt.NAT) itrc=inert(i-NAT)
             WRITE (out,190) nl_tnu2(itrc,ng), 'nl_tnu2', itrc,          &
      &            'NLM Horizontal, harmonic mixing coefficient',        &
      &            '(m2/s) for tracer ', itrc,                           &
@@ -2302,8 +2453,21 @@
      &            TRIM(Vname(1,idTvar(i)))
             END IF
           END DO
+          DO itrc=1,NPT
+            i=inert(itrc)
+            IF (LtracerSponge(i,ng)) THEN
+              WRITE (out,185) LtracerSponge(i,ng), 'LtracerSponge', i,  &
+     &            'Turning ON  sponge on tracer ', i,                   &
+     &            TRIM(Vname(1,idTvar(i)))
+            ELSE
+              WRITE (out,185) LtracerSponge(i,ng), 'LtracerSponge', i,  &
+     &            'Turning OFF sponge on tracer ', i,                   &
+     &            TRIM(Vname(1,idTvar(i)))
+            END IF
+          END DO
           DO i=1,NAT+NPT
             itrc=i
+            IF (i.gt.NAT) itrc=inert(i-NAT)
             WRITE (out,190) Akt_bak(itrc,ng), 'Akt_bak', itrc,          &
      &            'Background vertical mixing coefficient (m2/s)',      &
      &            'for tracer ', itrc, TRIM(Vname(1,idTvar(itrc)))
@@ -2346,6 +2510,7 @@
      &          'Reference time for units attribute (yyyymmdd.dd)'
           DO i=1,NAT+NPT
             itrc=i
+            IF (i.gt.NAT) itrc=inert(i-NAT)
             WRITE (out,190) Tnudg(itrc,ng), 'Tnudg', itrc,              &
      &            'Nudging/relaxation time scale (days)',               &
      &            'for tracer ', itrc, TRIM(Vname(1,idTvar(itrc)))
@@ -2402,6 +2567,18 @@
      &            TRIM(Vname(1,idTvar(itrc)))
             END IF
           END DO
+          DO i=1,NPT
+            itrc=inert(i)
+            IF (LtracerSrc(itrc,ng)) THEN
+              WRITE (out,185) LtracerSrc(itrc,ng), 'LtracerSrc', itrc,  &
+     &            'Turning ON  point Sources/Sinks on tracer ', itrc,   &
+     &            TRIM(Vname(1,idTvar(itrc)))
+            ELSE
+              WRITE (out,185) LtracerSrc(itrc,ng), 'LtracerSrc', itrc,  &
+     &            'Turning OFF  point Sources/Sinks on tracer ', itrc,  &
+     &            TRIM(Vname(1,idTvar(itrc)))
+            END IF
+          END DO
           IF (LsshCLM(ng)) THEN
             WRITE (out,170) LsshCLM(ng), 'LsshCLM',                     &
      &          'Turning ON  processing of SSH climatology.'
@@ -2434,6 +2611,18 @@
      &            TRIM(Vname(1,idTvar(i)))
             END IF
           END DO
+          DO itrc=1,NPT
+            i=inert(itrc)
+            IF (LtracerCLM(i,ng)) THEN
+              WRITE (out,185) LtracerCLM(i,ng), 'LtracerCLM', i,        &
+     &            'Turning ON  processing of climatology tracer ', i,   &
+     &            TRIM(Vname(1,idTvar(i)))
+            ELSE
+              WRITE (out,185) LtracerCLM(i,ng), 'LtracerCLM', i,        &
+     &            'Turning OFF processing of climatology tracer ', i,   &
+     &            TRIM(Vname(1,idTvar(i)))
+            END IF
+          END DO
           IF (LnudgeM2CLM(ng)) THEN
             WRITE (out,170) LnudgeM2CLM(ng), 'LnudgeM2CLM',             &
      &          'Turning ON  nudging of 2D momentum climatology.'
@@ -2449,6 +2638,18 @@
      &          'Turning OFF nudging of 3D momentum climatology.'
           END IF
           DO i=1,NAT
+            IF (LnudgeTCLM(i,ng)) THEN
+              WRITE (out,185) LnudgeTCLM(i,ng), 'LnudgeTCLM', i,        &
+     &            'Turning ON  nudging of climatology tracer ', i,      &
+     &            TRIM(Vname(1,idTvar(i)))
+            ELSE
+              WRITE (out,185) LnudgeTCLM(i,ng), 'LnudgeTCLM', i,        &
+     &            'Turning OFF nudging of climatology tracer ', i,      &
+     &            TRIM(Vname(1,idTvar(i)))
+            END IF
+          END DO
+          DO itrc=1,NPT
+            i=inert(itrc)
             IF (LnudgeTCLM(i,ng)) THEN
               WRITE (out,185) LnudgeTCLM(i,ng), 'LnudgeTCLM', i,        &
      &            'Turning ON  nudging of climatology tracer ', i,      &
@@ -2523,6 +2724,12 @@
             IF (Hout(idVbms,ng)) WRITE (out,170) Hout(idVbms,ng),       &
      &         'Hout(idVbms)',                                          &
      &         'Write out bottom V-momentum stress.'
+            DO itrc=1,NPT
+              IF (Hout(idTvar(inert(itrc)),ng)) WRITE (out,180)         &
+     &            Hout(idTvar(inert(itrc)),ng), 'Hout(inert)',          &
+     &            'Write out inert passive tracer ', itrc,              &
+     &            TRIM(Vname(1,idTvar(inert(itrc))))
+            END DO
             IF (Hout(idTsur(itemp),ng)) WRITE (out,170)                 &
      &          Hout(idTsur(itemp),ng), 'Hout(idTsur)',                 &
      &         'Write out surface net heat flux.'
@@ -2624,6 +2831,18 @@
             IF (Qout(idVbms,ng)) WRITE (out,170) Qout(idVbms,ng),       &
      &         'Qout(idVbms)',                                          &
      &         'Write out bottom V-momentum stress.'
+            DO itrc=1,NPT
+              IF (Qout(idTvar(inert(itrc)),ng)) WRITE (out,180)         &
+     &            Qout(idTvar(inert(itrc)),ng), 'Qout(inert)',          &
+     &            'Write out inert passive tracer ', itrc,              &
+     &            TRIM(Vname(1,idTvar(inert(itrc))))
+            END DO
+            DO itrc=1,NPT
+              IF (Qout(idsurT(inert(itrc)),ng)) WRITE (out,180)         &
+     &            Qout(idsurT(inert(itrc)),ng), 'Qout(Snert)',          &
+     &            'Write out inert passive tracer ', itrc,              &
+     &            TRIM(Vname(1,idsurT(inert(itrc))))
+            END DO
             IF (Qout(idTsur(itemp),ng)) WRITE (out,170)                 &
      &          Qout(idTsur(itemp),ng), 'Qout(idTsur)',                 &
      &         'Write out surface net heat flux.'
@@ -2696,6 +2915,12 @@
             IF (Aout(idVbms,ng)) WRITE (out,170) Aout(idVbms,ng),       &
      &         'Aout(idVbms)',                                          &
      &         'Write out averaged bottom V-momentum stress.'
+            DO itrc=1,NPT
+              IF (Aout(idTvar(inert(itrc)),ng)) WRITE (out,180)         &
+     &            Aout(idTvar(inert(itrc)),ng), 'Aout(inert)',          &
+     &            'Write out  averaged inert passive tracer ', itrc,    &
+     &            TRIM(Vname(1,idTvar(inert(itrc))))
+            END DO
             IF (Aout(idTsur(itemp),ng)) WRITE (out,170)                 &
      &          Aout(idTsur(itemp),ng), 'Aout(idTsur)',                 &
      &         'Write out averaged surface net heat flux.'
@@ -2850,7 +3075,21 @@
      &              'Write out rate of change of tracer ', itrc,        &
      &              TRIM(Vname(1,idTvar(itrc)))
             END DO
+            DO i=1,NPT
+              itrc=inert(i)
+              IF (Dout(idDtrc(itrc,iTrate),ng))                         &
+     &          WRITE (out,180) .TRUE., 'Dout(iTrate)',                 &
+     &              'Write out rate of change of tracer ', itrc,        &
+     &              TRIM(Vname(1,idTvar(itrc)))
+            END DO
             DO itrc=1,NAT
+              IF (Dout(idDtrc(itrc,iThadv),ng))                         &
+     &          WRITE (out,180) .TRUE., 'Dout(iThadv)',                 &
+     &              'Write out horizontal advection, tracer ', itrc,    &
+     &              TRIM(Vname(1,idTvar(itrc)))
+            END DO
+            DO i=1,NPT
+              itrc=inert(i)
               IF (Dout(idDtrc(itrc,iThadv),ng))                         &
      &          WRITE (out,180) .TRUE., 'Dout(iThadv)',                 &
      &              'Write out horizontal advection, tracer ', itrc,    &
@@ -2862,7 +3101,21 @@
      &              'Write out horizontal X-advection, tracer ', itrc,  &
      &              TRIM(Vname(1,idTvar(itrc)))
             END DO
+            DO i=1,NPT
+              itrc=inert(i)
+              IF (Dout(idDtrc(itrc,iTxadv),ng))                         &
+     &          WRITE (out,180) .TRUE., 'Dout(iTxadv)',                 &
+     &              'Write out horizontal X-advection, tracer ', itrc,  &
+     &              TRIM(Vname(1,idTvar(itrc)))
+            END DO
             DO itrc=1,NAT
+              IF (Dout(idDtrc(itrc,iTyadv),ng))                         &
+     &          WRITE (out,180) .TRUE., 'Dout(iTyadv)',                 &
+     &              'Write out horizontal Y-advection, tracer ', itrc,  &
+     &              TRIM(Vname(1,idTvar(itrc)))
+            END DO
+            DO i=1,NPT
+              itrc=inert(i)
               IF (Dout(idDtrc(itrc,iTyadv),ng))                         &
      &          WRITE (out,180) .TRUE., 'Dout(iTyadv)',                 &
      &              'Write out horizontal Y-advection, tracer ', itrc,  &
@@ -2874,7 +3127,21 @@
      &              'Write out vertical advection, tracer ', itrc,      &
      &              TRIM(Vname(1,idTvar(itrc)))
             END DO
+            DO i=1,NPT
+              itrc=inert(i)
+              IF (Dout(idDtrc(itrc,iTvadv),ng))                         &
+     &          WRITE (out,180) .TRUE., 'Dout(iTvadv)',                 &
+     &              'Write out vertical advection, tracer ', itrc,      &
+     &              TRIM(Vname(1,idTvar(itrc)))
+            END DO
             DO itrc=1,NAT
+              IF (Dout(idDtrc(itrc,iThdif),ng))                         &
+     &          WRITE (out,180) .TRUE., 'Dout(iThdif)',                 &
+     &              'Write out horizontal diffusion, tracer ', itrc,    &
+     &              TRIM(Vname(1,idTvar(itrc)))
+            END DO
+            DO i=1,NPT
+              itrc=inert(i)
               IF (Dout(idDtrc(itrc,iThdif),ng))                         &
      &          WRITE (out,180) .TRUE., 'Dout(iThdif)',                 &
      &              'Write out horizontal diffusion, tracer ', itrc,    &
@@ -2886,10 +3153,24 @@
      &              'Write out horizontal X-diffusion, tracer ', itrc,  &
      &              TRIM(Vname(1,idTvar(itrc)))
             END DO
+            DO i=1,NPT
+              itrc=inert(i)
+              IF (Dout(idDtrc(i,iTxdif),ng))                            &
+     &          WRITE (out,180) .TRUE., 'Dout(iTxdif)',                 &
+     &              'Write out horizontal X-diffusion, tracer ', itrc,  &
+     &              TRIM(Vname(1,idTvar(itrc)))
+            END DO
             DO itrc=1,NAT
               IF (Dout(idDtrc(itrc,iTydif),ng))                         &
      &          WRITE (out,180) .TRUE., 'Dout(iTydif)',                 &
      &              'Write out horizontal Y-diffusion , tracer ', itrc, &
+     &              TRIM(Vname(1,idTvar(itrc)))
+            END DO
+            DO i=1,NPT
+              itrc=inert(i)
+              IF (Dout(idDtrc(itrc,iTydif),ng))                         &
+     &          WRITE (out,180) .TRUE., 'Dout(iTydif)',                 &
+     &              'Write out horizontal Y-diffusion, tracer ', itrc,  &
      &              TRIM(Vname(1,idTvar(itrc)))
             END DO
             DO itrc=1,NAT
@@ -2898,7 +3179,21 @@
      &              'Write out horizontal S-diffusion, tracer ', itrc,  &
      &              TRIM(Vname(1,idTvar(itrc)))
             END DO
+            DO i=1,NPT
+              itrc=inert(i)
+              IF (Dout(idDtrc(itrc,iTsdif),ng))                         &
+     &          WRITE (out,180) .TRUE., 'Dout(iTsdif)',                 &
+     &              'Write out horizontal S-diffusion, tracer ', itrc,  &
+     &              TRIM(Vname(1,idTvar(itrc)))
+            END DO
             DO itrc=1,NAT
+              IF (Dout(idDtrc(itrc,iTvdif),ng))                         &
+     &          WRITE (out,180) .TRUE., 'Dout(iTvdif)',                 &
+     &              'Write out vertical diffusion, tracer ', itrc,      &
+     &              TRIM(Vname(1,idTvar(itrc)))
+            END DO
+            DO i=1,NPT
+              itrc=inert(i)
               IF (Dout(idDtrc(itrc,iTvdif),ng))                         &
      &          WRITE (out,180) .TRUE., 'Dout(iTvdif)',                 &
      &              'Write out vertical diffusion, tracer ', itrc,      &
@@ -2952,14 +3247,14 @@
         END IF
         fname=GRD(ng)%name
         IF (.not.find_file(ng, out, fname, 'GRDNAME')) THEN
-          IF (FoundError(exit_flag, NoError, 7426, MyFile)) RETURN
+          IF (FoundError(exit_flag, NoError, 7495, MyFile)) RETURN
         ELSE
           IF (Master.and.Lwrite) WRITE (out,230)                        &
      &      '                 Input Grid File:  ', TRIM(fname)
         END IF
         fname=INI(ng)%name
         IF (.not.find_file(ng, out, fname, 'ININAME')) THEN
-          IF (FoundError(exit_flag, NoError, 7447, MyFile)) RETURN
+          IF (FoundError(exit_flag, NoError, 7516, MyFile)) RETURN
         ELSE
           IF (Master.and.Lwrite) WRITE (out,230)                        &
             '    Input Nonlinear Initial File:  ', TRIM(fname)
@@ -2967,7 +3262,7 @@
         IF (LuvSrc(ng).or.LwSrc(ng).or.(ANY(LtracerSrc(:,ng)))) THEN
           fname=SSF(ng)%name
           IF (.not.find_file(ng, out, fname, 'SSFNAME')) THEN
-            IF (FoundError(exit_flag, NoError, 7504, MyFile)) RETURN
+            IF (FoundError(exit_flag, NoError, 7573, MyFile)) RETURN
           ELSE
             IF (Master.and.Lwrite) WRITE (out,230)                      &
      &        '        Input Sources/Sinks File:  ', TRIM(fname)
@@ -2976,7 +3271,7 @@
         IF (ng.eq.1) THEN                 ! only tidal forcing on grid 1
           fname=TIDE(ng)%name
           IF (.not.find_file(ng, out, fname, 'TIDENAME')) THEN
-            IF (FoundError(exit_flag, NoError, 7515, MyFile)) RETURN
+            IF (FoundError(exit_flag, NoError, 7584, MyFile)) RETURN
           ELSE
             IF (Master.and.Lwrite) WRITE (out,230)                      &
      &        '              Tidal Forcing File:  ', TRIM(fname)
@@ -2986,7 +3281,7 @@
           DO ifile=1,FRC(i,ng)%Nfiles
             fname=FRC(i,ng)%files(ifile)
             IF (.not.find_file(ng, out, fname, 'FRCNAME')) THEN
-              IF (FoundError(exit_flag, NoError, 7527, MyFile))         &
+              IF (FoundError(exit_flag, NoError, 7596, MyFile))         &
      &          RETURN
             ELSE
               IF (ifile.eq.1) THEN
@@ -3003,7 +3298,7 @@
             DO ifile=1,CLM(i,ng)%Nfiles
               fname=CLM(i,ng)%files(ifile)
               IF (.not.find_file(ng, out, fname, 'CLMNAME')) THEN
-                IF (FoundError(exit_flag, NoError, 7545, MyFile))       &
+                IF (FoundError(exit_flag, NoError, 7614, MyFile))       &
      &            RETURN
               ELSE
                 IF (ifile.eq.1) THEN
@@ -3021,7 +3316,7 @@
      &     (ANY(LnudgeTCLM(:,ng)))) THEN
           fname=NUD(ng)%name
           IF (.not.find_file(ng, out, fname, 'NUDNAME')) THEN
-            IF (FoundError(exit_flag, NoError, 7564, MyFile)) RETURN
+            IF (FoundError(exit_flag, NoError, 7633, MyFile)) RETURN
           ELSE
             IF (Master.and.Lwrite) WRITE (out,230)                      &
      &        '   Input Nudge Coefficients File:  ', TRIM(fname)
@@ -3033,7 +3328,7 @@
             DO ifile=1,BRY(i,ng)%Nfiles
               fname=BRY(i,ng)%files(ifile)
               IF (.not.find_file(ng, out, fname, 'BRYNAME')) THEN
-                IF (FoundError(exit_flag, NoError, 7606, MyFile))       &
+                IF (FoundError(exit_flag, NoError, 7675, MyFile))       &
      &            RETURN
               ELSE
                 IF (ifile.eq.1) THEN
@@ -3050,7 +3345,7 @@
         END IF
         fname=varname
         IF (.not.find_file(ng, out, fname, 'VARNAME')) THEN
-          IF (FoundError(exit_flag, NoError, 7671, MyFile)) RETURN
+          IF (FoundError(exit_flag, NoError, 7740, MyFile)) RETURN
         ELSE
           IF (Master.and.Lwrite) WRITE (out,230)                        &
      &      'ROMS I/O variables Metadata File:  ', TRIM(fname)
@@ -3089,6 +3384,7 @@
       DO ng=1,Ngrids
         DO i=1,NAT+NPT
           itrc=i
+          IF (i.gt.NAT) itrc=inert(i-NAT)
 !
 !  Take the square root of the biharmonic coefficients so it can
 !  be applied to each harmonic operator.
@@ -3104,6 +3400,7 @@
           END IF
         END DO
       END DO
+!
   50  FORMAT (/,' READ_PhyPar - Error while processing line: ',/,a)
   60  FORMAT (/,1x,a,/,                                                 &
      &        /,1x,'Operating system  : ',a,                            &
@@ -3178,5 +3475,15 @@
      &              '''roms.in''.'/)
  350  FORMAT (/,' READ_PHYPAR - Invalid input parameter, ',a,i0,        &
      &        ', for grid ',i2.2,/,15x,a,i0,', ',a,i0,/,15x,a,/,15x,a)
+ 360  FORMAT (/,' READ_PHYPAR - Grid = ',i0,1x,'dimensions are',1x,     &
+     &        'inappropriate for the given decimation factor:',/,15x,   &
+     &        'ExtractFlag = ',i0,/,15x,                                &
+     &        'MOD(Lm(ng)+1, ExtractFlag(ng)) = ',i0,/,15x,             &
+     &        'MOD(Mm(ng)+1, ExtractFlag(ng)) = ',i0,/,15x,             &
+     &        'because both division reminders must be zero.')
+ 370  FORMAT (/,' READ_PHYPAR - Unsupported decimation factor for',1x,  &
+     &        'coarsening split 4D-Var',/,15x,                          &
+     &        'Grid = ',i0,', ExtractFlag = ',i0)
+!
       RETURN
       END SUBROUTINE read_PhyPar

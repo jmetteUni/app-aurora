@@ -131,7 +131,7 @@
       Coptions(is:is+11)=' DJ_GRADPS,'
 !
       IF (Master) WRITE (stdout,20) 'DOUBLE_PRECISION',                 &
-     &   'Double precision arithmetic numerical kernel.'
+     &   'Double precision arithmetic numerical kernel'
       is=LEN_TRIM(Coptions)+1
       Coptions(is:is+18)=' DOUBLE_PRECISION,'
 !
@@ -229,6 +229,11 @@
      &   'Adding astronomical TGF term to pressure gradient'
       is=LEN_TRIM(Coptions)+1
       Coptions(is:is+24)=' TIDE_GENERATING_FORCES,'
+!
+      IF (Master) WRITE (stdout,20) 'T_PASSIVE',                        &
+     &   'Advecting and diffusing inert passive tracer'
+      is=LEN_TRIM(Coptions)+1
+      Coptions(is:is+11)=' T_PASSIVE,'
 !
       IF (Master) WRITE (stdout,20) 'TS_DIF2',                          &
      &   'Harmonic mixing of tracers'

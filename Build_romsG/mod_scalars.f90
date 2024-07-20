@@ -102,6 +102,7 @@
 !
         integer :: itemp              ! Potential temperature
         integer :: isalt              ! Salinity
+        integer, pointer :: inert(:)  ! inert tracers
 !
 !-----------------------------------------------------------------------
 !  Diagnostic fields identification indices.
@@ -808,6 +809,7 @@
         logical, allocatable :: LdefTIDE(:)      ! tide forcing file
         logical, allocatable :: LdefTLM(:)       ! Tangent linear file
         logical, allocatable :: LdefTLF(:)       ! TLM/RPM impulse file
+        logical, allocatable :: LdefXTR(:)       ! TLM/RPM impulse file
         logical, allocatable :: LreadADM(:)      ! Read ADM multi-files
         logical, allocatable :: LreadBLK(:)      ! Read NLM bulk fluxes
         logical, allocatable :: LreadFRC(:)      ! Read FRC files
@@ -822,8 +824,9 @@
         logical, allocatable :: LwrtPER(:)       ! Write during ensemble
         logical, allocatable :: LwrtQCK(:)       ! write quicksave file
         logical, allocatable :: LwrtRST(:)       ! Write restart file
-        logical, allocatable :: LwrtTLM(:)       ! Write tangent file
         logical, allocatable :: LwrtTLF(:)       ! Write impulse file
+        logical, allocatable :: LwrtTLM(:)       ! Write tangent file
+        logical, allocatable :: LwrtXTR(:)       ! Write extraction file
         logical, allocatable :: LdefNRM(:,:)     ! Norm file
         logical, allocatable :: LwrtNRM(:,:)     ! Write norm file
 !
@@ -874,6 +877,7 @@
         integer, allocatable :: ndefHIS(:)       ! History file
         integer, allocatable :: ndefQCK(:)       ! Quicksave file
         integer, allocatable :: ndefTLM(:)       ! Tangent linear file
+        integer, allocatable :: ndefXTR(:)       ! extraction file
 !
 !  Starting timestep for accumulation of output.
 !
@@ -891,6 +895,17 @@
         integer, allocatable :: nRST(:)          ! Restart file
         integer, allocatable :: nSTA(:)          ! Stations file
         integer, allocatable :: nTLM(:)          ! Tangent linear file
+        integer, allocatable :: nXTR(:)          ! extraction file
+!
+!  Field extraction flag to interpolate or decimate solution to the
+!  provided grid geometry.
+!  (For 4D-Var coarser inner loops use ExtractFlag = 2)
+!
+!    ExtractFlag = 0    no extraction
+!    ExtractFlag = 1    extraction by interpolation
+!    ExtractFlag > 1    extraction by decimation
+!
+        integer, allocatable :: ExtractFlag(:)
 !
 !  Number of timesteps between print of single line information to
 !  standard output.
@@ -1212,6 +1227,10 @@
 !  Allocate variables.
 !-----------------------------------------------------------------------
 !
+      IF (.not.associated(inert)) THEN
+        allocate ( inert(NPT) )
+        Dmem(1)=Dmem(1)+REAL(NPT,r8)
+      END IF
       IF (.not.allocated(PerfectRST)) THEN
         allocate ( PerfectRST(Ngrids) )
         Dmem(1)=Dmem(1)+REAL(Ngrids,r8)
@@ -1820,6 +1839,10 @@
         allocate ( LdefRST(Ngrids) )
         Dmem(1)=Dmem(1)+REAL(Ngrids,r8)
       END IF
+      IF (.not.allocated(LdefXTR)) THEN
+        allocate ( LdefXTR(Ngrids) )
+        Dmem(1)=Dmem(1)+REAL(Ngrids,r8)
+      END IF
       IF (.not.allocated(LdefSTA)) THEN
         allocate ( LdefSTA(Ngrids) )
         Dmem(1)=Dmem(1)+REAL(Ngrids,r8)
@@ -1892,12 +1915,16 @@
         allocate ( LwrtRST(Ngrids) )
         Dmem(1)=Dmem(1)+REAL(Ngrids,r8)
       END IF
+      IF (.not.allocated(LwrtTLF)) THEN
+        allocate ( LwrtTLF(Ngrids) )
+        Dmem(1)=Dmem(1)+REAL(Ngrids,r8)
+      END IF
       IF (.not.allocated(LwrtTLM)) THEN
         allocate ( LwrtTLM(Ngrids) )
         Dmem(1)=Dmem(1)+REAL(Ngrids,r8)
       END IF
-      IF (.not.allocated(LwrtTLF)) THEN
-        allocate ( LwrtTLF(Ngrids) )
+      IF (.not.allocated(LwrtXTR)) THEN
+        allocate ( LwrtXTR(Ngrids) )
         Dmem(1)=Dmem(1)+REAL(Ngrids,r8)
       END IF
       IF (.not.allocated(LdefNRM)) THEN
@@ -1964,6 +1991,10 @@
         allocate ( ndefTLM(Ngrids) )
         Dmem(1)=Dmem(1)+REAL(Ngrids,r8)
       END IF
+      IF (.not.allocated(ndefXTR)) THEN
+        allocate ( ndefXTR(Ngrids) )
+        Dmem(1)=Dmem(1)+REAL(Ngrids,r8)
+      END IF
       IF (.not.allocated(ntsAVG)) THEN
         allocate ( ntsAVG(Ngrids) )
         Dmem(1)=Dmem(1)+REAL(Ngrids,r8)
@@ -2006,6 +2037,14 @@
       END IF
       IF (.not.allocated(nTLM)) THEN
         allocate ( nTLM(Ngrids) )
+        Dmem(1)=Dmem(1)+REAL(Ngrids,r8)
+      END IF
+      IF (.not.allocated(nXTR)) THEN
+        allocate ( nXTR(Ngrids) )
+        Dmem(1)=Dmem(1)+REAL(Ngrids,r8)
+      END IF
+      IF (.not.allocated(ExtractFlag)) THEN
+        allocate ( ExtractFlag(Ngrids) )
         Dmem(1)=Dmem(1)+REAL(Ngrids,r8)
       END IF
       IF (.not.allocated(ninfo)) THEN
@@ -2258,6 +2297,7 @@
 !
 !  Deallocate regular variables
 !
+      IF (associated(inert))            deallocate ( inert )
       IF (allocated(PerfectRST))        deallocate ( PerfectRST )
       IF (allocated(ndtfast))           deallocate ( ndtfast )
       IF (allocated(nfast))             deallocate ( nfast )
@@ -2406,8 +2446,9 @@
       IF (allocated(LdefRST))           deallocate ( LdefRST )
       IF (allocated(LdefSTA))           deallocate ( LdefSTA )
       IF (allocated(LdefTIDE))          deallocate ( LdefTIDE )
-      IF (allocated(LdefTLM))           deallocate ( LdefTLM )
       IF (allocated(LdefTLF))           deallocate ( LdefTLF )
+      IF (allocated(LdefTLM))           deallocate ( LdefTLM )
+      IF (allocated(LdefXTR))           deallocate ( LdefXTR )
       IF (allocated(LreadADM))          deallocate ( LreadADM )
       IF (allocated(LreadBLK))          deallocate ( LreadBLK )
       IF (allocated(LreadFRC))          deallocate ( LreadFRC )
@@ -2422,8 +2463,9 @@
       IF (allocated(LwrtPER))           deallocate ( LwrtPER )
       IF (allocated(LwrtQCK))           deallocate ( LwrtQCK )
       IF (allocated(LwrtRST))           deallocate ( LwrtRST )
-      IF (allocated(LwrtTLM))           deallocate ( LwrtTLM )
       IF (allocated(LwrtTLF))           deallocate ( LwrtTLF )
+      IF (allocated(LwrtTLM))           deallocate ( LwrtTLM )
+      IF (allocated(LwrtXTR))           deallocate ( LwrtXTR )
       IF (allocated(LdefNRM))           deallocate ( LdefNRM )
       IF (allocated(LwrtNRM))           deallocate ( LwrtNRM )
       IF (allocated(LwrtState2d))       deallocate ( LwrtState2d )
@@ -2440,6 +2482,7 @@
       IF (allocated(ndefHIS))           deallocate ( ndefHIS )
       IF (allocated(ndefQCK))           deallocate ( ndefQCK )
       IF (allocated(ndefTLM))           deallocate ( ndefTLM )
+      IF (allocated(ndefTLM))           deallocate ( ndefXTR )
       IF (allocated(ntsAVG))            deallocate ( ntsAVG )
       IF (allocated(ntsDIA))            deallocate ( ntsDIA )
       IF (allocated(nADJ))              deallocate ( nADJ )
@@ -2451,6 +2494,7 @@
       IF (allocated(nRST))              deallocate ( nRST )
       IF (allocated(nSTA))              deallocate ( nSTA )
       IF (allocated(nTLM))              deallocate ( nTLM )
+      IF (allocated(ExtractFlag))       deallocate ( ExtractFlag )
       IF (allocated(ninfo))             deallocate ( ninfo )
       IF (allocated(nOBC))              deallocate ( nOBC )
       IF (allocated(Nbrec))             deallocate ( Nbrec )
@@ -2528,6 +2572,13 @@
       itemp=1
       isalt=2
       ic=NAT
+!
+!  Indices for inert passive tracers to advect and diffuse.
+!
+      DO i=1,NPT
+        ic=ic+1
+        inert(i)=ic
+      END DO
 !
 !---------------------------------------------------------------------
 !  Set diagnostic fields identification indices.
@@ -2624,6 +2675,7 @@
         NudgingCoeff(ng)=.FALSE.
         ObcData(ng)=.FALSE.
         SetGridConfig(ng)=.TRUE.
+        ExtractFlag(ng)=0
         RefineScale(ng)=0
         gamma2(ng)=-1.0_r8
         Vtransform(ng)=1
@@ -2759,6 +2811,7 @@
         LwrtQCK(ng)=.FALSE.
         LwrtRST(ng)=.FALSE.
         LwrtTLM(ng)=.FALSE.
+        LwrtXTR(ng)=.FALSE.
         LwrtInfo(ng)=.TRUE.
         LwrtState2d(ng)=.FALSE.
         LwrtTime(ng)=.TRUE.

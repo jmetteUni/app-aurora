@@ -114,6 +114,26 @@
      &                FORCES(ng) % btfluxG(:,:,:,itemp))
       IF (FoundError(exit_flag, NoError, 630, MyFile)) RETURN
 !
+!  Passive tracers surface fluxes.
+!
+      DO i=NAT+1,NT(ng)
+        CALL get_2dfld (ng, iNLM, idTsur(i), FRCncid(idTsur(i),ng),     &
+     &                  nFfiles(ng), FRC(1,ng), update(1),              &
+     &                  LBi, UBi, LBj, UBj, 2, 1,                       &
+     &                  FORCES(ng) % stfluxG(:,:,:,i))
+        IF (FoundError(exit_flag, NoError, 724, MyFile)) RETURN
+      END DO
+!
+!  Passive tracers bottom fluxes.
+!
+      DO i=NAT+1,NT(ng)
+        CALL get_2dfld (ng, iNLM, idTbot(i), FRCncid(idTbot(i),ng),     &
+     &                  nFfiles(ng), FRC(1,ng), update(1),              &
+     &                  LBi, UBi, LBj, UBj, 2, 1,                       &
+     &                  FORCES(ng) % btfluxG(:,:,:,i))
+        IF (FoundError(exit_flag, NoError, 743, MyFile)) RETURN
+      END DO
+!
 !=======================================================================
 !  Read in open boundary conditions from BOUNDARY NetCDF file.
 !=======================================================================

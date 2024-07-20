@@ -834,13 +834,15 @@
 !
           IF (self%list(ipair)%is_sequence) THEN
             Lstr=LEN_TRIM(Vstring)
-            nvalues=COUNT((/(Vstring(j:j), j=1,Lstr)/) == CHAR(44)) + 1
+            nvalues=yaml_CountKeys(Vstring, CHAR(44))
 !
             IF (.not.ALLOCATED(S)) THEN
               ALLOCATE ( S(npairs) )                   ! main structure
             END IF
+            IF (i.eq.1) THEN
+              S(1:npairs)%has_vector=.TRUE.
+            END IF
             ALLOCATE ( S(i)%vector(nvalues) )          ! sub-structure
-            S(i)%has_vector=.TRUE.
 !
             is=1
             DO j=1,nvalues
@@ -854,7 +856,7 @@
               IF (yaml_Error(yaml_AssignString(S(i)%vector(j)%value,    &
      &                                         Vstring(is:ie),          &
      &                                         LenStr),                 &
-     &                       NoErr, 865, MyFile)) RETURN
+     &                       NoErr, 867, MyFile)) RETURN
               IF (yaml_Master.and.LdebugYAML) THEN
                 PRINT '(3a,2(i0,a),a)', 'keystring = ',TRIM(keystring), &
      &                               ', S(', i, ')%vector(', j, ') = ', &
@@ -871,11 +873,13 @@
             IF (.not.ALLOCATED(S)) THEN
               ALLOCATE ( S(npairs) )
             END IF
-            S(i)%has_vector=.FALSE.
+            IF (i.eq.1) THEN
+              S(1:npairs)%has_vector=.FALSE.
+            END IF
 !
             IF (yaml_Error(yaml_AssignString(S(i)%value,                &
      &                                       Vstring, LenStr),          &
-     &                     NoErr, 888, MyFile)) RETURN
+     &                     NoErr, 892, MyFile)) RETURN
             IF (yaml_Master.and.LdebugYAML) THEN
               PRINT '(a,i0,4a)', 'keystring ',i,' = ', TRIM(keystring), &
      &                           ', value = ', TRIM(S(i)%value)
@@ -890,10 +894,14 @@
 !
           IF (self%list(ipair)%is_sequence) THEN
             Lstr=LEN_TRIM(Vstring)
-            nvalues=COUNT((/(Vstring(j:j), j=1,Lstr)/) == CHAR(44)) + 1
+            nvalues=yaml_CountKeys(Vstring, CHAR(44))
 !
-            ALLOCATE ( S(nvalues) )
-            S(i)%has_vector=.FALSE.
+            IF (.not.ALLOCATED(S)) THEN
+              ALLOCATE ( S(nvalues) )
+            END IF
+            IF (i.eq.1) THEN
+              S(1:nvalues)%has_vector=.FALSE.
+            END IF
 !
             is=1
             DO j=1,nvalues
@@ -907,7 +915,7 @@
               IF (yaml_Error(yaml_AssignString(S(j)%value,              &
      &                                         Vstring(is:ie),          &
      &                                         LenStr),                 &
-     &                       NoErr, 921, MyFile)) RETURN
+     &                       NoErr, 929, MyFile)) RETURN
               IF (icomma.gt.0) Vstring(is:ie+1)=REPEAT(CHAR(32),ie-is+2)
               Vstring=TRIM(ADJUSTL(Vstring))
               IF (yaml_Master.and.LdebugYAML) THEN
@@ -921,12 +929,14 @@
 !
           ELSE
 !
-            ALLOCATE ( S(1) )
+            IF (.not.ALLOCATED(S)) THEN
+              allocate ( S(1) )
+            END IF
             S(1)%has_vector=.FALSE.
 !
             IF (yaml_Error(yaml_AssignString(S(1)%value,                &
      &                                       Vstring, LenStr),          &
-     &                     NoErr, 941, MyFile)) RETURN
+     &                     NoErr, 951, MyFile)) RETURN
             IF (yaml_Master.and.LdebugYAML) THEN
                PRINT '(4a)', 'keystring = ', TRIM(keystring),           &
      &                       ', value = ', TRIM(S(1)%value)
@@ -1003,7 +1013,7 @@
         SELECT CASE (status)
           CASE (-1)       ! error condition during reading
             yaml_ErrFlag=4
-            IF (yaml_Error(yaml_ErrFlag, NoErr, 1019, MyFile)) THEN
+            IF (yaml_Error(yaml_ErrFlag, NoErr, 1029, MyFile)) THEN
               IF (yaml_Master) WRITE (yaml_stdout,10) self%filename,    &
      &                                                TRIM(line)
               RETURN
@@ -1060,22 +1070,22 @@
 !
         IF (yaml_Error(yaml_AssignString(self%list(icount)%line,        &
      &                                   line, LenStr),                 &
-     &                 NoErr, 1076, MyFile)) RETURN
+     &                 NoErr, 1086, MyFile)) RETURN
 !
         IF (yaml_Error(yaml_AssignString(self%list(icount)%key,         &
      &                                   key, LenStr),                  &
-     &                 NoErr, 1080, MyFile)) RETURN
+     &                 NoErr, 1090, MyFile)) RETURN
 !
         IF (LEN_TRIM(value).gt.0) THEN
           IF (yaml_Error(yaml_AssignString(self%list(icount)%value,     &
      &                                     value, LenStr),              &
-     &                   NoErr, 1085, MyFile)) RETURN
+     &                   NoErr, 1095, MyFile)) RETURN
         END IF
 !
         IF (Lswitch(2).and.LEN_TRIM(anchor).gt.0) THEN
           IF (yaml_Error(yaml_AssignString(self%list(icount)%anchor,    &
      &                                     anchor, LenStr),             &
-     &                   NoErr, 1091, MyFile)) RETURN
+     &                   NoErr, 1101, MyFile)) RETURN
         END IF
 !
       END DO YAML_LINE
@@ -1169,7 +1179,7 @@
               IF (yaml_Error(yaml_AssignString(self%list(j)%value,      &
      &                                         TRIM(AnchorVal(i)),      &
      &                                         LenStr),                 &
-     &                       NoErr, 1185, MyFile)) RETURN
+     &                       NoErr, 1195, MyFile)) RETURN
 !
               Lswitch=.FALSE.
               CALL yaml_ValueType (self%list(j)%value, Lswitch)
@@ -1233,7 +1243,7 @@
       Lstr=LEN_TRIM(keystring)
       IF (yaml_Error(yaml_AssignString(Kstring,                         &
      &                                 keystring, LenStr),              &
-     &               NoErr, 1250, MyFile)) RETURN
+     &               NoErr, 1260, MyFile)) RETURN
 !
       nkeys=yaml_CountKeys(Kstring, CHAR(46))
 !
@@ -1267,7 +1277,7 @@
           END IF
           IF (yaml_Error(yaml_AssignString(K(j)%value,                  &
      &                                     Kstring(is:ie), LenStr),     &
-     &                   NoErr, 1284, MyFile)) RETURN
+     &                   NoErr, 1294, MyFile)) RETURN
           IF (idot.gt.0) Kstring(is:ie+1) = REPEAT(CHAR(32), ie-is+2)
           Kstring=TRIM(ADJUSTL(Kstring))
         END DO
@@ -1424,7 +1434,7 @@
         IF (yaml_Master) THEN
           WRITE (yaml_stdout,30) TRIM(line)
         END IF
-        IF (yaml_Error(yaml_ErrFlag, NoErr, 1445, MyFile)) RETURN
+        IF (yaml_Error(yaml_ErrFlag, NoErr, 1455, MyFile)) RETURN
       END IF
 !
       Idash =INDEX(line,CHAR(45),BACK=.FALSE.)
@@ -1617,7 +1627,7 @@
 !                                                                      !
 !  nkeys=COUNT((/ (string(i:i), i=1,Lstr) /) == token) + 1             !
 !                                                                      !
-!  But compilier like 'gfortran' cannot handle such abstraction.       !
+!  But compiliers like 'gfortran' cannot handle such abstraction.      !
 !                                                                      !
 !  On Input:                                                           !
 !                                                                      !
@@ -1747,7 +1757,7 @@
       status=NoErr
 !
       IF (yaml_Error(self%extract(keystring, S),                        &
-     &               NoErr, 1772, MyFile)) RETURN
+     &               NoErr, 1782, MyFile)) RETURN
 !
 !  Allocate output structure.
 !
@@ -1764,7 +1774,7 @@
           DO i=1,Nvalues
             READ (S(n)%vector(i)%value, * ,IOSTAT=status, IOMSG=msg)    &
      &           V(n)%vector(i)
-            IF (yaml_Error(status, NoErr, 1789, MyFile)) THEN
+            IF (yaml_Error(status, NoErr, 1799, MyFile)) THEN
               yaml_ErrFlag=5
               IF (yaml_Master) WRITE (yaml_stdout,10) TRIM(keystring),  &
      &                                            S(n)%vector(i)%value, &
@@ -1829,7 +1839,7 @@
       status=NoErr
 !
       IF (yaml_Error(self%extract(keystring, S),                        &
-     &               NoErr, 1854, MyFile)) RETURN
+     &               NoErr, 1864, MyFile)) RETURN
 !
 !  Allocate output structure.
 !
@@ -1905,7 +1915,7 @@
       status=NoErr
 !
       IF (yaml_Error(self%extract(keystring, S),                        &
-     &               NoErr, 1931, MyFile)) RETURN
+     &               NoErr, 1941, MyFile)) RETURN
 !
 !  Allocate output structure.
 !
@@ -1922,7 +1932,7 @@
           DO i=1,Nvalues
             READ (S(n)%vector(i)%value, * ,IOSTAT=status, IOMSG=msg)    &
      &           V(n)%vector(i)
-            IF (yaml_Error(status, NoErr, 1948, MyFile)) THEN
+            IF (yaml_Error(status, NoErr, 1958, MyFile)) THEN
               yaml_ErrFlag=5
               IF (yaml_Master) WRITE (yaml_stdout,10) TRIM(keystring),  &
      &                                            S(n)%vector(i)%value, &
@@ -1933,7 +1943,7 @@
         ELSE
           READ (S(n)%value, * ,IOSTAT=status, IOMSG=msg)                &
      &         V(n)%vector(i)
-          IF (yaml_Error(status, NoErr, 1959, MyFile)) THEN
+          IF (yaml_Error(status, NoErr, 1969, MyFile)) THEN
             yaml_ErrFlag=5
             IF (yaml_Master) WRITE (yaml_stdout,10) TRIM(keystring),    &
      &                                              S(n)%value,         &
@@ -1997,7 +2007,7 @@
       status=NoErr
 !
       IF (yaml_Error(self%extract(keystring, S),                        &
-     &               NoErr, 2023, MyFile)) RETURN
+     &               NoErr, 2033, MyFile)) RETURN
 !
 !  Allocate output structure.
 !
@@ -2067,7 +2077,7 @@
       status=NoErr
 !
       IF (yaml_Error(self%extract(keystring, S),                        &
-     &               NoErr, 2094, MyFile)) RETURN
+     &               NoErr, 2104, MyFile)) RETURN
 !
 !  Make sure that extracted value is a scalar.
 !
@@ -2076,7 +2086,7 @@
       IF (Nvalues.gt.1) THEN
         status=7
         yaml_ErrFlag=status
-        IF (yaml_Error(status, NoErr, 2103, MyFile)) THEN
+        IF (yaml_Error(status, NoErr, 2113, MyFile)) THEN
           IF (yaml_Master) WRITE (yaml_stdout,10) keystring, Nvalues,   &
      &                                            self%filename
           RETURN
@@ -2086,7 +2096,7 @@
 !
       ELSE
         READ (S(1)%value, *, IOSTAT=status, IOMSG=msg) value
-        IF (yaml_Error(status, NoErr, 2113, MyFile)) THEN
+        IF (yaml_Error(status, NoErr, 2123, MyFile)) THEN
           yaml_ErrFlag=5
           IF (yaml_Master) WRITE (yaml_stdout,20) TRIM(keystring),      &
      &                                            S(1)%value, TRIM(msg)
@@ -2147,7 +2157,7 @@
       status=NoErr
 !
       IF (yaml_Error(self%extract(keystring, S),                        &
-     &               NoErr, 2175, MyFile)) RETURN
+     &               NoErr, 2185, MyFile)) RETURN
 !
 !  Make sure that extracted value is a scalar.
 !
@@ -2156,7 +2166,7 @@
       IF (SIZE(value, DIM=1).lt.Nvalues) THEN
         status=7
         yaml_ErrFlag=status
-        IF (yaml_Error(status, NoErr, 2184, MyFile)) THEN
+        IF (yaml_Error(status, NoErr, 2194, MyFile)) THEN
           IF (yaml_Master) WRITE (yaml_stdout,10) keystring, Nvalues,   &
      &                                            SIZE(value, DIM=1),   &
      &                                            self%filename
@@ -2168,7 +2178,7 @@
 !
       DO i=1,Nvalues
         READ (S(i)%value, *, IOSTAT=status, IOMSG=msg) value(i)
-        IF (yaml_Error(status, NoErr, 2196, MyFile)) THEN
+        IF (yaml_Error(status, NoErr, 2206, MyFile)) THEN
           yaml_ErrFlag=5
           IF (yaml_Master) WRITE (yaml_stdout,20) TRIM(keystring),      &
      &                                            S(i)%value, TRIM(msg)
@@ -2228,7 +2238,7 @@
       status=NoErr
 !
       IF (yaml_Error(self%extract(keystring, S),                        &
-     &               NoErr, 2256, MyFile)) RETURN
+     &               NoErr, 2266, MyFile)) RETURN
 !
 !  Make sure that extracted value is a scalar.
 !
@@ -2237,7 +2247,7 @@
       IF (Nvalues.gt.1) THEN
         status=7
         yaml_ErrFlag=status
-        IF (yaml_Error(status, NoErr, 2265, MyFile)) THEN
+        IF (yaml_Error(status, NoErr, 2275, MyFile)) THEN
           IF (yaml_Master) WRITE (yaml_stdout,10) keystring, Nvalues,   &
      &                                            self%filename
           RETURN
@@ -2303,7 +2313,7 @@
       status=NoErr
 !
       IF (yaml_Error(self%extract(keystring, S),                        &
-     &               NoErr, 2331, MyFile)) RETURN
+     &               NoErr, 2341, MyFile)) RETURN
 !
 !  Make sure that extracted value is a scalar.
 !
@@ -2312,7 +2322,7 @@
       IF (SIZE(value, DIM=1).lt.Nvalues) THEN
         yaml_ErrFlag=7
         status=yaml_ErrFlag
-        IF (yaml_Error(yaml_ErrFlag, NoErr, 2340, MyFile)) THEN
+        IF (yaml_Error(yaml_ErrFlag, NoErr, 2350, MyFile)) THEN
           IF (yaml_Master) WRITE (yaml_stdout,10) keystring, Nvalues,   &
      &                                            SIZE(value, DIM=1),   &
      &                                            self%filename
@@ -2382,7 +2392,7 @@
       status=NoErr
 !
       IF (yaml_Error(self%extract(keystring, S),                        &
-     &               NoErr, 2411, MyFile)) RETURN
+     &               NoErr, 2421, MyFile)) RETURN
 !
 !  Make sure that extracted value is a scalar.
 !
@@ -2391,7 +2401,7 @@
       IF (Nvalues.gt.1) THEN
         yaml_ErrFlag=7
         status=yaml_ErrFlag
-        IF (yaml_Error(yaml_ErrFlag, NoErr, 2420, MyFile)) THEN
+        IF (yaml_Error(yaml_ErrFlag, NoErr, 2430, MyFile)) THEN
           IF (yaml_Master) WRITE (yaml_stdout,10) keystring, Nvalues,   &
      &                                            self%filename
           RETURN
@@ -2403,7 +2413,7 @@
         S(1)%value=ADJUSTL(S(1)%value)
         ie=LEN_TRIM(S(1)%value)
         READ (S(1)%value(1:ie), *, IOSTAT=status, IOMSG=msg) value
-        IF (yaml_Error(status, NoErr, 2432, MyFile)) THEN
+        IF (yaml_Error(status, NoErr, 2442, MyFile)) THEN
           yaml_ErrFlag=5
           IF (yaml_Master) WRITE (yaml_stdout,20) TRIM(keystring),      &
      &                                            S(1)%value, TRIM(msg)
@@ -2464,7 +2474,7 @@
       status=NoErr
 !
       IF (yaml_Error(self%extract(keystring, S),                        &
-     &               NoErr, 2494, MyFile)) RETURN
+     &               NoErr, 2504, MyFile)) RETURN
 !
 !  Make sure that extracted value is a scalar.
 !
@@ -2473,7 +2483,7 @@
       IF (SIZE(value, DIM=1).lt.Nvalues) THEN
         yaml_ErrFlag=7
         status=yaml_ErrFlag
-        IF (yaml_Error(yaml_ErrFlag, NoErr, 2503, MyFile)) THEN
+        IF (yaml_Error(yaml_ErrFlag, NoErr, 2513, MyFile)) THEN
           IF (yaml_Master) WRITE (yaml_stdout,10) keystring, Nvalues,   &
      &                                            SIZE(value, DIM=1),   &
      &                                            self%filename
@@ -2487,7 +2497,7 @@
         S(i)%value=ADJUSTL(S(i)%value)
         ie=LEN_TRIM(S(i)%value)
         READ (S(i)%value(1:ie), *, IOSTAT=status, IOMSG=msg) value(i)
-        IF (yaml_Error(status, NoErr, 2517, MyFile)) THEN
+        IF (yaml_Error(status, NoErr, 2527, MyFile)) THEN
           yaml_ErrFlag=5
           IF (yaml_Master) WRITE (yaml_stdout,20) TRIM(keystring),      &
      &                                            S(i)%value, TRIM(msg)
@@ -2548,7 +2558,7 @@
       status=NoErr
 !
       IF (yaml_Error(self%extract(keystring, S),                        &
-     &               NoErr, 2578, MyFile)) RETURN
+     &               NoErr, 2588, MyFile)) RETURN
 !
 !  Make sure that extracted value is a scalar.
 !
@@ -2557,7 +2567,7 @@
       IF (Nvalues.gt.1) THEN
         yaml_ErrFlag=7
         status=yaml_ErrFlag
-        IF (yaml_Error(yaml_ErrFlag, NoErr, 2587, MyFile)) THEN
+        IF (yaml_Error(yaml_ErrFlag, NoErr, 2597, MyFile)) THEN
           IF (yaml_Master) WRITE (yaml_stdout,10) keystring, Nvalues,   &
      &                                            self%filename
           RETURN
@@ -2619,7 +2629,7 @@
       status=NoErr
 !
       IF (yaml_Error(self%extract(keystring, S),                        &
-     &               NoErr, 2649, MyFile)) RETURN
+     &               NoErr, 2659, MyFile)) RETURN
 !
 !  Make sure that extracted value is a scalar.
 !
@@ -2628,7 +2638,7 @@
       IF (SIZE(value, DIM=1).lt.Nvalues) THEN
         yaml_ErrFlag=7
         status=yaml_ErrFlag
-        IF (yaml_Error(yaml_ErrFlag, NoErr, 2658, MyFile)) THEN
+        IF (yaml_Error(yaml_ErrFlag, NoErr, 2668, MyFile)) THEN
           IF (yaml_Master) WRITE (yaml_stdout,10) keystring, Nvalues,   &
      &                                            SIZE(value, DIM=1),   &
      &                                            self%filename

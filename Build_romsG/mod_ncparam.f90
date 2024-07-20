@@ -520,6 +520,7 @@
       integer, allocatable :: idefHIS(:)    ! history file
       integer, allocatable :: idefQCK(:)    ! quicksave file
       integer, allocatable :: idefTLM(:)    ! tangent file
+      integer, allocatable :: idefXTR(:)    ! extraction file
 !
 !  Output NetCDF variables IDs.
 !
@@ -860,6 +861,10 @@
         allocate ( idefTLM(Ngrids) )
         Dmem(1)=Dmem(1)+REAL(Ngrids,r8)
       END IF
+      IF (.not.allocated(idefXTR)) THEN
+        allocate ( idefXTR(Ngrids) )
+        Dmem(1)=Dmem(1)+REAL(Ngrids,r8)
+      END IF
       IF (.not.allocated(idTvar)) THEN
         allocate ( idTvar(MT) )
         Dmem(1)=Dmem(1)+REAL(MT,r8)
@@ -997,6 +1002,7 @@
       IF (allocated(idefHIS))     deallocate ( idefHIS )
       IF (allocated(idefQCK))     deallocate ( idefQCK )
       IF (allocated(idefTLM))     deallocate ( idefTLM )
+      IF (allocated(idefXTR))     deallocate ( idefXTR )
 !
       IF (allocated(idTvar))      deallocate ( idTvar )
       IF (allocated(idTrcD))      deallocate ( idTrcD )
@@ -1092,6 +1098,7 @@
         idefHIS(ng)=-1
         idefQCK(ng)=-1
         idefTLM(ng)=-1
+        idefXTR(ng)=-1
       END DO
 !
 !  Analytical files switch and names.
@@ -1179,7 +1186,7 @@
 !  assigned in the 'makefile' to the CPPFLAGS macro.
 !
       git_url="https://github.com/myroms/roms.git"
-      git_rev="b7a47408ba224a4703d9122c33995eee3c5ed06c"
+      git_rev="5ab6b489468437d33a8a3da0a6d124cfdf195791"
 !
       svn_url="https://www.myroms.org/svn/src/trunk"
       svn_rev="1219"
@@ -1198,7 +1205,7 @@
 !  Load I/O metadata information.
 !
         Ldone = io_metadata(FirstPass, Vinfo, scale, add_offset)
-        IF (FoundError(exit_flag, NoError, 1424, MyFile)) RETURN
+        IF (FoundError(exit_flag, NoError, 1431, MyFile)) RETURN
         IF (Ldone) EXIT
 !
 !  Determine staggered C-grid variable.
@@ -1675,6 +1682,18 @@
             idUVav=varid
           CASE ('idVVav')
             idVVav=varid
+          CASE ('idTvar(inert(i))')
+            load=.TRUE.
+          CASE ('idTbry(iwest,inert(i))')
+            load=.TRUE.
+          CASE ('idTbry(ieast,inert(i))')
+            load=.TRUE.
+          CASE ('idTbry(isouth,inert(i))')
+            load=.TRUE.
+          CASE ('idTbry(inorth,inert(i))')
+            load=.TRUE.
+          CASE ('idRtrc(inert(i))')
+            load=.TRUE.
           CASE ('id2dPV')
             id2dPV=varid
           CASE ('id2dRV')
@@ -1810,6 +1829,155 @@
             Iinfo(1,varid,ng)=gtype
             Fscale(varid,ng)=scale
           END DO
+!
+!  Adjust information for all inert passive tracers.
+!
+          SELECT CASE (TRIM(ADJUSTL(Vinfo(8))))
+            CASE ('idTvar(inert(i))')
+              IF (NPT.gt.0) THEN
+                varid=varid-1
+                DO i=1,NPT
+                  varid=varid+1
+                  idTvar(inert(i))=varid
+                  DO ng=1,Ngrids
+                    Fscale(varid,ng)=scale
+                    Iinfo(1,varid,ng)=gtype
+                  END DO
+                  WRITE (Vname(1,varid),'(a,i2.2)')                     &
+     &                  TRIM(ADJUSTL(Vinfo(1))), i
+                  WRITE (Vname(2,varid),'(a,a,i2.2)')                   &
+     &                  TRIM(ADJUSTL(Vinfo(2))), ', type ', i
+                  WRITE (Vname(3,varid),'(a)')                          &
+     &                  TRIM(ADJUSTL(Vinfo(3)))
+                  WRITE (Vname(4,varid),'(a,i2.2)')                     &
+     &                  TRIM(ADJUSTL(Vinfo(4))), i
+                  WRITE (Vname(5,varid),'(a)')                          &
+     &                  TRIM(ADJUSTL(Vinfo(5)))
+                  WRITE (Vname(6,varid),'(a,i2.2)')                     &
+     &                  TRIM(ADJUSTL(Vinfo(6))), i
+                END DO
+              END IF
+            CASE ('idTbry(iwest,inert(i))')
+              IF (NPT.gt.0) THEN
+                varid=varid-1
+                DO i=1,NPT
+                  varid=varid+1
+                  idTbry(iwest,inert(i))=varid
+                  DO ng=1,Ngrids
+                    Fscale(varid,ng)=scale
+                    Iinfo(1,varid,ng)=gtype
+                  END DO
+                  WRITE (Vname(1,varid),'(a,i2.2)')                     &
+     &                  TRIM(ADJUSTL(Vinfo(1))), i
+                  WRITE (Vname(2,varid),'(a,a,i2.2)')                   &
+     &                  TRIM(ADJUSTL(Vinfo(2))), ', type ', i
+                  WRITE (Vname(3,varid),'(a)')                          &
+     &                  TRIM(ADJUSTL(Vinfo(3)))
+                  WRITE (Vname(4,varid),'(a,i2.2,a)')                   &
+     &                  TRIM(ADJUSTL(Vinfo(1))), i, ' western_boundary'
+                  WRITE (Vname(5,varid),'(a)')                          &
+     &                  TRIM(ADJUSTL(Vinfo(5)))
+                  WRITE (Vname(6,varid),'(a,i2.2)')                     &
+     &                  TRIM(ADJUSTL(Vinfo(6))), i
+                END DO
+              END IF
+            CASE ('idTbry(ieast,inert(i))')
+              IF (NPT.gt.0) THEN
+                varid=varid-1
+                DO i=1,NPT
+                  varid=varid+1
+                  idTbry(ieast,inert(i))=varid
+                  DO ng=1,Ngrids
+                    Fscale(varid,ng)=scale
+                    Iinfo(1,varid,ng)=gtype
+                  END DO
+                  WRITE (Vname(1,varid),'(a,i2.2)')                     &
+     &                  TRIM(ADJUSTL(Vinfo(1))), i
+                  WRITE (Vname(2,varid),'(a,a,i2.2)')                   &
+     &                  TRIM(ADJUSTL(Vinfo(2))), ', type ', i
+                  WRITE (Vname(3,varid),'(a)')                          &
+     &                  TRIM(ADJUSTL(Vinfo(3)))
+                  WRITE (Vname(4,varid),'(a,i2.2,a)')                   &
+     &                  TRIM(ADJUSTL(Vinfo(1))), i, ' eastern_boundary'
+                  WRITE (Vname(5,varid),'(a)')                          &
+     &                  TRIM(ADJUSTL(Vinfo(5)))
+                  WRITE (Vname(6,varid),'(a,i2.2)')                     &
+     &                  TRIM(ADJUSTL(Vinfo(6))), i
+                END DO
+              END IF
+            CASE ('idTbry(isouth,inert(i))')
+              IF (NPT.gt.0) THEN
+                varid=varid-1
+                DO i=1,NPT
+                  varid=varid+1
+                  idTbry(isouth,inert(i))=varid
+                  DO ng=1,Ngrids
+                    Fscale(varid,ng)=scale
+                    Iinfo(1,varid,ng)=gtype
+                  END DO
+                  WRITE (Vname(1,varid),'(a,i2.2)')                     &
+     &                  TRIM(ADJUSTL(Vinfo(1))), i
+                  WRITE (Vname(2,varid),'(a,a,i2.2)')                   &
+     &                  TRIM(ADJUSTL(Vinfo(2))), ', type ', i
+                  WRITE (Vname(3,varid),'(a)')                          &
+     &                  TRIM(ADJUSTL(Vinfo(3)))
+                  WRITE (Vname(4,varid),'(a,i2.2,a)')                   &
+     &                  TRIM(ADJUSTL(Vinfo(1))), i, ' southern_boundary'
+                  WRITE (Vname(5,varid),'(a)')                          &
+     &                  TRIM(ADJUSTL(Vinfo(5)))
+                  WRITE (Vname(6,varid),'(a,i2.2)')                     &
+     &                  TRIM(ADJUSTL(Vinfo(6))), i
+               END DO
+              END IF
+            CASE ('idTbry(inorth,inert(i))')
+              IF (NPT.gt.0) THEN
+                varid=varid-1
+                DO i=1,NPT
+                  varid=varid+1
+                  idTbry(inorth,inert(i))=varid
+                  DO ng=1,Ngrids
+                    Fscale(varid,ng)=scale
+                    Iinfo(1,varid,ng)=gtype
+                  END DO
+                  WRITE (Vname(1,varid),'(a,i2.2)')                     &
+     &                  TRIM(ADJUSTL(Vinfo(1))), i
+                  WRITE (Vname(2,varid),'(a,a,i2.2)')                   &
+     &                  TRIM(ADJUSTL(Vinfo(2))), ', type ', i
+                  WRITE (Vname(3,varid),'(a)')                          &
+     &                  TRIM(ADJUSTL(Vinfo(3)))
+                  WRITE (Vname(4,varid),'(a,i2.2,a)')                   &
+     &                  TRIM(ADJUSTL(Vinfo(1))), i, ' northern_boundary'
+                  WRITE (Vname(5,varid),'(a)')                          &
+     &                  TRIM(ADJUSTL(Vinfo(5)))
+                  WRITE (Vname(6,varid),'(a,i2.2)')                     &
+     &                  TRIM(ADJUSTL(Vinfo(6))), i
+                END DO
+              END IF
+            CASE ('idRtrc(inert(i))')
+              IF (NPT.gt.0) THEN
+                varid=varid-1
+                DO i=1,NPT
+                  varid=varid+1
+                  idRtrc(inert(i))=varid
+                  DO ng=1,Ngrids
+                    Fscale(varid,ng)=scale
+                    Iinfo(1,varid,ng)=gtype
+                  END DO
+                  WRITE (Vname(1,varid),'(a,i2.2)')                     &
+     &                  TRIM(ADJUSTL(Vinfo(1))), i
+                  WRITE (Vname(2,varid),'(a,a,i2.2)')                   &
+     &                  TRIM(ADJUSTL(Vinfo(2))), ', type ', i
+                  WRITE (Vname(3,varid),'(a)')                          &
+     &                  TRIM(ADJUSTL(Vinfo(3)))
+                  WRITE (Vname(4,varid),'(a,i2.2)')                     &
+     &                  TRIM(ADJUSTL(Vinfo(4))), i
+                  WRITE (Vname(5,varid),'(a)')                          &
+     &                  TRIM(ADJUSTL(Vinfo(5)))
+                  WRITE (Vname(6,varid),'(a,i2.2)')                     &
+     &                  TRIM(ADJUSTL(Vinfo(6))), i
+                END DO
+              END IF
+          END SELECT
 !
 !  Adjust information for tracer diagnostic variables.  This needs to be
 !  done last because it needs all the tracers variable names.

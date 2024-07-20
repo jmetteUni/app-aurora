@@ -164,7 +164,8 @@
 !
       CONTAINS
 !
-      SUBROUTINE allocate_grid (ng, LBi, UBi, LBj, UBj, LBij, UBij)
+      SUBROUTINE allocate_grid (ng, Extract_Flag,                       &
+     &                          LBi, UBi, LBj, UBj, LBij, UBij)
 !
 !=======================================================================
 !                                                                      !
@@ -177,9 +178,12 @@
 !
 !  Local variable declarations.
 !
-      integer, intent(in) :: ng, LBi, UBi, LBj, UBj, LBij, UBij
+      integer, intent(in) :: ng, Extract_Flag
+      integer, intent(in) :: LBi, UBi, LBj, UBj, LBij, UBij
 !
 !  Local variable declarations.
+!
+      integer  :: my_size
 !
       real(r8) :: size2d
 !

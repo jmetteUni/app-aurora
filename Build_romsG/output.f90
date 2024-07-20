@@ -56,7 +56,7 @@
 !  Turn on output data time wall clock.
 !-----------------------------------------------------------------------
 !
-      CALL wclock_on (ng, iNLM, 8, 99, MyFile)
+      CALL wclock_on (ng, iNLM, 8, 105, MyFile)
 !
 !-----------------------------------------------------------------------
 !  If appropriate, process nonlinear history NetCDF file.
@@ -122,7 +122,7 @@
               END IF
               exit_flag=4
               IF (FoundError(exit_flag, NoError,                        &
-     &                       174, MyFile)) RETURN
+     &                       180, MyFile)) RETURN
             END IF
             Fcount=HIS(ng)%load
             HIS(ng)%Nrec(Fcount)=0
@@ -133,7 +133,7 @@
             HIS(ng)%files(Fcount)=TRIM(HIS(ng)%name)
             CALL close_file (ng, iNLM, HIS(ng), HIS(ng)%name, Lupdate)
             CALL def_his (ng, NewFile)
-            IF (FoundError(exit_flag, NoError, 187, MyFile)) RETURN
+            IF (FoundError(exit_flag, NoError, 193, MyFile)) RETURN
           END IF
           IF ((iic(ng).eq.ntstart(ng)).and.(nrrec(ng).ne.0)) THEN
             LwrtHIS(ng)=.FALSE.                 ! avoid writing initial
@@ -143,7 +143,7 @@
         ELSE
           IF (iic(ng).eq.ntstart(ng)) THEN
             CALL def_his (ng, ldefout(ng))
-            IF (FoundError(exit_flag, NoError, 197, MyFile)) RETURN
+            IF (FoundError(exit_flag, NoError, 203, MyFile)) RETURN
             LwrtHIS(ng)=.TRUE.
             LdefHIS(ng)=.FALSE.
           END IF
@@ -160,12 +160,12 @@
             IF (nrrec(ng).eq.0.or.iic(ng).ne.ntstart(ng)) THEN
               CALL wrt_his (ng, tile)
             END IF
-            IF (FoundError(exit_flag, NoError, 214, MyFile)) RETURN
+            IF (FoundError(exit_flag, NoError, 220, MyFile)) RETURN
           END IF
         ELSE
           IF (MOD(iic(ng)-1,nHIS(ng)).eq.0) THEN
             CALL wrt_his (ng, tile)
-            IF (FoundError(exit_flag, NoError, 219, MyFile)) RETURN
+            IF (FoundError(exit_flag, NoError, 225, MyFile)) RETURN
           END IF
         END IF
       END IF
@@ -219,7 +219,7 @@
               END IF
               exit_flag=4
               IF (FoundError(exit_flag, NoError,                        &
-     &                       273, MyFile)) RETURN
+     &                       381, MyFile)) RETURN
             END IF
             Fcount=QCK(ng)%load
             QCK(ng)%Nrec(Fcount)=0
@@ -230,7 +230,7 @@
             QCK(ng)%files(Fcount)=TRIM(QCK(ng)%name)
             CALL close_file (ng, iNLM, QCK(ng), QCK(ng)%name, Lupdate)
             CALL def_quick (ng, NewFile)
-            IF (FoundError(exit_flag, NoError, 286, MyFile)) RETURN
+            IF (FoundError(exit_flag, NoError, 394, MyFile)) RETURN
           END IF
           IF ((iic(ng).eq.ntstart(ng)).and.(nrrec(ng).ne.0)) THEN
             LwrtQCK(ng)=.FALSE.                 ! avoid writing initial
@@ -240,7 +240,7 @@
         ELSE
           IF (iic(ng).eq.ntstart(ng)) THEN
             CALL def_quick (ng, ldefout(ng))
-            IF (FoundError(exit_flag, NoError, 296, MyFile)) RETURN
+            IF (FoundError(exit_flag, NoError, 404, MyFile)) RETURN
             LwrtQCK(ng)=.TRUE.
             LdefQCK(ng)=.FALSE.
           END IF
@@ -257,12 +257,12 @@
             IF (nrrec(ng).eq.0.or.iic(ng).ne.ntstart(ng)) THEN
               CALL wrt_quick (ng, tile)
             END IF
-            IF (FoundError(exit_flag, NoError, 313, MyFile)) RETURN
+            IF (FoundError(exit_flag, NoError, 421, MyFile)) RETURN
           END IF
         ELSE
           IF (MOD(iic(ng)-1,nQCK(ng)).eq.0) THEN
             CALL wrt_quick (ng, tile)
-            IF (FoundError(exit_flag, NoError, 318, MyFile)) RETURN
+            IF (FoundError(exit_flag, NoError, 426, MyFile)) RETURN
           END IF
         END IF
       END IF
@@ -322,7 +322,7 @@
               END IF
               exit_flag=4
               IF (FoundError(exit_flag, NoError,                        &
-     &                       380, MyFile)) RETURN
+     &                       488, MyFile)) RETURN
             END IF
             Fcount=AVG(ng)%load
             AVG(ng)%Nrec(Fcount)=0
@@ -333,13 +333,13 @@
             AVG(ng)%files(Fcount)=TRIM(AVG(ng)%name)
             CALL close_file (ng, iNLM, AVG(ng), AVG(ng)%name, Lupdate)
             CALL def_avg (ng, Newfile)
-            IF (FoundError(exit_flag, NoError, 393, MyFile)) RETURN
+            IF (FoundError(exit_flag, NoError, 501, MyFile)) RETURN
             LwrtAVG(ng)=.TRUE.
           END IF
         ELSE
           IF (iic(ng).eq.ntstart(ng)) THEN
             CALL def_avg (ng, ldefout(ng))
-            IF (FoundError(exit_flag, NoError, 399, MyFile)) RETURN
+            IF (FoundError(exit_flag, NoError, 507, MyFile)) RETURN
             LwrtAVG(ng)=.TRUE.
             LdefAVG(ng)=.FALSE.
           END IF
@@ -353,7 +353,7 @@
      &       (MOD(iic(ng)-1,nAVG(ng)).eq.0)).or.                        &
      &      ((iic(ng).ge.ntsAVG(ng)).and.(nAVG(ng).eq.1))) THEN
           CALL wrt_avg (ng, tile)
-          IF (FoundError(exit_flag, NoError, 413, MyFile)) RETURN
+          IF (FoundError(exit_flag, NoError, 521, MyFile)) RETURN
         END IF
       END IF
 !
@@ -412,7 +412,7 @@
               END IF
               exit_flag=4
               IF (FoundError(exit_flag, NoError,                        &
-     &                       479, MyFile)) RETURN
+     &                       587, MyFile)) RETURN
             END IF
             Fcount=DIA(ng)%load
             DIA(ng)%Nrec(Fcount)=0
@@ -423,13 +423,13 @@
             DIA(ng)%files(Fcount)=TRIM(DIA(ng)%name)
             CALL close_file (ng, iNLM, DIA(ng), DIA(ng)%name, Lupdate)
             CALL def_diags (ng, Newfile)
-            IF (FoundError(exit_flag, NoError, 492, MyFile)) RETURN
+            IF (FoundError(exit_flag, NoError, 600, MyFile)) RETURN
             LwrtDIA(ng)=.TRUE.
           END IF
         ELSE
           IF (iic(ng).eq.ntstart(ng)) THEN
             CALL def_diags (ng, ldefout(ng))
-            IF (FoundError(exit_flag, NoError, 498, MyFile)) RETURN
+            IF (FoundError(exit_flag, NoError, 606, MyFile)) RETURN
             LwrtDIA(ng)=.TRUE.
             LdefDIA(ng)=.FALSE.
           END IF
@@ -443,7 +443,7 @@
      &       (MOD(iic(ng)-1,nDIA(ng)).eq.0)).or.                        &
      &      ((iic(ng).ge.ntsDIA(ng)).and.(nDIA(ng).eq.1))) THEN
           CALL wrt_diags (ng, tile)
-          IF (FoundError(exit_flag, NoError, 512, MyFile)) RETURN
+          IF (FoundError(exit_flag, NoError, 620, MyFile)) RETURN
         END IF
       END IF
 !
@@ -456,7 +456,7 @@
 !
       IF (LdefRST(ng)) THEN
         CALL def_rst (ng)
-        IF (FoundError(exit_flag, NoError, 586, MyFile)) RETURN
+        IF (FoundError(exit_flag, NoError, 694, MyFile)) RETURN
         LwrtRST(ng)=.TRUE.
         LdefRST(ng)=.FALSE.
       END IF
@@ -467,7 +467,7 @@
         IF ((iic(ng).gt.ntstart(ng)).and.                               &
      &      (MOD(iic(ng)-1,nRST(ng)).eq.0)) THEN
           CALL wrt_rst (ng, tile)
-          IF (FoundError(exit_flag, NoError, 597, MyFile)) RETURN
+          IF (FoundError(exit_flag, NoError, 705, MyFile)) RETURN
         END IF
       END IF
 !
@@ -475,7 +475,7 @@
 !  Turn off output data time wall clock.
 !-----------------------------------------------------------------------
 !
-      CALL wclock_off (ng, iNLM, 8, 637, MyFile)
+      CALL wclock_off (ng, iNLM, 8, 745, MyFile)
 !
  10   FORMAT (/,' OUTPUT - multi-file counter ',a,i0,                   &
      &          ', is greater than Nfiles = ',i0,1x,'dimension',        &

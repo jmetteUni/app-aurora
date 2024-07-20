@@ -131,7 +131,7 @@
 !  Turn on time clocks.
 !-----------------------------------------------------------------------
 !
-      CALL wclock_on (ng, model, 72, 147, MyFile)
+      CALL wclock_on (ng, model, 72, 155, MyFile)
 !
 !-----------------------------------------------------------------------
 !  Set distributed-memory communicator handle (context ID).
@@ -153,7 +153,7 @@
 !  Turn off time clocks.
 !-----------------------------------------------------------------------
 !
-      CALL wclock_off (ng, model, 72, 175, MyFile)
+      CALL wclock_off (ng, model, 72, 183, MyFile)
 !
       RETURN
       END SUBROUTINE mp_barrier
@@ -198,7 +198,7 @@
 !  Turn on time clocks.
 !-----------------------------------------------------------------------
 !
-      CALL wclock_on (ng, model, 64, 405, MyFile)
+      CALL wclock_on (ng, model, 64, 600, MyFile)
 !
 !-----------------------------------------------------------------------
 !  Set distributed-memory communicator handle (context ID).
@@ -230,7 +230,7 @@
 !  Turn off time clocks.
 !-----------------------------------------------------------------------
 !
-      CALL wclock_off (ng, model, 64, 443, MyFile)
+      CALL wclock_off (ng, model, 64, 638, MyFile)
 !
       RETURN
       END SUBROUTINE mp_bcastf_0d
@@ -275,7 +275,7 @@
 !  Turn on time clocks.
 !-----------------------------------------------------------------------
 !
-      CALL wclock_on (ng, model, 64, 493, MyFile)
+      CALL wclock_on (ng, model, 64, 688, MyFile)
 !
 !-----------------------------------------------------------------------
 !  Set distributed-memory communicator handle (context ID).
@@ -307,7 +307,7 @@
 !  Turn off time clocks.
 !-----------------------------------------------------------------------
 !
-      CALL wclock_off (ng, model, 64, 532, MyFile)
+      CALL wclock_off (ng, model, 64, 727, MyFile)
 !
       RETURN
       END SUBROUTINE mp_bcastf_1d
@@ -353,7 +353,7 @@
 !  Turn on time clocks.
 !-----------------------------------------------------------------------
 !
-      CALL wclock_on (ng, model, 64, 584, MyFile)
+      CALL wclock_on (ng, model, 64, 779, MyFile)
 !
 !-----------------------------------------------------------------------
 !  Set distributed-memory communicator handle (context ID).
@@ -387,7 +387,7 @@
 !  Turn off time clocks.
 !-----------------------------------------------------------------------
 !
-      CALL wclock_off (ng, model, 64, 625, MyFile)
+      CALL wclock_off (ng, model, 64, 820, MyFile)
 !
       RETURN
       END SUBROUTINE mp_bcastf_2d
@@ -433,7 +433,7 @@
 !  Turn on time clocks.
 !-----------------------------------------------------------------------
 !
-      CALL wclock_on (ng, model, 64, 677, MyFile)
+      CALL wclock_on (ng, model, 64, 872, MyFile)
 !
 !-----------------------------------------------------------------------
 !  Set distributed-memory communicator handle (context ID).
@@ -468,7 +468,7 @@
 !  Turn off time clocks.
 !-----------------------------------------------------------------------
 !
-      CALL wclock_off (ng, model, 64, 719, MyFile)
+      CALL wclock_off (ng, model, 64, 914, MyFile)
 !
       RETURN
       END SUBROUTINE mp_bcastf_3d
@@ -513,7 +513,7 @@
 !  Turn on time clocks.
 !-----------------------------------------------------------------------
 !
-      CALL wclock_on (ng, model, 64, 770, MyFile)
+      CALL wclock_on (ng, model, 64, 965, MyFile)
 !
 !-----------------------------------------------------------------------
 !  Set distributed-memory communicator handle (context ID).
@@ -549,7 +549,7 @@
 !  Turn off time clocks.
 !-----------------------------------------------------------------------
 !
-      CALL wclock_off (ng, model, 64, 813, MyFile)
+      CALL wclock_off (ng, model, 64, 1008, MyFile)
 !
       RETURN
       END SUBROUTINE mp_bcastf_4d
@@ -594,7 +594,7 @@
 !-----------------------------------------------------------------------
 !
       IF (Lwclock) THEN
-        CALL wclock_on (ng, model, 64, 864, MyFile)
+        CALL wclock_on (ng, model, 64, 1059, MyFile)
       END IF
 !
 !-----------------------------------------------------------------------
@@ -628,7 +628,7 @@
 !-----------------------------------------------------------------------
 !
       IF (Lwclock) THEN
-        CALL wclock_off (ng, model, 64, 904, MyFile)
+        CALL wclock_off (ng, model, 64, 1099, MyFile)
       END IF
 !
       RETURN
@@ -673,7 +673,7 @@
 !  Turn on time clocks.
 !-----------------------------------------------------------------------
 !
-      CALL wclock_on (ng, model, 64, 955, MyFile)
+      CALL wclock_on (ng, model, 64, 1150, MyFile)
 !
 !-----------------------------------------------------------------------
 !  Set distributed-memory communicator handle (context ID).
@@ -705,7 +705,7 @@
 !  Turn off time clocks.
 !-----------------------------------------------------------------------
 !
-      CALL wclock_off (ng, model, 64, 994, MyFile)
+      CALL wclock_off (ng, model, 64, 1189, MyFile)
 !
       RETURN
       END SUBROUTINE mp_bcasti_1d
@@ -750,7 +750,7 @@
 !  Turn on time clocks.
 !-----------------------------------------------------------------------
 !
-      CALL wclock_on (ng, model, 64, 1045, MyFile)
+      CALL wclock_on (ng, model, 64, 1240, MyFile)
 !
 !-----------------------------------------------------------------------
 !  Set distributed-memory communicator handle (context ID).
@@ -784,7 +784,7 @@
 !  Turn off time clocks.
 !-----------------------------------------------------------------------
 !
-      CALL wclock_off (ng, model, 64, 1086, MyFile)
+      CALL wclock_off (ng, model, 64, 1281, MyFile)
 !
       RETURN
       END SUBROUTINE mp_bcasti_2d
@@ -829,7 +829,7 @@
 !  Turn on time clocks.
 !-----------------------------------------------------------------------
 !
-      CALL wclock_on (ng, model, 64, 1136, MyFile)
+      CALL wclock_on (ng, model, 64, 1331, MyFile)
 !
 !-----------------------------------------------------------------------
 !  Set distributed-memory communicator handle (context ID).
@@ -861,7 +861,7 @@
 !  Turn off time clocks.
 !-----------------------------------------------------------------------
 !
-      CALL wclock_off (ng, model, 64, 1174, MyFile)
+      CALL wclock_off (ng, model, 64, 1369, MyFile)
 !
       RETURN
       END SUBROUTINE mp_bcastl_0d
@@ -906,7 +906,7 @@
 !  Turn on time clocks.
 !-----------------------------------------------------------------------
 !
-      CALL wclock_on (ng, model, 64, 1224, MyFile)
+      CALL wclock_on (ng, model, 64, 1419, MyFile)
 !
 !-----------------------------------------------------------------------
 !  Set distributed-memory communicator handle (context ID).
@@ -938,7 +938,7 @@
 !  Turn off time clocks.
 !-----------------------------------------------------------------------
 !
-      CALL wclock_off (ng, model, 64, 1263, MyFile)
+      CALL wclock_off (ng, model, 64, 1458, MyFile)
 !
       RETURN
       END SUBROUTINE mp_bcastl_1d
@@ -984,7 +984,7 @@
 !  Turn on time clocks.
 !-----------------------------------------------------------------------
 !
-      CALL wclock_on (ng, model, 64, 1314, MyFile)
+      CALL wclock_on (ng, model, 64, 1509, MyFile)
 !
 !-----------------------------------------------------------------------
 !  Set distributed-memory communicator handle (context ID).
@@ -1018,7 +1018,7 @@
 !  Turn off time clocks.
 !-----------------------------------------------------------------------
 !
-      CALL wclock_off (ng, model, 64, 1355, MyFile)
+      CALL wclock_off (ng, model, 64, 1550, MyFile)
 !
       RETURN
       END SUBROUTINE mp_bcastl_2d
@@ -1063,7 +1063,7 @@
 !-----------------------------------------------------------------------
 !
       IF (Lwclock) THEN
-        CALL wclock_on (ng, model, 64, 1405, MyFile)
+        CALL wclock_on (ng, model, 64, 1600, MyFile)
       END IF
 !
 !-----------------------------------------------------------------------
@@ -1097,7 +1097,7 @@
 !-----------------------------------------------------------------------
 !
       IF (Lwclock) THEN
-        CALL wclock_off (ng, model, 64, 1445, MyFile)
+        CALL wclock_off (ng, model, 64, 1640, MyFile)
       END IF
 !
       RETURN
@@ -1142,7 +1142,7 @@
 !  Turn on time clocks.
 !-----------------------------------------------------------------------
 !
-      CALL wclock_on (ng, model, 64, 1495, MyFile)
+      CALL wclock_on (ng, model, 64, 1690, MyFile)
 !
 !-----------------------------------------------------------------------
 !  Set distributed-memory communicator handle (context ID).
@@ -1175,7 +1175,7 @@
 !  Turn off time clocks.
 !-----------------------------------------------------------------------
 !
-      CALL wclock_off (ng, model, 64, 1535, MyFile)
+      CALL wclock_off (ng, model, 64, 1730, MyFile)
 !
       RETURN
       END SUBROUTINE mp_bcasts_1d
@@ -1220,7 +1220,7 @@
 !  Turn on time clocks.
 !-----------------------------------------------------------------------
 !
-      CALL wclock_on (ng, model, 64, 1585, MyFile)
+      CALL wclock_on (ng, model, 64, 1780, MyFile)
 !
 !-----------------------------------------------------------------------
 !  Set distributed-memory communicator handle (context ID).
@@ -1254,7 +1254,7 @@
 !  Turn off time clocks.
 !-----------------------------------------------------------------------
 !
-      CALL wclock_off (ng, model, 64, 1626, MyFile)
+      CALL wclock_off (ng, model, 64, 1821, MyFile)
 !
       RETURN
       END SUBROUTINE mp_bcasts_2d
@@ -1299,7 +1299,7 @@
 !  Turn on time clocks.
 !-----------------------------------------------------------------------
 !
-      CALL wclock_on (ng, model, 64, 1676, MyFile)
+      CALL wclock_on (ng, model, 64, 1871, MyFile)
 !
 !-----------------------------------------------------------------------
 !  Set distributed-memory communicator handle (context ID).
@@ -1334,7 +1334,7 @@
 !  Turn off time clocks.
 !-----------------------------------------------------------------------
 !
-      CALL wclock_off (ng, model, 64, 1718, MyFile)
+      CALL wclock_off (ng, model, 64, 1913, MyFile)
 !
       RETURN
       END SUBROUTINE mp_bcasts_3d
@@ -1380,7 +1380,7 @@
 !  Turn on time clocks.
 !-----------------------------------------------------------------------
 !
-      CALL wclock_on (ng, model, 64, 1769, MyFile)
+      CALL wclock_on (ng, model, 64, 1964, MyFile)
 !
 !-----------------------------------------------------------------------
 !  Set distributed-memory communicator handle (context ID).
@@ -1499,7 +1499,7 @@
 !  Turn off time clocks.
 !-----------------------------------------------------------------------
 !
-      CALL wclock_off (ng, model, 64, 1898, MyFile)
+      CALL wclock_off (ng, model, 64, 2093, MyFile)
 !
       RETURN
       END SUBROUTINE mp_bcast_struc
@@ -1562,7 +1562,7 @@
 !  Turn on time clocks.
 !-----------------------------------------------------------------------
 !
-      CALL wclock_on (ng, model, 68, 1971, MyFile)
+      CALL wclock_on (ng, model, 68, 2166, MyFile)
 !
 !-----------------------------------------------------------------------
 !  Pack boundary data.  Zero-out boundary array except points updated
@@ -1631,7 +1631,7 @@
 !  Turn off time clocks.
 !-----------------------------------------------------------------------
 !
-      CALL wclock_off (ng, model, 68, 2073, MyFile)
+      CALL wclock_off (ng, model, 68, 2268, MyFile)
 !
       RETURN
       END SUBROUTINE mp_boundary
@@ -1685,7 +1685,7 @@
 !  Turn on time clocks.
 !-----------------------------------------------------------------------
 !
-      CALL wclock_on (ng, model, 70, 2140, MyFile)
+      CALL wclock_on (ng, model, 70, 2335, MyFile)
 !
 !-----------------------------------------------------------------------
 !  Set distributed-memory communicator handle (context ID).
@@ -1748,7 +1748,7 @@
 !  Turn off time clocks.
 !-----------------------------------------------------------------------
 !
-      CALL wclock_off (ng, model, 70, 2302, MyFile)
+      CALL wclock_off (ng, model, 70, 2497, MyFile)
 !
  10   FORMAT (/,' MP_ASSEMBLEF_1D - inconsistent array size, Npts = ',  &
      &        i10,2x,i10,/,19x,'number of addressed array elements ',   &
@@ -1812,7 +1812,7 @@
 !  Turn on time clocks.
 !-----------------------------------------------------------------------
 !
-      CALL wclock_on (ng, model, 70, 2382, MyFile)
+      CALL wclock_on (ng, model, 70, 2577, MyFile)
 !
 !-----------------------------------------------------------------------
 !  Set distributed-memory communicator handle (context ID).
@@ -1878,7 +1878,7 @@
 !  Turn off time clocks.
 !-----------------------------------------------------------------------
 !
-      CALL wclock_off (ng, model, 70, 2558, MyFile)
+      CALL wclock_off (ng, model, 70, 2753, MyFile)
 !
  10   FORMAT (/,' MP_ASSEMBLEF_2D - inconsistent array size, Npts = ',  &
      &        i10,2x,i10,/,19x,'number of addressed array elements ',   &
@@ -1941,7 +1941,7 @@
 !  Turn on time clocks.
 !-----------------------------------------------------------------------
 !
-      CALL wclock_on (ng, model, 70, 2638, MyFile)
+      CALL wclock_on (ng, model, 70, 2833, MyFile)
 !
 !-----------------------------------------------------------------------
 !  Set distributed-memory communicator handle (context ID).
@@ -2008,7 +2008,7 @@
 !  Turn off time clocks.
 !-----------------------------------------------------------------------
 !
-      CALL wclock_off (ng, model, 70, 2815, MyFile)
+      CALL wclock_off (ng, model, 70, 3010, MyFile)
 !
  10   FORMAT (/,' MP_ASSEMBLEF_3D - inconsistent array size, Npts = ',  &
      &        i10,2x,i10,/,19x,'number of addressed array elements ',   &
@@ -2069,7 +2069,7 @@
 !  Turn on time clocks.
 !-----------------------------------------------------------------------
 !
-      CALL wclock_on (ng, model, 70, 2891, MyFile)
+      CALL wclock_on (ng, model, 70, 3086, MyFile)
 !
 !-----------------------------------------------------------------------
 !  Set distributed-memory communicator handle (context ID).
@@ -2132,7 +2132,7 @@
 !  Turn off time clocks.
 !-----------------------------------------------------------------------
 !
-      CALL wclock_off (ng, model, 70, 3053, MyFile)
+      CALL wclock_off (ng, model, 70, 3248, MyFile)
 !
  10   FORMAT (/,' MP_ASSEMBLEI_1D - inconsistent array size, Npts = ',  &
      &        i10,2x,i10,/,19x,'number of addressed array elements ',   &
@@ -2193,7 +2193,7 @@
 !  Turn on time clocks.
 !-----------------------------------------------------------------------
 !
-      CALL wclock_on (ng, model, 70, 3132, MyFile)
+      CALL wclock_on (ng, model, 70, 3327, MyFile)
 !
 !-----------------------------------------------------------------------
 !  Set distributed-memory communicator handle (context ID).
@@ -2259,7 +2259,7 @@
 !  Turn off time clocks.
 !-----------------------------------------------------------------------
 !
-      CALL wclock_off (ng, model, 70, 3309, MyFile)
+      CALL wclock_off (ng, model, 70, 3504, MyFile)
 !
  10   FORMAT (/,' MP_ASSEMBLEI_2D - inconsistent array size, Npts = ',  &
      &        i10,2x,i10,/,19x,'number of addressed array elements ',   &
@@ -2321,7 +2321,7 @@
 !  Turn on time clocks.
 !-----------------------------------------------------------------------
 !
-      CALL wclock_on (ng, model, 69, 3384, MyFile)
+      CALL wclock_on (ng, model, 69, 3579, MyFile)
 !
 !-----------------------------------------------------------------------
 !  Set distributed-memory communicator handle (context ID).
@@ -2366,7 +2366,7 @@
 !  Turn off time clocks.
 !-----------------------------------------------------------------------
 !
-      CALL wclock_off (ng, model, 69, 3528, MyFile)
+      CALL wclock_off (ng, model, 69, 3723, MyFile)
 !
       RETURN
       END SUBROUTINE mp_collect_f
@@ -2418,7 +2418,7 @@
 !  Turn on time clocks.
 !-----------------------------------------------------------------------
 !
-      CALL wclock_on (ng, model, 69, 3595, MyFile)
+      CALL wclock_on (ng, model, 69, 3790, MyFile)
 !
 !-----------------------------------------------------------------------
 !  Set distributed-memory communicator handle (context ID).
@@ -2463,7 +2463,7 @@
 !  Turn off time clocks.
 !-----------------------------------------------------------------------
 !
-      CALL wclock_off (ng, model, 69, 3739, MyFile)
+      CALL wclock_off (ng, model, 69, 3934, MyFile)
 !
       RETURN
       END SUBROUTINE mp_collect_i
@@ -2542,7 +2542,7 @@
 !  Turn on time clocks.
 !-----------------------------------------------------------------------
 !
-      CALL wclock_on (ng, model, 66, 3835, MyFile)
+      CALL wclock_on (ng, model, 66, 4030, MyFile)
 !
 !-----------------------------------------------------------------------
 !  Set horizontal starting and ending indices for parallel domain
@@ -2716,7 +2716,7 @@
 !  Turn off time clocks.
 !-----------------------------------------------------------------------
 !
-      CALL wclock_off (ng, model, 66, 4066, MyFile)
+      CALL wclock_off (ng, model, 66, 4261, MyFile)
 !
       RETURN
       END SUBROUTINE mp_gather2d
@@ -2797,7 +2797,7 @@
 !  Turn on time clocks.
 !-----------------------------------------------------------------------
 !
-      CALL wclock_on (ng, model, 66, 4165, MyFile)
+      CALL wclock_on (ng, model, 66, 4690, MyFile)
 !
 !-----------------------------------------------------------------------
 !  Set horizontal starting and ending indices for parallel domain
@@ -2987,7 +2987,7 @@
 !  Turn off time clocks.
 !-----------------------------------------------------------------------
 !
-      CALL wclock_off (ng, model, 66, 4417, MyFile)
+      CALL wclock_off (ng, model, 66, 4942, MyFile)
 !
       RETURN
       END SUBROUTINE mp_gather3d
@@ -3041,7 +3041,7 @@
 !  Turn on time clocks.
 !-----------------------------------------------------------------------
 !
-      CALL wclock_on (ng, model, 66, 4476, MyFile)
+      CALL wclock_on (ng, model, 66, 5001, MyFile)
 !
 !-----------------------------------------------------------------------
 !  Collect data from all nodes.
@@ -3121,7 +3121,7 @@
 !  Turn off time clocks.
 !-----------------------------------------------------------------------
 !
-      CALL wclock_off (ng, model, 66, 4559, MyFile)
+      CALL wclock_off (ng, model, 66, 5084, MyFile)
 !
       RETURN
       END SUBROUTINE mp_gather_state
@@ -3191,7 +3191,7 @@
 !  Turn on time clocks.
 !-----------------------------------------------------------------------
 !
-      CALL wclock_on (ng, model, 67, 4635, MyFile)
+      CALL wclock_on (ng, model, 67, 5160, MyFile)
 !
 !-----------------------------------------------------------------------
 !  Read requested NetCDF file and scatter it to all nodes.
@@ -3317,7 +3317,7 @@
 !  Turn on time clocks.
 !-----------------------------------------------------------------------
 !
-      CALL wclock_off (ng, model, 67, 4764, MyFile)
+      CALL wclock_off (ng, model, 67, 5289, MyFile)
 !
  10   FORMAT (/,' MP_NCREAD1D - error during ',a,' call, Node = ',i0,   &
      &        ' Error = ',i0,/,15x,a)
@@ -3396,7 +3396,7 @@
 !  Turn on time clocks.
 !-----------------------------------------------------------------------
 !
-      CALL wclock_on (ng, model, 67, 4849, MyFile)
+      CALL wclock_on (ng, model, 67, 5374, MyFile)
 !
 !-----------------------------------------------------------------------
 !  Read requested NetCDF file and scatter it to all nodes.
@@ -3532,7 +3532,7 @@
 !  Turn on time clocks.
 !-----------------------------------------------------------------------
 !
-      CALL wclock_off (ng, model, 67, 4988, MyFile)
+      CALL wclock_off (ng, model, 67, 5513, MyFile)
 !
  10   FORMAT (/,' MP_NCREAD2D - error during ',a,' call, Node = ',i0,   &
      &        ' Error = ',i0,/,15x,a)
@@ -3608,7 +3608,7 @@
 !  Turn on time clocks.
 !-----------------------------------------------------------------------
 !
-      CALL wclock_on (ng, model, 66, 5071, MyFile)
+      CALL wclock_on (ng, model, 66, 5596, MyFile)
 !
 !-----------------------------------------------------------------------
 !  Collect and write data into requested NetCDF file.
@@ -3740,7 +3740,7 @@
 !  Turn on time clocks.
 !-----------------------------------------------------------------------
 !
-      CALL wclock_off (ng, model, 66, 5206, MyFile)
+      CALL wclock_off (ng, model, 66, 5731, MyFile)
 !
  10   FORMAT (/,' MP_NCWRITE1D - error during ',a,' call, Node = ',i0,  &
      &        ' Error = ',i0,/,21x,a)
@@ -3819,7 +3819,7 @@
 !  Turn on time clocks.
 !-----------------------------------------------------------------------
 !
-      CALL wclock_on (ng, model, 66, 5291, MyFile)
+      CALL wclock_on (ng, model, 66, 5816, MyFile)
 !
 !-----------------------------------------------------------------------
 !  Collect and write data into requested NetCDF file.
@@ -3961,7 +3961,7 @@
 !  Turn on time clocks.
 !-----------------------------------------------------------------------
 !
-      CALL wclock_off (ng, model, 66, 5436, MyFile)
+      CALL wclock_off (ng, model, 66, 5961, MyFile)
 !
  10   FORMAT (/,' MP_NCWRITE2D - error during ',a,' call, Node = ',i0,  &
      &        ' Error = ',i0,/,21x,a)
@@ -4026,7 +4026,7 @@
 !  Turn on time clocks.
 !-----------------------------------------------------------------------
 !
-      CALL wclock_on (ng, model, 65, 5508, MyFile)
+      CALL wclock_on (ng, model, 65, 6033, MyFile)
 !
 !-----------------------------------------------------------------------
 !  Set distributed-memory communicator handle (context ID).
@@ -4087,7 +4087,7 @@
 !  Turn off time clocks.
 !-----------------------------------------------------------------------
 !
-      CALL wclock_off (ng, model, 65, 5653, MyFile)
+      CALL wclock_off (ng, model, 65, 6178, MyFile)
 !
       RETURN
       END SUBROUTINE mp_reduce_i8
@@ -4146,7 +4146,7 @@
 !  Turn on time clocks.
 !-----------------------------------------------------------------------
 !
-      CALL wclock_on (ng, model, 65, 6128, MyFile)
+      CALL wclock_on (ng, model, 65, 6653, MyFile)
 !
 !-----------------------------------------------------------------------
 !  Set distributed-memory communicator handle (context ID).
@@ -4197,7 +4197,7 @@
 !  Turn off time clocks.
 !-----------------------------------------------------------------------
 !
-      CALL wclock_off (ng, model, 65, 6257, MyFile)
+      CALL wclock_off (ng, model, 65, 6782, MyFile)
 !
       RETURN
       END SUBROUTINE mp_reduce_0d
@@ -4256,7 +4256,7 @@
 !  Turn on time clocks.
 !-----------------------------------------------------------------------
 !
-      CALL wclock_on (ng, model, 65, 6323, MyFile)
+      CALL wclock_on (ng, model, 65, 6848, MyFile)
 !
 !-----------------------------------------------------------------------
 !  Set distributed-memory communicator handle (context ID).
@@ -4317,7 +4317,7 @@
 !  Turn off time clocks.
 !-----------------------------------------------------------------------
 !
-      CALL wclock_off (ng, model, 65, 6467, MyFile)
+      CALL wclock_off (ng, model, 65, 6992, MyFile)
 !
       RETURN
       END SUBROUTINE mp_reduce_1d
@@ -4376,7 +4376,7 @@
 !  Turn on time clocks.
 !-----------------------------------------------------------------------
 !
-      CALL wclock_on (ng, model, 65, 6531, MyFile)
+      CALL wclock_on (ng, model, 65, 7056, MyFile)
 !
 !-----------------------------------------------------------------------
 !  Set distributed-memory communicator handle (context ID).
@@ -4435,7 +4435,7 @@
 !  Turn off time clocks.
 !-----------------------------------------------------------------------
 !
-      CALL wclock_off (ng, model, 65, 6599, MyFile)
+      CALL wclock_off (ng, model, 65, 7124, MyFile)
 !
       RETURN
       END SUBROUTINE mp_reduce2
@@ -4508,7 +4508,7 @@
 !  Turn on time clocks.
 !-----------------------------------------------------------------------
 !
-      CALL wclock_on (ng, model, 67, 6684, MyFile)
+      CALL wclock_on (ng, model, 67, 7209, MyFile)
 !
 !-----------------------------------------------------------------------
 !  Set horizontal starting and ending indices for parallel domain
@@ -4666,7 +4666,7 @@
 !  Turn off time clocks.
 !-----------------------------------------------------------------------
 !
-      CALL wclock_off (ng, model, 67, 6866, MyFile)
+      CALL wclock_off (ng, model, 67, 7391, MyFile)
 !
       RETURN
       END SUBROUTINE mp_scatter2d
@@ -4741,7 +4741,7 @@
 !  Turn on time clocks.
 !-----------------------------------------------------------------------
 !
-      CALL wclock_on (ng, model, 67, 6953, MyFile)
+      CALL wclock_on (ng, model, 67, 7748, MyFile)
 !
 !-----------------------------------------------------------------------
 !  Set horizontal starting and ending indices for parallel domain
@@ -4908,7 +4908,7 @@
 !  Turn off time clocks.
 !-----------------------------------------------------------------------
 !
-      CALL wclock_off (ng, model, 67, 7148, MyFile)
+      CALL wclock_off (ng, model, 67, 7943, MyFile)
 !
       RETURN
       END SUBROUTINE mp_scatter3d
@@ -4965,7 +4965,7 @@
 !  Turn on time clocks.
 !-----------------------------------------------------------------------
 !
-      CALL wclock_on (ng, model, 67, 7212, MyFile)
+      CALL wclock_on (ng, model, 67, 8007, MyFile)
 !
 !-----------------------------------------------------------------------
 !  Collect data blocks from all nodes and scatter the data to all nodes.
@@ -5059,7 +5059,7 @@
 !  Turn off time clocks.
 !-----------------------------------------------------------------------
 !
-      CALL wclock_off (ng, model, 67, 7309, MyFile)
+      CALL wclock_off (ng, model, 67, 8104, MyFile)
 !
       RETURN
       END SUBROUTINE mp_scatter_state
@@ -5166,7 +5166,7 @@
       nc=nc+1
       IF (Master) THEN
         WRITE (10,'(a,i3.3,a,a)') 'file ', nc, ': ', TRIM(name)
-        CALL my_flush (10)
+        FLUSH (10)
       END IF
 !
 !  Write out field including ghost-points.
@@ -5197,7 +5197,7 @@
       WRITE (unit,*) ILB, IUB, JLB, JUB, KLB, KUB,                      &
      &               Ioff, Joff, Imin, Imax, Jmin, Jmax,                &
      &               A(ILB:IUB,JLB:JUB,KLB:KUB)
-      CALL my_flush (unit)
+      FLUSH (unit)
 !
 !  Write out non-overlapping field.
 !
@@ -5229,7 +5229,7 @@
       WRITE (unit,*) Imin, Imax, Jmin, Jmax, KLB, KUB,                  &
      &               Ioff, Joff, Imin, Imax, Jmin, Jmax,                &
      &               A(Imin:Imax,Jmin:Jmax,KLB:KUB)
-      CALL my_flush (unit)
+      FLUSH (unit)
       RETURN
       END SUBROUTINE mp_dump
 !
@@ -5292,7 +5292,7 @@
 !  Turn on time clocks.
 !-----------------------------------------------------------------------
 !
-      CALL wclock_on (ng, model, 71, 7497, MyFile)
+      CALL wclock_on (ng, model, 71, 8292, MyFile)
 !
 !-----------------------------------------------------------------------
 !  Set horizontal starting and ending indices for parallel domain
@@ -5417,7 +5417,7 @@
 !  Turn off time clocks.
 !-----------------------------------------------------------------------
 !
-      CALL wclock_off (ng, model, 71, 7627, MyFile)
+      CALL wclock_off (ng, model, 71, 8422, MyFile)
 !
       RETURN
       END SUBROUTINE mp_aggregate2d
@@ -5487,7 +5487,7 @@
 !  Turn on time clocks.
 !-----------------------------------------------------------------------
 !
-      CALL wclock_on (ng, model, 71, 7703, MyFile)
+      CALL wclock_on (ng, model, 71, 8498, MyFile)
 !
 !-----------------------------------------------------------------------
 !  Set horizontal starting and ending indices for parallel domain
@@ -5618,7 +5618,7 @@
 !  Turn off time clocks.
 !-----------------------------------------------------------------------
 !
-      CALL wclock_off (ng, model, 71, 7839, MyFile)
+      CALL wclock_off (ng, model, 71, 8634, MyFile)
 !
       RETURN
       END SUBROUTINE mp_aggregate3d

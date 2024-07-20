@@ -88,7 +88,7 @@
 !
       DO ng=1,Ngrids
         DO thread=MyRank,MyRank
-          CALL wclock_on (ng, iNLM, 1, 138, MyFile)
+          CALL wclock_on (ng, iNLM, 1, 143, MyFile)
         END DO
 !$OMP BARRIER
       END DO
@@ -115,7 +115,8 @@
           CALL allocate_coupling (ng, LBi, UBi, LBj, UBj)
           CALL allocate_diags (ng, LBi, UBi, LBj, UBj)
           CALL allocate_forces (ng, LBi, UBi, LBj, UBj)
-          CALL allocate_grid (ng, LBi, UBi, LBj, UBj, LBij, UBij)
+          CALL allocate_grid (ng, ExtractFlag(ng),                      &
+     &                        LBi, UBi, LBj, UBj, LBij, UBij)
           CALL allocate_mixing (ng, LBi, UBi, LBj, UBj)
           CALL allocate_ocean (ng, LBi, UBi, LBj, UBj)
           CALL allocate_tides (ng, LBi, UBi, LBj, UBj)
@@ -134,7 +135,7 @@
 !
       DO ng=1,Ngrids
         DO thread=MyRank,MyRank
-          CALL wclock_off (ng, iNLM, 1, 236, MyFile)
+          CALL wclock_off (ng, iNLM, 1, 249, MyFile)
         END DO
 !$OMP BARRIER
       END DO
@@ -219,7 +220,7 @@
 !
       DO ng=1,Ngrids
         DO thread=MyRank,MyRank
-          CALL wclock_on (ng, iNLM, 1, 361, MyFile)
+          CALL wclock_on (ng, iNLM, 1, 377, MyFile)
         END DO
 !$OMP BARRIER
       END DO
@@ -252,7 +253,7 @@
 !
       DO ng=1,Ngrids
         DO thread=MyRank,MyRank
-          CALL wclock_off (ng, iNLM, 1, 432, MyFile)
+          CALL wclock_off (ng, iNLM, 1, 451, MyFile)
         END DO
 !$OMP BARRIER
       END DO

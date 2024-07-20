@@ -768,7 +768,7 @@
         END IF
       END IF
 !
-!  Write out surface active traces fluxes.
+!  Write out surface active tracers fluxes.
 !
       DO itrc=1,NAT
         IF (Qout(idTsur(itrc),ng)) THEN

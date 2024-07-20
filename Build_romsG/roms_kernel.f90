@@ -29,6 +29,7 @@
 !
       USE close_io_mod,      ONLY : close_inp, close_out
       USE inp_par_mod,       ONLY : inp_par
+      USE stdout_mod,        ONLY : Set_StdOutUnit, stdout_unit
       USE strings_mod,       ONLY : FoundError
       USE wrt_rst_mod,       ONLY : wrt_rst
 !
@@ -93,12 +94,25 @@
 !
         CALL initialize_parallel
 !
+!  Set the ROMS standard output unit to write verbose execution info.
+!  Notice that the default standard out unit in Fortran is 6.
+!
+!  In some applications like coupling or disjointed mpi-communications,
+!  it is advantageous to write standard output to a specific filename
+!  instead of the default Fortran standard output unit 6. If that is
+!  the case, it opens such formatted file for writing.
+!
+        IF (Set_StdOutUnit) THEN
+          stdout=stdout_unit(Master)
+          Set_StdOutUnit=.FALSE.
+        END IF
+!
 !  Read in model tunable parameters from standard input. Allocate and
 !  initialize variables in several modules after the number of nested
 !  grids and dimension parameters are known.
 !
         CALL inp_par (iNLM)
-        IF (FoundError(exit_flag, NoError, 126, MyFile)) RETURN
+        IF (FoundError(exit_flag, NoError, 140, MyFile)) RETURN
 !
 !  Set domain decomposition tile partition range.  This range is
 !  computed only once since the "first_tile" and "last_tile" values
@@ -125,7 +139,7 @@
         DO ng=1,Ngrids
 !$OMP PARALLEL
           DO thread=MyRank,MyRank
-            CALL wclock_on (ng, iNLM, 0, 159, MyFile)
+            CALL wclock_on (ng, iNLM, 0, 173, MyFile)
           END DO
 !$OMP END PARALLEL
         END DO
@@ -136,7 +150,7 @@
         CALL ROMS_allocate_arrays (allocate_vars)
         CALL ROMS_initialize_arrays
 !$OMP END PARALLEL
-        IF (FoundError(exit_flag, NoError, 170, MyFile)) RETURN
+        IF (FoundError(exit_flag, NoError, 184, MyFile)) RETURN
       END IF
 !
 !-----------------------------------------------------------------------
@@ -147,7 +161,7 @@
 !$OMP PARALLEL
       CALL initial
 !$OMP END PARALLEL
-      IF (FoundError(exit_flag, NoError, 198, MyFile)) RETURN
+      IF (FoundError(exit_flag, NoError, 212, MyFile)) RETURN
 !
 !  Initialize run or ensemble counter.
 !
@@ -191,7 +205,7 @@
 !$OMP PARALLEL
       CALL main3d (MyRunInterval)
 !$OMP END PARALLEL
-      IF (FoundError(exit_flag, NoError, 299, MyFile)) RETURN
+      IF (FoundError(exit_flag, NoError, 313, MyFile)) RETURN
 !
  10   FORMAT (1x,a,1x,'ROMS/TOMS: started time-stepping:',              &
      &        ' (Grid: ',i2.2,' TimeSteps: ',i12.12,' - ',i12.12,')')
@@ -253,7 +267,7 @@
       DO ng=1,Ngrids
 !$OMP PARALLEL
         DO thread=MyRank,MyRank
-          CALL wclock_off (ng, iNLM, 0, 397, MyFile)
+          CALL wclock_off (ng, iNLM, 0, 411, MyFile)
         END DO
 !$OMP END PARALLEL
       END DO

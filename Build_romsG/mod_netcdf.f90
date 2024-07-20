@@ -24,7 +24,9 @@
       USE mod_scalars
       USE netcdf
 !
-      USE strings_mod, ONLY : FoundError
+      USE distribute_mod, ONLY : mp_bcastf, mp_bcasti, mp_bcastl,       &
+     &                           mp_bcasts
+      USE strings_mod,    ONLY : FoundError
 !
       implicit none
 !
@@ -207,8 +209,6 @@
 !                                                                      !
 !=======================================================================
 !
-      USE distribute_mod, ONLY : mp_bcasti
-!
 !  Imported variable declarations.
 !
       integer, intent(in) :: ng, model, ncid
@@ -291,8 +291,6 @@
 !                                                                      !
 !=======================================================================
 !
-      USE distribute_mod, ONLY : mp_bcasti, mp_bcasts
-!
 !  Imported variable declarations.
 !
       integer, intent(in) :: ng, model
@@ -339,7 +337,7 @@
 !
       IF (.not.PRESENT(ncid)) THEN
          CALL netcdf_open (ng, model, TRIM(ncname), 0, my_ncid)
-         IF (FoundError(exit_flag, NoError, 421, MyFile)) RETURN
+         IF (FoundError(exit_flag, NoError, 417, MyFile)) RETURN
       ELSE
         my_ncid=ncid
       END IF
@@ -361,7 +359,7 @@
             dim_id(i)=i
             status=nf90_inquire_dimension(my_ncid, dim_id(i),           &
      &                                    dim_name(i), dim_size(i))
-            IF (FoundError(status, nf90_noerr, 450, MyFile)) THEN
+            IF (FoundError(status, nf90_noerr, 446, MyFile)) THEN
               WRITE (stdout,10) dim_id(i), TRIM(ncname),                &
      &                          TRIM(SourceFile), nf90_strerror(status)
               exit_flag=2
@@ -379,7 +377,7 @@
             exit_flag=2
             ioerror=0
           END IF
-          IF (FoundError(status, nf90_noerr, 470, MyFile)) THEN
+          IF (FoundError(status, nf90_noerr, 466, MyFile)) THEN
             WRITE (stdout,30) TRIM(ncname), TRIM(SourceFile)
             exit_flag=2
             ioerror=status
@@ -503,7 +501,7 @@
         CALL netcdf_get_dim (ng, model, ncname,                         &
      &                       ncid = ncid)
       END IF
-      IF (FoundError(exit_flag, NoError, 597, MyFile)) RETURN
+      IF (FoundError(exit_flag, NoError, 593, MyFile)) RETURN
 !
 !-----------------------------------------------------------------------
 !  Check dimensions for consistency.
@@ -682,7 +680,7 @@
         CALL netcdf_inq_var (ng, IDmod, ncname,                         &
      &                       ncid = ncid)
       END IF
-      IF (FoundError(exit_flag, NoError, 808, MyFile)) RETURN
+      IF (FoundError(exit_flag, NoError, 804, MyFile)) RETURN
 !
 !-----------------------------------------------------------------------
 !  Check several important variables for consistency.
@@ -699,7 +697,7 @@
      &                              IvarS,                              &
      &                              ncid = ncid)
             END IF
-            IF (FoundError(exit_flag, NoError, 827, MyFile)) RETURN
+            IF (FoundError(exit_flag, NoError, 823, MyFile)) RETURN
             IF (IvarS.ne.Vtransform(ng)) THEN
               IF (Master) WRITE (stdout,10) TRIM(var_name(i)),          &
      &                                      IvarS, Vtransform(ng),      &
@@ -716,7 +714,7 @@
      &                              IvarS,                              &
      &                              ncid = ncid)
             END IF
-            IF (FoundError(exit_flag, NoError, 845, MyFile)) RETURN
+            IF (FoundError(exit_flag, NoError, 841, MyFile)) RETURN
             IF (IvarS.ne.Vstretching(ng)) THEN
               IF (Master) WRITE (stdout,10) TRIM(var_name(i)),          &
      &                                      IvarS, Vstretching(ng),     &
@@ -733,7 +731,7 @@
      &                              FvarS,                              &
      &                              ncid = ncid)
             END IF
-            IF (FoundError(exit_flag, NoError, 863, MyFile)) RETURN
+            IF (FoundError(exit_flag, NoError, 859, MyFile)) RETURN
             IF (ABS(hc(ng)-FvarS).gt.RoundOff) THEN
               IF (Master) WRITE (stdout,20) TRIM(var_name(i)),          &
      &                                      FvarS, hc(ng),              &
@@ -750,7 +748,7 @@
      &                              FvarS,                              &
      &                              ncid = ncid)
             END IF
-            IF (FoundError(exit_flag, NoError, 881, MyFile)) RETURN
+            IF (FoundError(exit_flag, NoError, 877, MyFile)) RETURN
             IF (ABS(theta_s(ng)-FvarS).gt.RoundOff) THEN
               IF (Master) WRITE (stdout,20) TRIM(var_name(i)),          &
      &                                      FvarS, theta_s(ng),         &
@@ -767,7 +765,7 @@
      &                              FvarS,                              &
      &                              ncid = ncid)
             END IF
-            IF (FoundError(exit_flag, NoError, 899, MyFile)) RETURN
+            IF (FoundError(exit_flag, NoError, 895, MyFile)) RETURN
             IF (ABS(theta_b(ng)-FvarS).gt.RoundOff) THEN
               IF (Master) WRITE (stdout,20) TRIM(var_name(i)),          &
      &                                      FvarS, theta_b(ng),         &
@@ -784,7 +782,7 @@
      &                              FvarS,                              &
      &                              ncid = ncid)
             END IF
-            IF (FoundError(exit_flag, NoError,917, MyFile)) RETURN
+            IF (FoundError(exit_flag, NoError,913, MyFile)) RETURN
             IF (ABS(Tcline(ng)-FvarS).gt.RoundOff) THEN
               IF (Master) WRITE (stdout,20) TRIM(var_name(i)),          &
      &                                      FvarS, Tcline(ng),          &
@@ -861,8 +859,6 @@
 !                                                                      !
 !=======================================================================
 !
-      USE distribute_mod, ONLY : mp_bcasti, mp_bcastf, mp_bcasts
-!
 !  Imported variable declarations.
 !
       integer, intent(in) :: ng, model
@@ -933,7 +929,7 @@
 !
       IF (.not.PRESENT(ncid)) THEN
         CALL netcdf_open (ng, model, TRIM(ncname), 0, my_ncid)
-        IF (FoundError(exit_flag, NoError, 1513, MyFile)) RETURN
+        IF (FoundError(exit_flag, NoError, 1504, MyFile)) RETURN
       ELSE
         my_ncid=ncid
       END IF
@@ -955,7 +951,7 @@
             dim_id(i)=i
             status=nf90_inquire_dimension(my_ncid, dim_id(i),           &
      &                                    dim_name(i), dim_size(i))
-            IF (FoundError(status, nf90_noerr, 1537, MyFile)) THEN
+            IF (FoundError(status, nf90_noerr, 1528, MyFile)) THEN
               WRITE (stdout,10) dim_id(i), TRIM(ncname),                &
      &                          TRIM(SourceFile), nf90_strerror(status)
               exit_flag=2
@@ -1039,7 +1035,7 @@
             WRITE (stdout,30) 'Mvars = ', Mvars, n_var
             exit_flag=2
           END IF
-          IF (FoundError(status, nf90_noerr, 1623, MyFile)) THEN
+          IF (FoundError(status, nf90_noerr, 1614, MyFile)) THEN
             WRITE (stdout,40) TRIM(ncname), TRIM(SourceFile)
             exit_flag=2
             ioerror=status
@@ -1125,7 +1121,7 @@
             DO i=1,n_vdim
               status=nf90_inquire_dimension(my_ncid, var_Dids(i),       &
      &                                      var_Dname(i), var_Dsize(i))
-              IF (FoundError(status, nf90_noerr, 1712, MyFile)) THEN
+              IF (FoundError(status, nf90_noerr, 1703, MyFile)) THEN
                 WRITE (stdout,50) i, TRIM(myVarName), TRIM(ncname),     &
      &                            TRIM(SourceFile),                     &
      &                            nf90_strerror(status)
@@ -1149,7 +1145,7 @@
      &                                    TRIM(var_Aname(i)),           &
      &                                    var_Aint(i))
                       IF (FoundError(status, nf90_noerr,                &
-     &                               1736, MyFile)) THEN
+     &                               1727, MyFile)) THEN
                         WRITE (stdout,60) 'integer',                    &
      &                                    TRIM(var_Aname(i)),           &
      &                                    TRIM(myVarName),              &
@@ -1166,7 +1162,7 @@
      &                                    TRIM(var_Aname(i)),           &
      &                                    my_Afloat)
                       IF (FoundError(status, nf90_noerr,                &
-     &                               1753, MyFile)) THEN
+     &                               1744, MyFile)) THEN
                         WRITE (stdout,60) 'float',                      &
      &                                    TRIM(var_Aname(i)),           &
      &                                    TRIM(myVarName),              &
@@ -1184,7 +1180,7 @@
      &                                    TRIM(var_Aname(i)),           &
      &                                    my_Adouble)
                       IF (FoundError(status, nf90_noerr,                &
-     &                               1775, MyFile)) THEN
+     &                               1766, MyFile)) THEN
                         WRITE (stdout,60) 'float',                      &
      &                                    TRIM(var_Aname(i)),           &
      &                                    TRIM(myVarName),              &
@@ -1201,7 +1197,7 @@
      &                                    TRIM(var_Aname(i)),           &
      &                                    text(1:my_Alen))
                       IF (FoundError(status, nf90_noerr,                &
-     &                               1796, MyFile)) THEN
+     &                               1787, MyFile)) THEN
                         WRITE (stdout,60) 'string',                     &
      &                                    TRIM(var_Aname(i)),           &
      &                                    TRIM(myVarName),              &
@@ -1328,8 +1324,6 @@
 !                                                                      !
 !=======================================================================
 !
-      USE distribute_mod, ONLY : mp_bcasti
-!
 !  Imported variable declarations.
 !
       integer, intent(in) :: ng, model, ncid
@@ -1353,7 +1347,7 @@
 !
       IF (InpThread) THEN
         status=nf90_inq_varid(ncid, TRIM(myVarName), VarID)
-        IF (FoundError(status, nf90_noerr, 1956, MyFile)) THEN
+        IF (FoundError(status, nf90_noerr, 1942, MyFile)) THEN
           WRITE (stdout,10) TRIM(myVarName), TRIM(ncname),              &
      &                      TRIM(SourceFile), nf90_strerror(status)
           exit_flag=3
@@ -1400,8 +1394,6 @@
 !                                                                      !
 !=======================================================================
 !
-      USE distribute_mod, ONLY : mp_bcastf, mp_bcasti
-!
 !  Imported variable declarations.
 !
       integer, intent(in) :: ng, model, varid
@@ -1444,7 +1436,7 @@
 !
       IF (.not.PRESENT(ncid)) THEN
         CALL netcdf_open (ng, model, TRIM(ncname), 0, my_ncid)
-        IF (FoundError(exit_flag, NoError, 2252, MyFile)) RETURN
+        IF (FoundError(exit_flag, NoError, 2228, MyFile)) RETURN
       ELSE
         my_ncid=ncid
       END IF
@@ -1469,7 +1461,7 @@
                   status=nf90_get_att(my_ncid, varid, TRIM(AttName(i)), &
      &                                AttValue(i))
                   IF (FoundError(status, nf90_noerr,                    &
-     &                           2277, MyFile)) THEN
+     &                           2253, MyFile)) THEN
                     IF (Master) WRITE (stdout,10) TRIM(AttName(i)),     &
      &                                            TRIM(my_Vname),       &
      &                                            TRIM(ncname),         &
@@ -1574,8 +1566,6 @@
 !                                                                      !
 !=======================================================================
 !
-      USE distribute_mod, ONLY : mp_bcasti, mp_bcasts
-!
 !  Imported variable declarations.
 !
       integer, intent(in) :: ng, model, varid
@@ -1617,7 +1607,7 @@
 !
       IF (.not.PRESENT(ncid)) THEN
         CALL netcdf_open (ng, model, TRIM(ncname), 0, my_ncid)
-        IF (FoundError(exit_flag, NoError, 2440, MyFile)) RETURN
+        IF (FoundError(exit_flag, NoError, 2411, MyFile)) RETURN
       ELSE
         my_ncid=ncid
       END IF
@@ -1642,7 +1632,7 @@
                   status=nf90_get_att(my_ncid, varid, TRIM(AttName(i)), &
      &                                AttValue(i))
                   IF (FoundError(status, nf90_noerr,                    &
-     &                           2465, MyFile)) THEN
+     &                           2436, MyFile)) THEN
                     IF (Master) WRITE (stdout,10) TRIM(AttName(i)),     &
      &                                            TRIM(my_Vname),       &
      &                                            TRIM(ncname),         &
@@ -1760,8 +1750,6 @@
 !                                                                      !
 !=======================================================================
 !
-      USE distribute_mod, ONLY : mp_bcastf, mp_bcasti
-!
 !  Imported variable declarations.
 !
       logical, intent(in), optional :: broadcast
@@ -1798,7 +1786,7 @@
 !
       IF (.not.PRESENT(ncid)) THEN
         CALL netcdf_open (ng, model, TRIM(ncname), 0, my_ncid)
-        IF (FoundError(exit_flag, NoError, 3056, MyFile)) RETURN
+        IF (FoundError(exit_flag, NoError, 3514, MyFile)) RETURN
       ELSE
         my_ncid=ncid
       END IF
@@ -1823,7 +1811,7 @@
           ELSE
             status=nf90_get_var(my_ncid, varid, A)
           END IF
-          IF (FoundError(status, nf90_noerr, 3084, MyFile)) THEN
+          IF (FoundError(status, nf90_noerr, 3542, MyFile)) THEN
             WRITE (stdout,10) TRIM(myVarName), TRIM(ncname),            &
      &                        TRIM(SourceFile), nf90_strerror(status)
             exit_flag=2
@@ -1915,8 +1903,6 @@
 !                                                                      !
 !=======================================================================
 !
-      USE distribute_mod, ONLY : mp_bcastf, mp_bcasti
-!
 !  Imported variable declarations.
 !
       logical, intent(in), optional :: broadcast
@@ -1967,7 +1953,7 @@
 !
       IF (.not.PRESENT(ncid)) THEN
         CALL netcdf_open (ng, model, TRIM(ncname), 0, my_ncid)
-        IF (FoundError(exit_flag, NoError, 3244, MyFile)) RETURN
+        IF (FoundError(exit_flag, NoError, 3697, MyFile)) RETURN
       ELSE
         my_ncid=ncid
       END IF
@@ -1991,7 +1977,7 @@
           ELSE
             status=nf90_get_var(my_ncid, varid, A)
           END IF
-          IF (FoundError(status, nf90_noerr, 3271, MyFile)) THEN
+          IF (FoundError(status, nf90_noerr, 3724, MyFile)) THEN
             WRITE (stdout,10) TRIM(myVarName), TRIM(ncname),            &
      &                        TRIM(SourceFile), nf90_strerror(status)
             exit_flag=2
@@ -2135,8 +2121,6 @@
 !                                                                      !
 !=======================================================================
 !
-      USE distribute_mod, ONLY : mp_bcastf, mp_bcasti
-!
 !  Imported variable declarations.
 !
       logical, intent(in), optional :: broadcast
@@ -2186,7 +2170,7 @@
 !
       IF (.not.PRESENT(ncid)) THEN
         CALL netcdf_open (ng, model, TRIM(ncname), 0, my_ncid)
-        IF (FoundError(exit_flag, NoError, 3490, MyFile)) RETURN
+        IF (FoundError(exit_flag, NoError, 3938, MyFile)) RETURN
       ELSE
         my_ncid=ncid
       END IF
@@ -2210,7 +2194,7 @@
           ELSE
             status=nf90_get_var(my_ncid, varid, A)
           END IF
-          IF (FoundError(status, nf90_noerr, 3517, MyFile)) THEN
+          IF (FoundError(status, nf90_noerr, 3965, MyFile)) THEN
             WRITE (stdout,10) TRIM(myVarName), TRIM(ncname),            &
      &                        TRIM(SourceFile), nf90_strerror(status)
             exit_flag=2
@@ -2358,8 +2342,6 @@
 !                                                                      !
 !=======================================================================
 !
-      USE distribute_mod, ONLY : mp_bcastf, mp_bcasti
-!
 !  Imported variable declarations.
 !
       logical, intent(in), optional :: broadcast
@@ -2411,7 +2393,7 @@
 !
       IF (.not.PRESENT(ncid)) THEN
         CALL netcdf_open (ng, model, TRIM(ncname), 0, my_ncid)
-        IF (FoundError(exit_flag, NoError, 3742, MyFile)) RETURN
+        IF (FoundError(exit_flag, NoError, 4185, MyFile)) RETURN
       ELSE
         my_ncid=ncid
       END IF
@@ -2435,7 +2417,7 @@
           ELSE
             status=nf90_get_var(my_ncid, varid, A)
           END IF
-          IF (FoundError(status, nf90_noerr, 3769, MyFile)) THEN
+          IF (FoundError(status, nf90_noerr, 4212, MyFile)) THEN
             WRITE (stdout,10) TRIM(myVarName), TRIM(ncname),            &
      &                        TRIM(SourceFile), nf90_strerror(status)
             exit_flag=2
@@ -2590,8 +2572,6 @@
 !                                                                      !
 !=======================================================================
 !
-      USE distribute_mod, ONLY : mp_bcastf, mp_bcasti
-!
 !  Imported variable declarations.
 !
       logical, intent(in), optional :: broadcast
@@ -2645,7 +2625,7 @@
 !
       IF (.not.PRESENT(ncid)) THEN
         CALL netcdf_open (ng, model, TRIM(ncname), 0, my_ncid)
-        IF (FoundError(exit_flag, NoError, 4003, MyFile)) RETURN
+        IF (FoundError(exit_flag, NoError, 4441, MyFile)) RETURN
       ELSE
         my_ncid=ncid
       END IF
@@ -2669,7 +2649,7 @@
           ELSE
             status=nf90_get_var(my_ncid, varid, A)
           END IF
-          IF (FoundError(status, nf90_noerr, 4030, MyFile)) THEN
+          IF (FoundError(status, nf90_noerr, 4468, MyFile)) THEN
             WRITE (stdout,10) TRIM(myVarName), TRIM(ncname),            &
      &                        TRIM(SourceFile), nf90_strerror(status)
             exit_flag=2
@@ -2826,8 +2806,6 @@
 !                                                                      !
 !=======================================================================
 !
-      USE distribute_mod, ONLY : mp_bcasti, mp_bcastl
-!
 !  Imported variable declarations.
 !
       integer, intent(in) :: ng, model
@@ -2859,7 +2837,7 @@
 !
       IF (.not.PRESENT(ncid)) THEN
         CALL netcdf_open (ng, model, TRIM(ncname), 0, my_ncid)
-        IF (FoundError(exit_flag, NoError, 4239, MyFile)) RETURN
+        IF (FoundError(exit_flag, NoError, 4672, MyFile)) RETURN
       ELSE
         my_ncid=ncid
       END IF
@@ -2899,7 +2877,7 @@
                 END IF
               END IF
             END IF
-            IF (FoundError(status, nf90_noerr, 4279, MyFile)) THEN
+            IF (FoundError(status, nf90_noerr, 4712, MyFile)) THEN
               WRITE (stdout,10) TRIM(myVarName), TRIM(ncname),          &
      &                          TRIM(SourceFile), nf90_strerror(status)
               exit_flag=2
@@ -2984,8 +2962,6 @@
 !                                                                      !
 !=======================================================================
 !
-      USE distribute_mod, ONLY : mp_bcasti, mp_bcastl
-!
 !  Imported variable declarations.
 !
       integer, intent(in) :: ng, model
@@ -3016,7 +2992,7 @@
 !
       IF (.not.PRESENT(ncid)) THEN
         CALL netcdf_open (ng, model, TRIM(ncname), 0, my_ncid)
-        IF (FoundError(exit_flag, NoError, 4408, MyFile)) RETURN
+        IF (FoundError(exit_flag, NoError, 4836, MyFile)) RETURN
       ELSE
         my_ncid=ncid
       END IF
@@ -3059,7 +3035,7 @@
                 END DO
               END IF
             END IF
-            IF (FoundError(status, nf90_noerr, 4451, MyFile)) THEN
+            IF (FoundError(status, nf90_noerr, 4879, MyFile)) THEN
               WRITE (stdout,10) TRIM(myVarName), TRIM(ncname),          &
      &                          TRIM(SourceFile), nf90_strerror(status)
               exit_flag=2
@@ -3141,8 +3117,6 @@
 !                                                                      !
 !=======================================================================
 !
-      USE distribute_mod, ONLY : mp_bcasti
-!
 !  Imported variable declarations.
 !
       integer, intent(in) :: ng, model
@@ -3172,7 +3146,7 @@
 !
       IF (.not.PRESENT(ncid)) THEN
         CALL netcdf_open (ng, model, TRIM(ncname), 0, my_ncid)
-        IF (FoundError(exit_flag, NoError, 4575, MyFile)) RETURN
+        IF (FoundError(exit_flag, NoError, 4998, MyFile)) RETURN
       ELSE
         my_ncid=ncid
       END IF
@@ -3188,7 +3162,7 @@
           ELSE
             status=nf90_get_var(my_ncid, varid, A)
           END IF
-          IF (FoundError(status, nf90_noerr, 4591, MyFile)) THEN
+          IF (FoundError(status, nf90_noerr, 5014, MyFile)) THEN
             WRITE (stdout,10) TRIM(myVarName), TRIM(ncname),            &
      &                        TRIM(SourceFile), nf90_strerror(status)
             exit_flag=2
@@ -3262,8 +3236,6 @@
 !                                                                      !
 !=======================================================================
 !
-      USE distribute_mod, ONLY : mp_bcasti
-!
 !  Imported variable declarations.
 !
       integer, intent(in) :: ng, model
@@ -3292,7 +3264,7 @@
 !
       IF (.not.PRESENT(ncid)) THEN
         CALL netcdf_open (ng, model, TRIM(ncname), 0, my_ncid)
-        IF (FoundError(exit_flag, NoError, 4705, MyFile)) RETURN
+        IF (FoundError(exit_flag, NoError, 5123, MyFile)) RETURN
       ELSE
         my_ncid=ncid
       END IF
@@ -3307,7 +3279,7 @@
           ELSE
             status=nf90_get_var(my_ncid, varid, A)
           END IF
-          IF (FoundError(status, nf90_noerr, 4720, MyFile)) THEN
+          IF (FoundError(status, nf90_noerr, 5138, MyFile)) THEN
             WRITE (stdout,10) TRIM(myVarName), TRIM(ncname),            &
      &                        TRIM(SourceFile), nf90_strerror(status)
             exit_flag=2
@@ -3382,8 +3354,6 @@
 !                                                                      !
 !=======================================================================
 !
-      USE distribute_mod, ONLY : mp_bcasti
-!
 !  Imported variable declarations.
 !
       integer, intent(in) :: ng, model
@@ -3412,7 +3382,7 @@
 !
       IF (.not.PRESENT(ncid)) THEN
         CALL netcdf_open (ng, model, TRIM(ncname), 0, my_ncid)
-        IF (FoundError(exit_flag, NoError, 4835, MyFile)) RETURN
+        IF (FoundError(exit_flag, NoError, 5248, MyFile)) RETURN
       ELSE
         my_ncid=ncid
       END IF
@@ -3427,7 +3397,7 @@
           ELSE
             status=nf90_get_var(my_ncid, varid, A)
           END IF
-          IF (FoundError(status, nf90_noerr, 4850, MyFile)) THEN
+          IF (FoundError(status, nf90_noerr, 5263, MyFile)) THEN
             WRITE (stdout,10) TRIM(myVarName), TRIM(ncname),            &
      &                        TRIM(SourceFile), nf90_strerror(status)
             exit_flag=2
@@ -3510,8 +3480,6 @@
 !                                                                      !
 !=======================================================================
 !
-      USE distribute_mod, ONLY : mp_bcasti, mp_bcasts
-!
 !  Imported variable declarations.
 !
       integer, intent(in) :: ng, model
@@ -3540,7 +3508,7 @@
 !
       IF (.not.PRESENT(ncid)) THEN
         CALL netcdf_open (ng, model, TRIM(ncname), 0, my_ncid)
-        IF (FoundError(exit_flag, NoError, 4975, MyFile)) RETURN
+        IF (FoundError(exit_flag, NoError, 5383, MyFile)) RETURN
       ELSE
         my_ncid=ncid
       END IF
@@ -3556,7 +3524,7 @@
           ELSE
             status=nf90_get_var(my_ncid, varid, A)
           END IF
-          IF (FoundError(status, nf90_noerr, 4991, MyFile)) THEN
+          IF (FoundError(status, nf90_noerr, 5399, MyFile)) THEN
             WRITE (stdout,10) TRIM(myVarName), TRIM(ncname),            &
      &                        TRIM(SourceFile), nf90_strerror(status)
             exit_flag=2
@@ -3635,8 +3603,6 @@
 !                                                                      !
 !=======================================================================
 !
-      USE distribute_mod, ONLY : mp_bcasti, mp_bcasts
-!
 !  Imported variable declarations.
 !
       integer, intent(in) :: ng, model
@@ -3664,7 +3630,7 @@
 !
       IF (.not.PRESENT(ncid)) THEN
         CALL netcdf_open (ng, model, TRIM(ncname), 0, my_ncid)
-        IF (FoundError(exit_flag, NoError, 5110, MyFile)) RETURN
+        IF (FoundError(exit_flag, NoError, 5513, MyFile)) RETURN
       ELSE
         my_ncid=ncid
       END IF
@@ -3679,7 +3645,7 @@
           ELSE
             status=nf90_get_var(my_ncid, varid, A)
           END IF
-          IF (FoundError(status, nf90_noerr, 5125, MyFile)) THEN
+          IF (FoundError(status, nf90_noerr, 5528, MyFile)) THEN
             WRITE (stdout,10) TRIM(myVarName), TRIM(ncname),            &
      &                        TRIM(SourceFile), nf90_strerror(status)
             exit_flag=2
@@ -3758,8 +3724,6 @@
 !                                                                      !
 !=======================================================================
 !
-      USE distribute_mod, ONLY : mp_bcasti, mp_bcasts
-!
 !  Imported variable declarations.
 !
       integer, intent(in) :: ng, model
@@ -3787,7 +3751,7 @@
 !
       IF (.not.PRESENT(ncid)) THEN
         CALL netcdf_open (ng, model, TRIM(ncname), 0, my_ncid)
-        IF (FoundError(exit_flag, NoError, 5244, MyFile)) RETURN
+        IF (FoundError(exit_flag, NoError, 5642, MyFile)) RETURN
       ELSE
         my_ncid=ncid
       END IF
@@ -3802,7 +3766,7 @@
           ELSE
             status=nf90_get_var(my_ncid, varid, A)
           END IF
-          IF (FoundError(status, nf90_noerr, 5259, MyFile)) THEN
+          IF (FoundError(status, nf90_noerr, 5657, MyFile)) THEN
             WRITE (stdout,10) TRIM(myVarName), TRIM(ncname),            &
      &                        TRIM(SourceFile), nf90_strerror(status)
             exit_flag=2
@@ -3881,8 +3845,6 @@
 !                                                                      !
 !=======================================================================
 !
-      USE distribute_mod, ONLY : mp_bcasti, mp_bcasts
-!
 !  Imported variable declarations.
 !
       integer, intent(in) :: ng, model
@@ -3910,7 +3872,7 @@
 !
       IF (.not.PRESENT(ncid)) THEN
         CALL netcdf_open (ng, model, TRIM(ncname), 0, my_ncid)
-        IF (FoundError(exit_flag, NoError, 5378, MyFile)) RETURN
+        IF (FoundError(exit_flag, NoError, 5771, MyFile)) RETURN
       ELSE
         my_ncid=ncid
       END IF
@@ -3925,7 +3887,7 @@
           ELSE
             status=nf90_get_var(my_ncid, varid, A)
           END IF
-          IF (FoundError(status, nf90_noerr, 5393, MyFile)) THEN
+          IF (FoundError(status, nf90_noerr, 5786, MyFile)) THEN
             WRITE (stdout,10) TRIM(myVarName), TRIM(ncname),            &
      &                        TRIM(SourceFile), nf90_strerror(status)
             exit_flag=2
@@ -4009,7 +3971,6 @@
 !=======================================================================
 !
       USE dateclock_mod,  ONLY : datenum, datestr, time_units
-      USE distribute_mod, ONLY : mp_bcastf, mp_bcasti
       USE strings_mod,    ONLY : lowercase
 !
 !  Imported variable declarations.
@@ -4038,7 +3999,7 @@
       integer :: year, month, day, hour, minutes
       integer, dimension(2) :: ibuffer
       real(dp) :: Afactor, Aoffset, my_Rdate(2), seconds
-      real(dp) :: dnum_old, dnum_new
+      real(dp) :: dnum_old, dnum_new, scale
       real(dp), dimension(1) :: my_A
       real(r8), dimension(2) :: AttValue
 !
@@ -4057,7 +4018,7 @@
 !
       IF (.not.PRESENT(ncid)) THEN
         CALL netcdf_open (ng, model, TRIM(ncname), 0, my_ncid)
-        IF (FoundError(exit_flag, NoError, 5539, MyFile)) RETURN
+        IF (FoundError(exit_flag, NoError, 5929, MyFile)) RETURN
       ELSE
         my_ncid=ncid
       END IF
@@ -4073,7 +4034,7 @@
           ELSE
             status=nf90_get_var(my_ncid, varid, A)
           END IF
-          IF (FoundError(status, nf90_noerr, 5555, MyFile)) THEN
+          IF (FoundError(status, nf90_noerr, 5945, MyFile)) THEN
             WRITE (stdout,10) TRIM(myVarName), TRIM(ncname),            &
      &                        TRIM(SourceFile), nf90_strerror(status)
             exit_flag=2
@@ -4175,6 +4136,27 @@
                     dnum_new=Rdate(2)+A
                     CALL datestr (dnum_new, .FALSE., dstr_new)
                   END IF
+                CASE ('hour', 'hours')        ! convert to seconds
+                  IF (Ldebug) THEN
+                    scale=3600.0_dp           ! hours to seconds
+                    IF (JulianOffset) THEN
+                      dnum_old=A*scale
+                    ELSE
+                      dnum_old=my_Rdate(2)+A*scale
+                    END IF
+                    CALL datestr (dnum_old, .FALSE., dstr_old)
+                  END IF
+                  scale=24.0_dp               ! time reference to hours
+                  IF (JulianOffset) THEN
+                    A=A-Rdate(1)*scale        ! 'add_offset' added above
+                  ELSE
+                    A=(my_Rdate(1)*scale+A)-Rdate(1)*scale
+                  END IF
+                  IF (Ldebug) THEN
+                    scale=3600.0_dp           ! convert to seconds
+                    dnum_new=Rdate(2)+A*scale
+                    CALL datestr (dnum_new, .FALSE., dstr_new)
+                  END IF
                 CASE ('day', 'days')
                   IF (Ldebug) THEN
                     IF (JulianOffset) THEN
@@ -4270,7 +4252,6 @@
 !=======================================================================
 !
       USE dateclock_mod,  ONLY : datenum, datestr, time_units
-      USE distribute_mod, ONLY : mp_bcastf, mp_bcasti
       USE strings_mod,    ONLY : lowercase
 !
 !  Imported variable declarations.
@@ -4301,7 +4282,7 @@
       integer, dimension(2) :: ibuffer
 !
       real(dp) :: Afactor, Aoffset, my_Rdate(2), seconds
-      real(dp) :: dnum_old, dnum_new
+      real(dp) :: dnum_old, dnum_new, scale
       real(r8), dimension(2) :: AttValue
 !
       character (len=12) :: AttName(2)
@@ -4328,7 +4309,7 @@
 !
       IF (.not.PRESENT(ncid)) THEN
         CALL netcdf_open (ng, model, TRIM(ncname), 0, my_ncid)
-        IF (FoundError(exit_flag, NoError, 5831, MyFile)) RETURN
+        IF (FoundError(exit_flag, NoError, 6239, MyFile)) RETURN
       ELSE
         my_ncid=ncid
       END IF
@@ -4343,7 +4324,7 @@
           ELSE
             status=nf90_get_var(my_ncid, varid, A)
           END IF
-          IF (FoundError(status, nf90_noerr, 5846, MyFile)) THEN
+          IF (FoundError(status, nf90_noerr, 6254, MyFile)) THEN
             WRITE (stdout,10) TRIM(myVarName), TRIM(ncname),            &
      &                        TRIM(SourceFile), nf90_strerror(status)
             exit_flag=2
@@ -4452,6 +4433,31 @@
                     dnum_new=Rdate(2)+A(1)
                     CALL datestr (dnum_new, .FALSE., dstr_new)
                   END IF
+                CASE ('hour', 'hours')
+                  scale=3600.0_dp             ! convert to seconds
+                  IF (Ldebug) THEN
+                    IF (JulianOffset) THEN
+                      dnum_old=A(1)*scale
+                    ELSE
+                      dnum_old=my_Rdate(2)+A(1)*scale
+                    END IF
+                    CALL datestr (dnum_old, .FALSE., dstr_old)
+                  END IF
+                  scale=24.0_dp               ! time reference to hours
+                  IF (JulianOffset) THEN
+                    DO i=1,Asize(1)
+                      A(i)=A(i)-Rdate(1)*scale ! add_offset added above
+                    END DO
+                  ELSE
+                    DO i=1,Asize(1)
+                      A(i)=(my_Rdate(1)*scale+A(i))-Rdate(1)*scale
+                    END DO
+                  END IF
+                  IF (Ldebug) THEN
+                    scale=3600.0_dp           ! convert to seconds
+                    dnum_new=Rdate(2)+A(1)*scale
+                    CALL datestr (dnum_new, .FALSE., dstr_new)
+                  END IF
                 CASE ('day', 'days')
                   IF (Ldebug) THEN
                     IF (JulianOffset) THEN
@@ -4537,8 +4543,6 @@
 !                                                                      !
 !=======================================================================
 !
-      USE distribute_mod, ONLY : mp_bcasti
-!
 !  Imported variable declarations.
 !
       integer, intent(in) :: ng, model
@@ -4568,7 +4572,7 @@
 !
       IF (.not.PRESENT(ncid)) THEN
         CALL netcdf_open (ng, model, TRIM(ncname), 1, my_ncid)
-        IF (FoundError(exit_flag, NoError, 6486, MyFile)) RETURN
+        IF (FoundError(exit_flag, NoError, 7023, MyFile)) RETURN
       ELSE
         my_ncid=ncid
       END IF
@@ -4578,7 +4582,7 @@
       IF (OutThread) THEN
         IF (.not.PRESENT(varid)) THEN
           status=nf90_inq_varid(my_ncid, TRIM(myVarName), my_varid)
-          IF (FoundError(status, nf90_noerr, 6496, MyFile)) THEN
+          IF (FoundError(status, nf90_noerr, 7033, MyFile)) THEN
             WRITE (stdout,10) TRIM(myVarName), TRIM(ncname),            &
      &                        TRIM(SourceFile), nf90_strerror(status)
             exit_flag=3
@@ -4597,7 +4601,7 @@
             my_A(1)=A
             status=nf90_put_var(my_ncid, my_varid, my_A, start, total)
           END IF
-          IF (FoundError(status, nf90_noerr, 6515, MyFile)) THEN
+          IF (FoundError(status, nf90_noerr, 7052, MyFile)) THEN
             WRITE (stdout,20) TRIM(myVarName), TRIM(ncname),            &
      &                        TRIM(SourceFile), nf90_strerror(status)
             exit_flag=3
@@ -4662,8 +4666,6 @@
 !                                                                      !
 !=======================================================================
 !
-      USE distribute_mod, ONLY : mp_bcasti
-!
 !  Imported variable declarations.
 !
       integer, intent(in) :: ng, model
@@ -4684,14 +4686,14 @@
      &  "ROMS/Modules/mod_netcdf.F"//", netcdf_put_fvar_1d"
 !
 !-----------------------------------------------------------------------
-!  Read in a floating-point scalar variable.
+!  Read in a floating-point 1D-array variable.
 !-----------------------------------------------------------------------
 !
 !  If file ID is not provided, open file for writing.
 !
       IF (.not.PRESENT(ncid)) THEN
         CALL netcdf_open (ng, model, TRIM(ncname), 1, my_ncid)
-        IF (FoundError(exit_flag, NoError, 6620, MyFile)) RETURN
+        IF (FoundError(exit_flag, NoError, 7152, MyFile)) RETURN
       ELSE
         my_ncid=ncid
       END IF
@@ -4701,7 +4703,7 @@
       IF (OutThread) THEN
         IF (.not.PRESENT(varid)) THEN
           status=nf90_inq_varid(my_ncid, TRIM(myVarName), my_varid)
-          IF (FoundError(status, nf90_noerr, 6630, MyFile)) THEN
+          IF (FoundError(status, nf90_noerr, 7162, MyFile)) THEN
             WRITE (stdout,10) TRIM(myVarName), TRIM(ncname),            &
      &                        TRIM(SourceFile), nf90_strerror(status)
             exit_flag=3
@@ -4715,7 +4717,7 @@
 !
         IF (exit_flag.eq.NoError) THEN
           status=nf90_put_var(my_ncid, my_varid, A, start, total)
-          IF (FoundError(status, nf90_noerr, 6644, MyFile)) THEN
+          IF (FoundError(status, nf90_noerr, 7176, MyFile)) THEN
             WRITE (stdout,20) TRIM(myVarName), TRIM(ncname),            &
      &                        TRIM(SourceFile), nf90_strerror(status)
             exit_flag=3
@@ -4780,8 +4782,6 @@
 !                                                                      !
 !=======================================================================
 !
-      USE distribute_mod, ONLY : mp_bcasti
-!
 !  Imported variable declarations.
 !
       integer, intent(in) :: ng, model
@@ -4802,14 +4802,14 @@
      &  "ROMS/Modules/mod_netcdf.F"//", netcdf_put_fvar_2d"
 !
 !-----------------------------------------------------------------------
-!  Read in a floating-point scalar variable.
+!  Read in a floating-point 2D-array variable.
 !-----------------------------------------------------------------------
 !
 !  If file ID is not provided, open file for writing.
 !
       IF (.not.PRESENT(ncid)) THEN
         CALL netcdf_open (ng, model, TRIM(ncname), 1, my_ncid)
-        IF (FoundError(exit_flag, NoError, 6749, MyFile)) RETURN
+        IF (FoundError(exit_flag, NoError, 7276, MyFile)) RETURN
       ELSE
         my_ncid=ncid
       END IF
@@ -4819,7 +4819,7 @@
       IF (OutThread) THEN
         IF (.not.PRESENT(varid)) THEN
           status=nf90_inq_varid(my_ncid, TRIM(myVarName), my_varid)
-          IF (FoundError(status, nf90_noerr, 6759, MyFile)) THEN
+          IF (FoundError(status, nf90_noerr, 7286, MyFile)) THEN
             WRITE (stdout,10) TRIM(myVarName), TRIM(ncname),            &
      &                        TRIM(SourceFile), nf90_strerror(status)
             exit_flag=3
@@ -4833,7 +4833,7 @@
 !
         IF (exit_flag.eq.NoError) THEN
           status=nf90_put_var(my_ncid, my_varid, A, start, total)
-          IF (FoundError(status, nf90_noerr, 6773, MyFile)) THEN
+          IF (FoundError(status, nf90_noerr, 7300, MyFile)) THEN
             WRITE (stdout,20) TRIM(myVarName), TRIM(ncname),            &
      &                        TRIM(SourceFile), nf90_strerror(status)
             exit_flag=3
@@ -4898,8 +4898,6 @@
 !                                                                      !
 !=======================================================================
 !
-      USE distribute_mod, ONLY : mp_bcasti
-!
 !  Imported variable declarations.
 !
       integer, intent(in) :: ng, model
@@ -4920,14 +4918,14 @@
      &  "ROMS/Modules/mod_netcdf.F"//", netcdf_put_fvar_3d"
 !
 !-----------------------------------------------------------------------
-!  Read in a floating-point scalar variable.
+!  Read in a floating-point 3D-array variable.
 !-----------------------------------------------------------------------
 !
 !  If file ID is not provided, open file for writing.
 !
       IF (.not.PRESENT(ncid)) THEN
         CALL netcdf_open (ng, model, TRIM(ncname), 1, my_ncid)
-        IF (FoundError(exit_flag, NoError, 6878, MyFile)) RETURN
+        IF (FoundError(exit_flag, NoError, 7400, MyFile)) RETURN
       ELSE
         my_ncid=ncid
       END IF
@@ -4937,7 +4935,7 @@
       IF (OutThread) THEN
         IF (.not.PRESENT(varid)) THEN
           status=nf90_inq_varid(my_ncid, TRIM(myVarName), my_varid)
-          IF (FoundError(status, nf90_noerr, 6888, MyFile)) THEN
+          IF (FoundError(status, nf90_noerr, 7410, MyFile)) THEN
             WRITE (stdout,10) TRIM(myVarName), TRIM(ncname),            &
      &                        TRIM(SourceFile), nf90_strerror(status)
             exit_flag=3
@@ -4951,7 +4949,7 @@
 !
         IF (exit_flag.eq.NoError) THEN
           status=nf90_put_var(my_ncid, my_varid, A, start, total)
-          IF (FoundError(status, nf90_noerr, 6902, MyFile)) THEN
+          IF (FoundError(status, nf90_noerr, 7424, MyFile)) THEN
             WRITE (stdout,20) TRIM(myVarName), TRIM(ncname),            &
      &                        TRIM(SourceFile), nf90_strerror(status)
             exit_flag=3
@@ -5016,8 +5014,6 @@
 !                                                                      !
 !=======================================================================
 !
-      USE distribute_mod, ONLY : mp_bcasti
-!
 !  Imported variable declarations.
 !
       integer, intent(in) :: ng, model
@@ -5038,14 +5034,14 @@
      &  "ROMS/Modules/mod_netcdf.F"//", netcdf_put_fvar_4d"
 !
 !-----------------------------------------------------------------------
-!  Read in a floating-point scalar variable.
+!  Read in a floating-point 4D-array variable.
 !-----------------------------------------------------------------------
 !
 !  If NetCDF file ID is not provided, open NetCDF for writing.
 !
       IF (.not.PRESENT(ncid)) THEN
         CALL netcdf_open (ng, model, TRIM(ncname), 1, my_ncid)
-        IF (FoundError(exit_flag, NoError, 7007, MyFile)) RETURN
+        IF (FoundError(exit_flag, NoError, 7524, MyFile)) RETURN
       ELSE
         my_ncid=ncid
       END IF
@@ -5055,7 +5051,7 @@
       IF (OutThread) THEN
         IF (.not.PRESENT(varid)) THEN
           status=nf90_inq_varid(my_ncid, TRIM(myVarName), my_varid)
-          IF (FoundError(status, nf90_noerr, 7017, MyFile)) THEN
+          IF (FoundError(status, nf90_noerr, 7534, MyFile)) THEN
             WRITE (stdout,10) TRIM(myVarName), TRIM(ncname),            &
      &                        TRIM(SourceFile), nf90_strerror(status)
             exit_flag=3
@@ -5069,7 +5065,7 @@
 !
         IF (exit_flag.eq.NoError) THEN
           status=nf90_put_var(my_ncid, my_varid, A, start, total)
-          IF (FoundError(status, nf90_noerr, 7031, MyFile)) THEN
+          IF (FoundError(status, nf90_noerr, 7548, MyFile)) THEN
             WRITE (stdout,20) TRIM(myVarName), TRIM(ncname),            &
      &                        TRIM(SourceFile), nf90_strerror(status)
             exit_flag=3
@@ -5134,8 +5130,6 @@
 !                                                                      !
 !=======================================================================
 !
-      USE distribute_mod, ONLY : mp_bcasti
-!
 !  Imported variable declarations.
 !
       integer, intent(in) :: ng, model
@@ -5163,7 +5157,7 @@
 !
       IF (.not.PRESENT(ncid)) THEN
         CALL netcdf_open (ng, model, TRIM(ncname), 1, my_ncid)
-        IF (FoundError(exit_flag, NoError, 7138, MyFile)) RETURN
+        IF (FoundError(exit_flag, NoError, 7650, MyFile)) RETURN
       ELSE
         my_ncid=ncid
       END IF
@@ -5173,7 +5167,7 @@
       IF (OutThread) THEN
         IF (.not.PRESENT(varid)) THEN
           status=nf90_inq_varid(my_ncid, TRIM(myVarName), my_varid)
-          IF (FoundError(status, nf90_noerr, 7148, MyFile)) THEN
+          IF (FoundError(status, nf90_noerr, 7660, MyFile)) THEN
             WRITE (stdout,10) TRIM(myVarName), TRIM(ncname),            &
      &                        TRIM(SourceFile), nf90_strerror(status)
             exit_flag=3
@@ -5192,7 +5186,7 @@
             my_A(1)=A
             status=nf90_put_var(my_ncid, my_varid, my_A, start, total)
           END IF
-          IF (FoundError(status, nf90_noerr, 7167, MyFile)) THEN
+          IF (FoundError(status, nf90_noerr, 7679, MyFile)) THEN
             WRITE (stdout,20) TRIM(myVarName), TRIM(ncname),            &
      &                        TRIM(SourceFile), nf90_strerror(status)
             exit_flag=3
@@ -5257,8 +5251,6 @@
 !                                                                      !
 !=======================================================================
 !
-      USE distribute_mod, ONLY : mp_bcasti
-!
 !  Imported variable declarations.
 !
       integer, intent(in) :: ng, model
@@ -5285,7 +5277,7 @@
 !
       IF (.not.PRESENT(ncid)) THEN
         CALL netcdf_open (ng, model, TRIM(ncname), 1, my_ncid)
-        IF (FoundError(exit_flag, NoError, 7272, MyFile)) RETURN
+        IF (FoundError(exit_flag, NoError, 7779, MyFile)) RETURN
       ELSE
         my_ncid=ncid
       END IF
@@ -5295,7 +5287,7 @@
       IF (OutThread) THEN
         IF (.not.PRESENT(varid)) THEN
           status=nf90_inq_varid(my_ncid, TRIM(myVarName), my_varid)
-          IF (FoundError(status, nf90_noerr, 7282, MyFile)) THEN
+          IF (FoundError(status, nf90_noerr, 7789, MyFile)) THEN
             WRITE (stdout,10) TRIM(myVarName), TRIM(ncname),            &
      &                        TRIM(SourceFile), nf90_strerror(status)
             exit_flag=3
@@ -5309,7 +5301,7 @@
 !
         IF (exit_flag.eq.NoError) THEN
           status=nf90_put_var(my_ncid, my_varid, A, start, total)
-          IF (FoundError(status, nf90_noerr, 7296, MyFile)) THEN
+          IF (FoundError(status, nf90_noerr, 7803, MyFile)) THEN
             WRITE (stdout,20) TRIM(myVarName), TRIM(ncname),            &
      &                        TRIM(SourceFile), nf90_strerror(status)
             exit_flag=3
@@ -5374,8 +5366,6 @@
 !                                                                      !
 !=======================================================================
 !
-      USE distribute_mod, ONLY : mp_bcasti
-!
 !  Imported variable declarations.
 !
       integer, intent(in) :: ng, model
@@ -5402,7 +5392,7 @@
 !
       IF (.not.PRESENT(ncid)) THEN
         CALL netcdf_open (ng, model, TRIM(ncname), 1, my_ncid)
-        IF (FoundError(exit_flag, NoError, 7401, MyFile)) RETURN
+        IF (FoundError(exit_flag, NoError, 7903, MyFile)) RETURN
       ELSE
         my_ncid=ncid
       END IF
@@ -5412,7 +5402,7 @@
       IF (OutThread) THEN
         IF (.not.PRESENT(varid)) THEN
           status=nf90_inq_varid(my_ncid, TRIM(myVarName), my_varid)
-          IF (FoundError(status, nf90_noerr, 7411, MyFile)) THEN
+          IF (FoundError(status, nf90_noerr, 7913, MyFile)) THEN
             WRITE (stdout,10) TRIM(myVarName), TRIM(ncname),            &
      &                        TRIM(SourceFile), nf90_strerror(status)
             exit_flag=3
@@ -5426,7 +5416,7 @@
 !
         IF (exit_flag.eq.NoError) THEN
           status=nf90_put_var(my_ncid, my_varid, A, start, total)
-          IF (FoundError(status, nf90_noerr, 7425, MyFile)) THEN
+          IF (FoundError(status, nf90_noerr, 7927, MyFile)) THEN
             WRITE (stdout,20) TRIM(myVarName), TRIM(ncname),            &
      &                        TRIM(SourceFile), nf90_strerror(status)
             exit_flag=3
@@ -5494,8 +5484,6 @@
 !                                                                      !
 !=======================================================================
 !
-      USE distribute_mod, ONLY : mp_bcasti
-!
 !  Imported variable declarations.
 !
       integer, intent(in) :: ng, model
@@ -5525,7 +5513,7 @@
 !
       IF (.not.PRESENT(ncid)) THEN
         CALL netcdf_open (ng, model, TRIM(ncname), 1, my_ncid)
-        IF (FoundError(exit_flag, NoError, 7536, MyFile)) RETURN
+        IF (FoundError(exit_flag, NoError, 8033, MyFile)) RETURN
       ELSE
         my_ncid=ncid
       END IF
@@ -5535,7 +5523,7 @@
       IF (OutThread) THEN
         IF (.not.PRESENT(varid)) THEN
           status=nf90_inq_varid(my_ncid, TRIM(myVarName), my_varid)
-          IF (FoundError(status, nf90_noerr, 7546, MyFile)) THEN
+          IF (FoundError(status, nf90_noerr, 8043, MyFile)) THEN
             WRITE (stdout,10) TRIM(myVarName), TRIM(ncname),            &
      &                        TRIM(SourceFile), nf90_strerror(status)
             exit_flag=3
@@ -5563,7 +5551,7 @@
             my_AI(1)=AI
             status=nf90_put_var(my_ncid, my_varid, my_AI, start, total)
           END IF
-          IF (FoundError(status, nf90_noerr, 7574, MyFile)) THEN
+          IF (FoundError(status, nf90_noerr, 8071, MyFile)) THEN
             WRITE (stdout,20) TRIM(myVarName), TRIM(ncname),            &
      &                        TRIM(SourceFile), nf90_strerror(status)
             exit_flag=3
@@ -5631,14 +5619,6 @@
 !                                                                      !
 !=======================================================================
 !
-      USE mod_param
-      USE mod_parallel
-      USE mod_iounits
-      USE mod_scalars
-!
-      USE distribute_mod, ONLY : mp_bcasti
-      USE strings_mod,    ONLY : FoundError
-!
 !  Imported variable declarations.
 !
       integer, intent(in) :: ng, model
@@ -5667,7 +5647,7 @@
 !
       IF (.not.PRESENT(ncid)) THEN
         CALL netcdf_open (ng, model, TRIM(ncname), 1, my_ncid)
-        IF (FoundError(exit_flag, NoError, 7689, MyFile)) RETURN
+        IF (FoundError(exit_flag, NoError, 8176, MyFile)) RETURN
       ELSE
         my_ncid=ncid
       END IF
@@ -5677,7 +5657,7 @@
       IF (OutThread) THEN
         IF (.not.PRESENT(varid)) THEN
           status=nf90_inq_varid(my_ncid, TRIM(myVarName), my_varid)
-          IF (FoundError(status, nf90_noerr, 7699, MyFile)) THEN
+          IF (FoundError(status, nf90_noerr, 8186, MyFile)) THEN
             WRITE (stdout,10) TRIM(myVarName), TRIM(ncname),            &
      &                        TRIM(SourceFile), nf90_strerror(status)
             exit_flag=3
@@ -5702,7 +5682,7 @@
 !
         IF (exit_flag.eq.NoError) THEN
           status=nf90_put_var(my_ncid, my_varid, AI, start, total)
-          IF (FoundError(status, nf90_noerr, 7724, MyFile)) THEN
+          IF (FoundError(status, nf90_noerr, 8211, MyFile)) THEN
             WRITE (stdout,20) TRIM(myVarName), TRIM(ncname),            &
      &                        TRIM(SourceFile), nf90_strerror(status)
             exit_flag=3
@@ -5770,8 +5750,6 @@
 !                                                                      !
 !=======================================================================
 !
-      USE distribute_mod, ONLY : mp_bcasti
-!
 !  Imported variable declarations.
 !
       integer, intent(in) :: ng, model
@@ -5800,7 +5778,7 @@
 !
       IF (.not.PRESENT(ncid)) THEN
         CALL netcdf_open (ng, model, TRIM(ncname), 1, my_ncid)
-        IF (FoundError(exit_flag, NoError, 7834, MyFile)) RETURN
+        IF (FoundError(exit_flag, NoError, 8316, MyFile)) RETURN
       ELSE
         my_ncid=ncid
       END IF
@@ -5810,7 +5788,7 @@
       IF (OutThread) THEN
         IF (.not.PRESENT(varid)) THEN
           status=nf90_inq_varid(my_ncid, TRIM(myVarName), my_varid)
-          IF (FoundError(status, nf90_noerr, 7844, MyFile)) THEN
+          IF (FoundError(status, nf90_noerr, 8326, MyFile)) THEN
             WRITE (stdout,10) TRIM(myVarName), TRIM(ncname),            &
      &                        TRIM(SourceFile), nf90_strerror(status)
             exit_flag=3
@@ -5837,7 +5815,7 @@
 !
         IF (exit_flag.eq.NoError) THEN
           status=nf90_put_var(my_ncid, my_varid, AI, start, total)
-          IF (FoundError(status, nf90_noerr, 7871, MyFile)) THEN
+          IF (FoundError(status, nf90_noerr, 8353, MyFile)) THEN
             WRITE (stdout,20) TRIM(myVarName), TRIM(ncname),            &
      &                        TRIM(SourceFile), nf90_strerror(status)
             exit_flag=3
@@ -5911,8 +5889,6 @@
 !                                                                      !
 !=======================================================================
 !
-      USE distribute_mod, ONLY : mp_bcasti
-!
 !  Imported variable declarations.
 !
       integer, intent(in) :: ng, model
@@ -5940,7 +5916,7 @@
 !
       IF (.not.PRESENT(ncid)) THEN
         CALL netcdf_open (ng, model, TRIM(ncname), 1, my_ncid)
-        IF (FoundError(exit_flag, NoError, 7986, MyFile)) RETURN
+        IF (FoundError(exit_flag, NoError, 8463, MyFile)) RETURN
       ELSE
         my_ncid=ncid
       END IF
@@ -5950,7 +5926,7 @@
       IF (OutThread) THEN
         IF (.not.PRESENT(varid)) THEN
           status=nf90_inq_varid(my_ncid, TRIM(myVarName), my_varid)
-          IF (FoundError(status, nf90_noerr, 7996, MyFile)) THEN
+          IF (FoundError(status, nf90_noerr, 8473, MyFile)) THEN
             WRITE (stdout,10) TRIM(myVarName), TRIM(ncname),            &
      &                        TRIM(SourceFile), nf90_strerror(status)
             exit_flag=3
@@ -5969,7 +5945,7 @@
             my_A(1)=A
             status=nf90_put_var(my_ncid, my_varid, my_A, start, total)
           END IF
-          IF (FoundError(status, nf90_noerr, 8015, MyFile)) THEN
+          IF (FoundError(status, nf90_noerr, 8492, MyFile)) THEN
             WRITE (stdout,20) TRIM(myVarName), TRIM(ncname),            &
      &                        TRIM(SourceFile), nf90_strerror(status)
             exit_flag=3
@@ -6044,8 +6020,6 @@
 !                                                                      !
 !=======================================================================
 !
-      USE distribute_mod, ONLY : mp_bcasti
-!
 !  Imported variable declarations.
 !
       integer, intent(in) :: ng, model
@@ -6072,7 +6046,7 @@
 !
       IF (.not.PRESENT(ncid)) THEN
         CALL netcdf_open (ng, model, TRIM(ncname), 1, my_ncid)
-        IF (FoundError(exit_flag, NoError, 8130, MyFile)) RETURN
+        IF (FoundError(exit_flag, NoError, 8602, MyFile)) RETURN
       ELSE
         my_ncid=ncid
       END IF
@@ -6082,7 +6056,7 @@
       IF (OutThread) THEN
         IF (.not.PRESENT(varid)) THEN
           status=nf90_inq_varid(my_ncid, TRIM(myVarName), my_varid)
-          IF (FoundError(status, nf90_noerr, 8140, MyFile)) THEN
+          IF (FoundError(status, nf90_noerr, 8612, MyFile)) THEN
             WRITE (stdout,10) TRIM(myVarName), TRIM(ncname),            &
      &                        TRIM(SourceFile), nf90_strerror(status)
             exit_flag=3
@@ -6096,7 +6070,7 @@
 !
         IF (exit_flag.eq.NoError) THEN
           status=nf90_put_var(my_ncid, my_varid, A, start, total)
-          IF (FoundError(status, nf90_noerr, 8154, MyFile)) THEN
+          IF (FoundError(status, nf90_noerr, 8626, MyFile)) THEN
             WRITE (stdout,20) TRIM(myVarName), TRIM(ncname),            &
      &                        TRIM(SourceFile), nf90_strerror(status)
             exit_flag=3
@@ -6171,8 +6145,6 @@
 !                                                                      !
 !=======================================================================
 !
-      USE distribute_mod, ONLY : mp_bcasti
-!
 !  Imported variable declarations.
 !
       integer, intent(in) :: ng, model
@@ -6199,7 +6171,7 @@
 !
       IF (.not.PRESENT(ncid)) THEN
         CALL netcdf_open (ng, model, TRIM(ncname), 1, my_ncid)
-        IF (FoundError(exit_flag, NoError, 8269, MyFile)) RETURN
+        IF (FoundError(exit_flag, NoError, 8736, MyFile)) RETURN
       ELSE
         my_ncid=ncid
       END IF
@@ -6209,7 +6181,7 @@
       IF (OutThread) THEN
         IF (.not.PRESENT(varid)) THEN
           status=nf90_inq_varid(my_ncid, TRIM(myVarName), my_varid)
-          IF (FoundError(status, nf90_noerr, 8279, MyFile)) THEN
+          IF (FoundError(status, nf90_noerr, 8746, MyFile)) THEN
             WRITE (stdout,10) TRIM(myVarName), TRIM(ncname),            &
      &                        TRIM(SourceFile), nf90_strerror(status)
             exit_flag=3
@@ -6223,7 +6195,7 @@
 !
         IF (exit_flag.eq.NoError) THEN
           status=nf90_put_var(my_ncid, my_varid, A, start, total)
-          IF (FoundError(status, nf90_noerr, 8293, MyFile)) THEN
+          IF (FoundError(status, nf90_noerr, 8760, MyFile)) THEN
             WRITE (stdout,20) TRIM(myVarName), TRIM(ncname),            &
      &                        TRIM(SourceFile), nf90_strerror(status)
             exit_flag=3
@@ -6298,8 +6270,6 @@
 !                                                                      !
 !=======================================================================
 !
-      USE distribute_mod, ONLY : mp_bcasti
-!
 !  Imported variable declarations.
 !
       integer, intent(in) :: ng, model
@@ -6326,7 +6296,7 @@
 !
       IF (.not.PRESENT(ncid)) THEN
         CALL netcdf_open (ng, model, TRIM(ncname), 1, my_ncid)
-        IF (FoundError(exit_flag, NoError, 8408, MyFile)) RETURN
+        IF (FoundError(exit_flag, NoError, 8870, MyFile)) RETURN
       ELSE
         my_ncid=ncid
       END IF
@@ -6336,7 +6306,7 @@
       IF (OutThread) THEN
         IF (.not.PRESENT(varid)) THEN
           status=nf90_inq_varid(my_ncid, TRIM(myVarName), my_varid)
-          IF (FoundError(status, nf90_noerr, 8418, MyFile)) THEN
+          IF (FoundError(status, nf90_noerr, 8880, MyFile)) THEN
             WRITE (stdout,10) TRIM(myVarName), TRIM(ncname),            &
      &                        TRIM(SourceFile), nf90_strerror(status)
             exit_flag=3
@@ -6350,7 +6320,7 @@
 !
         IF (exit_flag.eq.NoError) THEN
           status=nf90_put_var(my_ncid, my_varid, A, start, total)
-          IF (FoundError(status, nf90_noerr, 8432, MyFile)) THEN
+          IF (FoundError(status, nf90_noerr, 8894, MyFile)) THEN
             WRITE (stdout,20) TRIM(myVarName), TRIM(ncname),            &
      &                        TRIM(SourceFile), nf90_strerror(status)
             exit_flag=3
@@ -6401,8 +6371,6 @@
 !                                                                      !
 !=======================================================================
 !
-      USE distribute_mod, ONLY : mp_bcasti
-!
 !  Imported variable declarations.
 !
       integer, intent(in) :: ng, model
@@ -6445,7 +6413,7 @@
 !
         IF (exit_flag.eq.NoError) THEN
           status=nf90_close(ncid)
-          IF (FoundError(status, nf90_noerr, 8593, MyFile)) THEN
+          IF (FoundError(status, nf90_noerr, 9050, MyFile)) THEN
             WRITE (stdout,20) ncid, TRIM(my_ncname), TRIM(SourceFile),  &
      &                        nf90_strerror(status)
             exit_flag=3
@@ -6455,7 +6423,7 @@
             WRITE (DBout,'(a,1x," <= ",i8,2(2x,a))')                    &
      &            KernelString(model)//' F90: CLOSE', ncid,             &
      &            TRIM(my_ncname), TRIM(SourceFile)
-            CALL my_flush (DBout)
+            FLUSH (DBout)
           END IF
           ncid=-1
         END IF
@@ -6501,8 +6469,6 @@
 !                                                                      !
 !=======================================================================
 !
-      USE distribute_mod, ONLY : mp_bcasti
-!
 !  Imported variable declarations.
 !
       integer, intent(in) :: ng, model
@@ -6526,7 +6492,7 @@
       my_cmode=IOR(nf90_clobber, CMODE)
       IF (OutThread) THEN
         status=nf90_create(TRIM(ncname), my_cmode, ncid)
-        IF (FoundError(status, nf90_noerr, 8720, MyFile)) THEN
+        IF (FoundError(status, nf90_noerr, 9172, MyFile)) THEN
           WRITE (stdout,10) TRIM(ncname), TRIM(SourceFile),             &
      &                      nf90_strerror(status)
           exit_flag=3
@@ -6536,14 +6502,14 @@
             WRITE (DBout,'(a," ** ",i8,2(2x,a))')                       &
      &            KernelString(model)//' F90: CREATE', ncid,            &
      &            TRIM(ncname), TRIM(SourceFile)
-          CALL my_flush (DBout)
+          FLUSH (DBout)
         END IF
 !
 !  Set NOFILL mode to enhance performance.
 !
         IF (exit_flag.eq.NoError) THEN
           status=nf90_set_fill(ncid, nf90_nofill, OldFillMode)
-          IF (FoundError(status, nf90_noerr, 8737, MyFile)) THEN
+          IF (FoundError(status, nf90_noerr, 9189, MyFile)) THEN
             IF (Master) WRITE (stdout,10) TRIM(ncname),                 &
      &                                    TRIM(SourceFile),             &
      &                                    nf90_strerror(status)
@@ -6587,8 +6553,6 @@
 !                                                                      !
 !=======================================================================
 !
-      USE distribute_mod, ONLY : mp_bcasti
-!
 !  Imported variable declarations.
 !
       integer, intent(in) :: ng, model, ncid
@@ -6609,7 +6573,7 @@
 !
       IF (OutThread) THEN
         status=nf90_enddef(ncid)
-        IF (FoundError(status, nf90_noerr, 8823, MyFile)) THEN
+        IF (FoundError(status, nf90_noerr, 9270, MyFile)) THEN
           IF (Master) WRITE (stdout,10) TRIM(ncname), TRIM(SourceFile), &
      &                                  nf90_strerror(status)
           exit_flag=3
@@ -6651,8 +6615,6 @@
 !                                                                      !
 !=======================================================================
 !
-      USE distribute_mod, ONLY : mp_bcasti
-!
 !  Imported variable declarations.
 !
       integer, intent(in) :: ng, model, omode
@@ -6684,7 +6646,7 @@
             my_omode=nf90_nowrite
             status=nf90_open(TRIM(ncname), my_omode, ncid)
         END SELECT
-        IF (FoundError(status, nf90_noerr, 8961, MyFile)) THEN
+        IF (FoundError(status, nf90_noerr, 9403, MyFile)) THEN
           WRITE (stdout,10) TRIM(ncname), TRIM(SourceFile),             &
      &                      nf90_strerror(status)
           exit_flag=3
@@ -6694,7 +6656,7 @@
            WRITE (DBout,'(a,2x," => ",i8,2(2x,a))')                     &
      &           KernelString(model)//' F90: OPEN', ncid,               &
      &           TRIM(ncname), TRIM(SourceFile)
-          CALL my_flush (DBout)
+          FLUSH (DBout)
         END IF
         ibuffer(1)=exit_flag
         ibuffer(2)=ioerror
@@ -6731,8 +6693,6 @@
 !                                                                      !
 !=======================================================================
 !
-      USE distribute_mod, ONLY : mp_bcasti
-!
 !  Imported variable declarations.
 !
       integer, intent(in) :: ng, model, ncid
@@ -6753,7 +6713,7 @@
 !
       IF (OutThread) THEN
         status=nf90_redef(ncid)
-        IF (FoundError(status, nf90_noerr, 9046, MyFile)) THEN
+        IF (FoundError(status, nf90_noerr, 9483, MyFile)) THEN
           IF (Master) WRITE (stdout,10) TRIM(ncname), TRIM(SourceFile), &
      &                                  nf90_strerror(status)
           exit_flag=3
@@ -6795,8 +6755,6 @@
 !                                                                      !
 !=======================================================================
 !
-      USE distribute_mod, ONLY : mp_bcasti
-!
 !  Imported variable declarations.
 !
       integer, intent(in) :: ng, model, ncid
@@ -6817,7 +6775,7 @@
 !
       IF (OutThread) THEN
         status=nf90_sync(ncid)
-        IF (FoundError(status, nf90_noerr, 9119, MyFile)) THEN
+        IF (FoundError(status, nf90_noerr, 9551, MyFile)) THEN
           WRITE (stdout,10) TRIM(ncname), TRIM(SourceFile),             &
      &                      nf90_strerror(status)
           exit_flag=3

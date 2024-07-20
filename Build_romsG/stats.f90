@@ -30,6 +30,8 @@
 !                                                                      !
 !=======================================================================
 !
+      USE mod_param
+!
       implicit none
 !
       PUBLIC :: stats_2dfld
@@ -39,6 +41,7 @@
       CONTAINS
 !
       SUBROUTINE stats_2dfld (ng, tile, model, gtype, S,                &
+     &                        Extract_Flag,                             &
      &                        LBi, UBi, LBj, UBj,                       &
      &                        F, Fmask, debug)
 !
@@ -52,6 +55,7 @@
 !     tile         Domain partition (integer)                          !
 !     model        Calling model identifier (integer)                  !
 !     gtype        Grid type (integer)                                 !
+!     Extract_Flag Extraction flag interpolation/decimation (integer)  !
 !     LBi          I-dimension Lower bound (integer)                   !
 !     UBi          I-dimension Upper bound (integer)                   !
 !     LBj          J-dimension Lower bound (integer)                   !
@@ -77,8 +81,11 @@
 !  Imported variable declarations.
 !
       logical, intent(in), optional :: debug
+!
       integer, intent(in) :: ng, tile, model, gtype
+      integer, intent(in) :: Extract_Flag
       integer, intent(in) :: LBi, UBi, LBj, UBj
+!
       real(r8), intent(in) :: F(LBi:,LBj:)
       real(r8), intent(in), optional :: Fmask(LBi:,LBj:)
       TYPE(T_STATS), intent(inout) :: S
@@ -86,9 +93,11 @@
 !  Local variable declarations.
 !
       logical :: Lprint
+!
       integer :: Imin, Imax, Jmin, Jmax, Npts, NSUB
       integer :: i, j, my_count
       integer :: my_threadnum
+!
       real(r8) :: fac
       real(r8) :: my_max, my_min
       real(r8) :: my_avg, my_rms
@@ -104,30 +113,40 @@
 !
       SELECT CASE (ABS(gtype))
         CASE (p2dvar)
-          Imin=BOUNDS(ng)%IstrP(tile)
-          Imax=BOUNDS(ng)%IendP(tile)
-          Jmin=BOUNDS(ng)%JstrP(tile)
-          Jmax=BOUNDS(ng)%JendP(tile)
+          IF (Extract_Flag.ge.0) THEN
+            Imin=BOUNDS(ng)%IstrP(tile)
+            Imax=BOUNDS(ng)%IendP(tile)
+            Jmin=BOUNDS(ng)%JstrP(tile)
+            Jmax=BOUNDS(ng)%JendP(tile)
+          END IF
         CASE (r2dvar)
-          Imin=BOUNDS(ng)%IstrT(tile)
-          Imax=BOUNDS(ng)%IendT(tile)
-          Jmin=BOUNDS(ng)%JstrT(tile)
-          Jmax=BOUNDS(ng)%JendT(tile)
+          IF (Extract_Flag.ge.0) THEN
+            Imin=BOUNDS(ng)%IstrT(tile)
+            Imax=BOUNDS(ng)%IendT(tile)
+            Jmin=BOUNDS(ng)%JstrT(tile)
+            Jmax=BOUNDS(ng)%JendT(tile)
+          END IF
         CASE (u2dvar)
-          Imin=BOUNDS(ng)%IstrP(tile)
-          Imax=BOUNDS(ng)%IendT(tile)
-          Jmin=BOUNDS(ng)%JstrT(tile)
-          Jmax=BOUNDS(ng)%JendT(tile)
+          IF (Extract_Flag.ge.0) THEN
+            Imin=BOUNDS(ng)%IstrP(tile)
+            Imax=BOUNDS(ng)%IendT(tile)
+            Jmin=BOUNDS(ng)%JstrT(tile)
+            Jmax=BOUNDS(ng)%JendT(tile)
+          END IF
         CASE (v2dvar)
-          Imin=BOUNDS(ng)%IstrT(tile)
-          Imax=BOUNDS(ng)%IendT(tile)
-          Jmin=BOUNDS(ng)%JstrP(tile)
-          Jmax=BOUNDS(ng)%JendT(tile)
+          IF (Extract_Flag.ge.0) THEN
+            Imin=BOUNDS(ng)%IstrT(tile)
+            Imax=BOUNDS(ng)%IendT(tile)
+            Jmin=BOUNDS(ng)%JstrP(tile)
+            Jmax=BOUNDS(ng)%JendT(tile)
+          END IF
         CASE DEFAULT
-          Imin=BOUNDS(ng)%IstrT(tile)
-          Imax=BOUNDS(ng)%IendT(tile)
-          Jmin=BOUNDS(ng)%JstrT(tile)
-          Jmax=BOUNDS(ng)%JendT(tile)
+          IF (Extract_Flag.ge.0) THEN
+            Imin=BOUNDS(ng)%IstrT(tile)
+            Imax=BOUNDS(ng)%IendT(tile)
+            Jmin=BOUNDS(ng)%JstrT(tile)
+            Jmax=BOUNDS(ng)%JendT(tile)
+          END IF
       END SELECT
 !
 !-----------------------------------------------------------------------
@@ -213,7 +232,7 @@
      &            'S%rms    = ', S%rms
   10    FORMAT (10x,5(5x,a,i0),/,                                       &
      &          6(15x,a,1p,e15.8,0p,5x,a,1p,e15.8,0p,/))
-        CALL my_flush (stdout)
+        FLUSH (stdout)
       END IF
       tile_count=tile_count+1
       IF (tile_count.eq.NSUB) THEN
@@ -253,6 +272,7 @@
       END SUBROUTINE stats_2dfld
 !
       SUBROUTINE stats_3dfld (ng, tile, model, gtype, S,                &
+     &                        Extract_Flag,                             &
      &                        LBi, UBi, LBj, UBj, LBk, UBk,             &
      &                        F, Fmask, debug)
 !
@@ -266,6 +286,7 @@
 !     tile         Domain partition (integer)                          !
 !     model        Calling model identifier (integer)                  !
 !     gtype        Grid type (integer)                                 !
+!     Extract_Flag Extraction flag interpolation/decimation (integer)  !
 !     LBi          I-dimension Lower bound (integer)                   !
 !     UBi          I-dimension Upper bound (integer)                   !
 !     LBj          J-dimension Lower bound (integer)                   !
@@ -293,8 +314,11 @@
 !  Imported variable declarations.
 !
       logical, intent(in), optional :: debug
+!
       integer, intent(in) :: ng, tile, model, gtype
+      integer, intent(in) :: Extract_Flag
       integer, intent(in) :: LBi, UBi, LBj, UBj, LBk, UBk
+!
       real(r8), intent(in) :: F(LBi:,LBj:,LBk:)
       real(r8), intent(in), optional :: Fmask(LBi:,LBj:)
       TYPE(T_STATS), intent(inout) :: S
@@ -302,9 +326,11 @@
 !  Local variable declarations.
 !
       logical :: Lprint
+!
       integer :: Imin, Imax, Jmin, Jmax, Npts, NSUB
       integer :: i, j, k, my_count
       integer :: my_threadnum
+!
       real(r8) :: fac
       real(r8) :: my_max, my_min
       real(r8) :: my_avg, my_rms
@@ -319,31 +345,41 @@
 !  Determine I- and J-indices according to staggered C-grid type.
 !
       SELECT CASE (ABS(gtype))
-        CASE (p3dvar)
-          Imin=BOUNDS(ng)%IstrP(tile)
-          Imax=BOUNDS(ng)%IendP(tile)
-          Jmin=BOUNDS(ng)%JstrP(tile)
-          Jmax=BOUNDS(ng)%JendP(tile)
-        CASE (r3dvar)
-          Imin=BOUNDS(ng)%IstrT(tile)
-          Imax=BOUNDS(ng)%IendT(tile)
-          Jmin=BOUNDS(ng)%JstrT(tile)
-          Jmax=BOUNDS(ng)%JendT(tile)
-        CASE (u3dvar)
-          Imin=BOUNDS(ng)%IstrP(tile)
-          Imax=BOUNDS(ng)%IendT(tile)
-          Jmin=BOUNDS(ng)%JstrT(tile)
-          Jmax=BOUNDS(ng)%JendT(tile)
-        CASE (v3dvar)
-          Imin=BOUNDS(ng)%IstrT(tile)
-          Imax=BOUNDS(ng)%IendT(tile)
-          Jmin=BOUNDS(ng)%JstrP(tile)
-          Jmax=BOUNDS(ng)%JendT(tile)
+        CASE (p2dvar)
+          IF (Extract_Flag.ge.0) THEN
+            Imin=BOUNDS(ng)%IstrP(tile)
+            Imax=BOUNDS(ng)%IendP(tile)
+            Jmin=BOUNDS(ng)%JstrP(tile)
+            Jmax=BOUNDS(ng)%JendP(tile)
+          END IF
+        CASE (r2dvar)
+          IF (Extract_Flag.ge.0) THEN
+            Imin=BOUNDS(ng)%IstrT(tile)
+            Imax=BOUNDS(ng)%IendT(tile)
+            Jmin=BOUNDS(ng)%JstrT(tile)
+            Jmax=BOUNDS(ng)%JendT(tile)
+          END IF
+        CASE (u2dvar)
+          IF (Extract_Flag.ge.0) THEN
+            Imin=BOUNDS(ng)%IstrP(tile)
+            Imax=BOUNDS(ng)%IendT(tile)
+            Jmin=BOUNDS(ng)%JstrT(tile)
+            Jmax=BOUNDS(ng)%JendT(tile)
+          END IF
+        CASE (v2dvar)
+          IF (Extract_Flag.ge.0) THEN
+            Imin=BOUNDS(ng)%IstrT(tile)
+            Imax=BOUNDS(ng)%IendT(tile)
+            Jmin=BOUNDS(ng)%JstrP(tile)
+            Jmax=BOUNDS(ng)%JendT(tile)
+          END IF
         CASE DEFAULT
-          Imin=BOUNDS(ng)%IstrT(tile)
-          Imax=BOUNDS(ng)%IendT(tile)
-          Jmin=BOUNDS(ng)%JstrT(tile)
-          Jmax=BOUNDS(ng)%JendT(tile)
+          IF (Extract_Flag.ge.0) THEN
+            Imin=BOUNDS(ng)%IstrT(tile)
+            Imax=BOUNDS(ng)%IendT(tile)
+            Jmin=BOUNDS(ng)%JstrT(tile)
+            Jmax=BOUNDS(ng)%JendT(tile)
+          END IF
       END SELECT
 !
 !-----------------------------------------------------------------------
@@ -436,7 +472,7 @@
      &            'S%rms    = ', S%rms
   10    FORMAT (10x,5(5x,a,i0),/,                                       &
      &          6(15x,a,1p,e15.8,0p,5x,a,1p,e15.8,0p,/))
-        CALL my_flush (stdout)
+        FLUSH (stdout)
       END IF
       thread_count=thread_count+1
       IF (thread_count.eq.NSUB) THEN
@@ -476,6 +512,7 @@
       END SUBROUTINE stats_3dfld
 !
       SUBROUTINE stats_4dfld (ng, tile, model, gtype, S,                &
+     &                        Extract_Flag,                             &
      &                        LBi, UBi, LBj, UBj, LBk, UBk, LBt, UBt,   &
      &                        F, Fmask, debug)
 !
@@ -489,6 +526,7 @@
 !     tile         Domain partition (integer)                          !
 !     model        Calling model identifier (integer)                  !
 !     gtype        Grid type (integer)                                 !
+!     Extract_Flag Extraction flag interpolation/decimation (integer)  !
 !     LBi          I-dimension Lower bound (integer)                   !
 !     UBi          I-dimension Upper bound (integer)                   !
 !     LBj          J-dimension Lower bound (integer)                   !
@@ -518,8 +556,11 @@
 !  Imported variable declarations.
 !
       logical, intent(in), optional :: debug
+!
       integer, intent(in) :: ng, tile, model, gtype
+      integer, intent(in) :: Extract_Flag
       integer, intent(in) :: LBi, UBi, LBj, UBj, LBk, UBk, LBt, UBt
+!
       real(r8), intent(in) :: F(LBi:,LBj:,LBk:,LBt:)
       real(r8), intent(in), optional :: Fmask(LBi:,LBj:)
       TYPE(T_STATS), intent(inout) :: S
@@ -527,9 +568,11 @@
 !  Local variable declarations.
 !
       logical :: Lprint
+!
       integer :: Imin, Imax, Jmin, Jmax, Npts, NSUB
       integer :: i, j, k, l, my_count
       integer :: my_threadnum
+!
       real(r8) :: fac
       real(r8) :: my_max, my_min
       real(r8) :: my_avg, my_rms
@@ -544,31 +587,41 @@
 !  Determine I- and J-indices according to staggered C-grid type.
 !
       SELECT CASE (ABS(gtype))
-        CASE (p3dvar)
-          Imin=BOUNDS(ng)%IstrP(tile)
-          Imax=BOUNDS(ng)%IendP(tile)
-          Jmin=BOUNDS(ng)%JstrP(tile)
-          Jmax=BOUNDS(ng)%JendP(tile)
-        CASE (r3dvar)
-          Imin=BOUNDS(ng)%IstrT(tile)
-          Imax=BOUNDS(ng)%IendT(tile)
-          Jmin=BOUNDS(ng)%JstrT(tile)
-          Jmax=BOUNDS(ng)%JendT(tile)
-        CASE (u3dvar)
-          Imin=BOUNDS(ng)%IstrP(tile)
-          Imax=BOUNDS(ng)%IendT(tile)
-          Jmin=BOUNDS(ng)%JstrT(tile)
-          Jmax=BOUNDS(ng)%JendT(tile)
-        CASE (v3dvar)
-          Imin=BOUNDS(ng)%IstrT(tile)
-          Imax=BOUNDS(ng)%IendT(tile)
-          Jmin=BOUNDS(ng)%JstrP(tile)
-          Jmax=BOUNDS(ng)%JendT(tile)
+        CASE (p2dvar)
+          IF (Extract_Flag.ge.0) THEN
+            Imin=BOUNDS(ng)%IstrP(tile)
+            Imax=BOUNDS(ng)%IendP(tile)
+            Jmin=BOUNDS(ng)%JstrP(tile)
+            Jmax=BOUNDS(ng)%JendP(tile)
+          END IF
+        CASE (r2dvar)
+          IF (Extract_Flag.ge.0) THEN
+            Imin=BOUNDS(ng)%IstrT(tile)
+            Imax=BOUNDS(ng)%IendT(tile)
+            Jmin=BOUNDS(ng)%JstrT(tile)
+            Jmax=BOUNDS(ng)%JendT(tile)
+          END IF
+        CASE (u2dvar)
+          IF (Extract_Flag.ge.0) THEN
+            Imin=BOUNDS(ng)%IstrP(tile)
+            Imax=BOUNDS(ng)%IendT(tile)
+            Jmin=BOUNDS(ng)%JstrT(tile)
+            Jmax=BOUNDS(ng)%JendT(tile)
+          END IF
+        CASE (v2dvar)
+          IF (Extract_Flag.ge.0) THEN
+            Imin=BOUNDS(ng)%IstrT(tile)
+            Imax=BOUNDS(ng)%IendT(tile)
+            Jmin=BOUNDS(ng)%JstrP(tile)
+            Jmax=BOUNDS(ng)%JendT(tile)
+          END IF
         CASE DEFAULT
-          Imin=BOUNDS(ng)%IstrT(tile)
-          Imax=BOUNDS(ng)%IendT(tile)
-          Jmin=BOUNDS(ng)%JstrT(tile)
-          Jmax=BOUNDS(ng)%JendT(tile)
+          IF (Extract_Flag.ge.0) THEN
+            Imin=BOUNDS(ng)%IstrT(tile)
+            Imax=BOUNDS(ng)%IendT(tile)
+            Jmin=BOUNDS(ng)%JstrT(tile)
+            Jmax=BOUNDS(ng)%JendT(tile)
+          END IF
       END SELECT
 !
 !-----------------------------------------------------------------------
@@ -665,7 +718,7 @@
      &            'S%rms    = ', S%rms
   10    FORMAT (10x,5(5x,a,i0),/,                                       &
      &          6(15x,a,1p,e15.8,0p,5x,a,1p,e15.8,0p,/))
-        CALL my_flush (stdout)
+        FLUSH (stdout)
       END IF
       thread_count=thread_count+1
       IF (thread_count.eq.NSUB) THEN

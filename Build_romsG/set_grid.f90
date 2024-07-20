@@ -48,7 +48,7 @@
 !$OMP END MASTER
       CALL mp_bcasti (ng, model, exit_flag)
 !$OMP BARRIER
-      IF (FoundError(exit_flag, NoError, 86, MyFile)) RETURN
+      IF (FoundError(exit_flag, NoError, 89, MyFile)) RETURN
 !
 !-----------------------------------------------------------------------
 !  Set vertical terrain-following coordinate transformation function.
@@ -88,7 +88,7 @@
 !$OMP END MASTER
         CALL mp_bcasti (ng, model, exit_flag)
 !$OMP BARRIER
-        IF (FoundError(exit_flag, NoError, 174, MyFile)) RETURN
+        IF (FoundError(exit_flag, NoError, 191, MyFile)) RETURN
       END IF
 !
 !-----------------------------------------------------------------------

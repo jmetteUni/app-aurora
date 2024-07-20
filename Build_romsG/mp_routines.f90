@@ -10,7 +10,6 @@
 !  This package contains multi-processing routines used during         !
 !  parallel applications:                                              !
 !                                                                      !
-!     my_flush         Flushes the contents of a unit buffer.          !
 !     my_getarg        Returns the argument from command-line.         !
 !     my_getpid        Returns process ID of the calling process.      !
 !     my_numthreads    Returns number of threads that would            !
@@ -21,25 +20,6 @@
 !                        an arbitrary time in the past.                !
 !                                                                      !
 !=======================================================================
-!
-!-----------------------------------------------------------------------
-      SUBROUTINE my_flush (unit)
-!-----------------------------------------------------------------------
-!
-      USE mod_kinds
-!
-      implicit none
-!
-!  Imported variable declarations.
-!
-      integer, intent(in) :: unit
-!
-!  Flush the buffere of requested standard output or Fortran file unit.
-!
-      FLUSH (unit)                     ! Fortran 2003 standard
-!
-      RETURN
-      END SUBROUTINE my_flush
 !
 !-----------------------------------------------------------------------
       SUBROUTINE my_getarg (Iarg, Carg)

@@ -64,7 +64,9 @@
      &                       tindex, gtype, Vsize,                      &
      &                       LBi, UBi, LBj, UBj,                        &
      &                       Ascl, Amin, Amax,                          &
-     &                       Adat, checksum, Lregrid) RESULT (status)
+     &                       Adat,                                      &
+     &                       checksum,                                  &
+     &                       Lregrid) RESULT (status)
 !***********************************************************************
 !
       USE mod_netcdf
@@ -215,7 +217,7 @@
       CALL netcdf_get_fatt (ng, model, ncname, ncvarid, AttName,        &
      &                      AttValue, foundit,                          &
      &                      ncid = ncid)
-      IF (FoundError(exit_flag, NoError, 896, MyFile)) THEN
+      IF (FoundError(exit_flag, NoError, 901, MyFile)) THEN
         status=ioerror
         RETURN
       END IF
@@ -298,7 +300,7 @@
         END IF
       END IF
       CALL mp_bcasti (ng, model, status)
-      IF (FoundError(status, nf90_noerr, 1016, MyFile)) THEN
+      IF (FoundError(status, nf90_noerr, 1021, MyFile)) THEN
         exit_flag=2
         ioerror=status
         RETURN

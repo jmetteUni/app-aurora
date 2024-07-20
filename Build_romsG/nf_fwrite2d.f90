@@ -30,6 +30,10 @@
 !     Adat         Field to write out (real)                           !
 !     SetFillVal   Logical switch to set fill value in land areas      !
 !                    (OPTIONAL)                                        !
+!     ExtractField Field extraction flag (integer, OPTIONAL)           !
+!                    ExtractField = 0   no extraction                  !
+!                    ExtractField = 1   extraction by interpolation    !
+!                    ExtractField > 1   extraction by decimation       !
 !                                                                      !
 !  On Output:                                                          !
 !                                                                      !
@@ -44,6 +48,8 @@
       USE mod_ncparam
       USE mod_scalars
 !
+      USE pack_field_mod,  ONLY : pack_field2d
+!
       implicit none
 !
       INTERFACE nf_fwrite2d
@@ -56,7 +62,9 @@
       FUNCTION nf90_fwrite2d (ng, model, ncid, ifield,                  &
      &                        ncvarid, tindex, gtype,                   &
      &                        LBi, UBi, LBj, UBj, Ascl,                 &
-     &                        Adat, SetFillVal,                         &
+     &                        Adat,                                     &
+     &                        SetFillVal,                               &
+     &                        ExtractField,                             &
      &                        MinValue, MaxValue) RESULT (status)
 !***********************************************************************
 !
@@ -72,6 +80,8 @@
       integer, intent(in) :: ifield
       integer, intent(in) :: LBi, UBi, LBj, UBj
 !
+      integer, intent(in), optional :: ExtractField
+!
       real(dp), intent(in) :: Ascl
 !
       real(r8), intent(in) :: Adat(LBi:,LBj:)
@@ -80,55 +90,37 @@
 !
 !  Local variable declarations.
 !
-      integer :: i, j, ic, Npts, tile
-      integer :: Imin, Imax, Jmin, Jmax
-      integer :: Ilen, Jlen, IJlen, MyType
+      logical :: LandFill
+!
+      integer :: Extract_Flag
+      integer :: Npts, i, tile
       integer :: status
       integer, dimension(3) :: start, total
 !
       real(r8), dimension((Lm(ng)+2)*(Mm(ng)+2)) :: Awrk
 !
 !-----------------------------------------------------------------------
-!  Set starting and ending indices to process.
+!  Initialize local variables.
 !-----------------------------------------------------------------------
 !
       status=nf90_noerr
 !
-!  Set first and last grid point according to staggered C-grid
-!  classification. Set loops offsets.
+!  Set parallel tile.
 !
-      MyType=gtype
+      tile=MyRank
 !
-      SELECT CASE (ABS(MyType))
-        CASE (p2dvar, p3dvar)
-          Imin=IOBOUNDS(ng)%ILB_psi
-          Imax=IOBOUNDS(ng)%IUB_psi
-          Jmin=IOBOUNDS(ng)%JLB_psi
-          Jmax=IOBOUNDS(ng)%JUB_psi
-        CASE (r2dvar, r3dvar)
-          Imin=IOBOUNDS(ng)%ILB_rho
-          Imax=IOBOUNDS(ng)%IUB_rho
-          Jmin=IOBOUNDS(ng)%JLB_rho
-          Jmax=IOBOUNDS(ng)%JUB_rho
-        CASE (u2dvar, u3dvar)
-          Imin=IOBOUNDS(ng)%ILB_u
-          Imax=IOBOUNDS(ng)%IUB_u
-          Jmin=IOBOUNDS(ng)%JLB_u
-          Jmax=IOBOUNDS(ng)%JUB_u
-        CASE (v2dvar, v3dvar)
-          Imin=IOBOUNDS(ng)%ILB_v
-          Imax=IOBOUNDS(ng)%IUB_v
-          Jmin=IOBOUNDS(ng)%JLB_v
-          Jmax=IOBOUNDS(ng)%JUB_v
-        CASE DEFAULT
-          Imin=IOBOUNDS(ng)%ILB_rho
-          Imax=IOBOUNDS(ng)%IUB_rho
-          Jmin=IOBOUNDS(ng)%JLB_rho
-          Jmax=IOBOUNDS(ng)%JUB_rho
-      END SELECT
-      Ilen=Imax-Imin+1
-      Jlen=Jmax-Jmin+1
-      IJlen=Ilen*Jlen
+!  Set switch to replace land areas with fill value, spval.
+!
+      LandFill=.FALSE.
+!
+!  If appropriate, set the field extraction flag to the provided grid
+!  geometry through interpolation or decimation.
+!
+      IF (PRESENT(ExtractField)) THEN
+        Extract_Flag=ExtractField
+      ELSE
+        Extract_Flag=0
+      END IF
 !
 !  Initialize local array to avoid denormalized numbers. This
 !  facilitates processing and debugging.
@@ -136,14 +128,15 @@
       Awrk=0.0_r8
 !
 !-----------------------------------------------------------------------
-!  If distributed-memory set-up, collect tile data from all spawned
-!  nodes and store it into a global scratch 1D array, packed in column-
-!  major order.
+!  Pack 2D field data into 1D array.
 !-----------------------------------------------------------------------
 !
-      CALL mp_gather2d (ng, model, LBi, UBi, LBj, UBj,                  &
-     &                  tindex, gtype, Ascl,                            &
-     &                  Adat, Npts, Awrk, SetFillVal)
+      CALL pack_field2d (ng, model, tile,                               &
+     &                   gtype, ifield, tindex,                         &
+     &                   LandFill, Extract_Flag,                        &
+     &                   LBi, UBi, LBj, UBj,                            &
+     &                   Ascl, Adat,                                    &
+     &                   start, total, Npts, Awrk)
 !
 !-----------------------------------------------------------------------
 !  If applicable, compute output field minimum and maximum values.
@@ -167,14 +160,6 @@
 !-----------------------------------------------------------------------
 !
       IF (OutThread) THEN
-        IF (gtype.gt.0) THEN
-          start(1)=1
-          total(1)=Ilen
-          start(2)=1
-          total(2)=Jlen
-          start(3)=tindex
-          total(3)=1
-        END IF
         status=nf90_put_var(ncid, ncvarid, Awrk, start, total)
       END IF
 !
