@@ -87,7 +87,7 @@
 !-----------------------------------------------------------------------
 !
       DO ng=1,Ngrids
-        DO thread=MyRank,MyRank
+        DO thread=0,numthreads-1
           CALL wclock_on (ng, iNLM, 1, 143, MyFile)
         END DO
 !$OMP BARRIER
@@ -98,7 +98,7 @@
 !-----------------------------------------------------------------------
 !
       IF (allocate_vars) then
-        tile=MyRank
+        tile=0
         DO ng=1,Ngrids
 !$OMP MASTER
           LBi=BOUNDS(ng)%LBi(tile)
@@ -134,7 +134,7 @@
 !-----------------------------------------------------------------------
 !
       DO ng=1,Ngrids
-        DO thread=MyRank,MyRank
+        DO thread=0,numthreads-1
           CALL wclock_off (ng, iNLM, 1, 249, MyFile)
         END DO
 !$OMP BARRIER
@@ -219,7 +219,7 @@
 !-----------------------------------------------------------------------
 !
       DO ng=1,Ngrids
-        DO thread=MyRank,MyRank
+        DO thread=0,numthreads-1
           CALL wclock_on (ng, iNLM, 1, 377, MyFile)
         END DO
 !$OMP BARRIER
@@ -252,7 +252,7 @@
 !-----------------------------------------------------------------------
 !
       DO ng=1,Ngrids
-        DO thread=MyRank,MyRank
+        DO thread=0,numthreads-1
           CALL wclock_off (ng, iNLM, 1, 451, MyFile)
         END DO
 !$OMP BARRIER

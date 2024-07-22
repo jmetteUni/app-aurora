@@ -26,8 +26,6 @@
       USE mod_iounits
       USE mod_strings
 !
-      USE distribute_mod, ONLY : mp_barrier
-!
       implicit none
 !
 !  Imported variable declarations.
@@ -39,7 +37,7 @@
 !
       integer :: iregion, MyModel, NSUB
       integer :: my_getpid
-      integer :: MyCOMM, nPETs, PETrank
+      integer :: my_threadnum
       real(r8), dimension(2) :: wtime
       real(r8) :: my_wtime
 !
@@ -49,10 +47,7 @@
 !
 !  Set number of subdivisions, same as for global reductions.
 !
-      MyCOMM=OCN_COMM_WORLD
-      nPETs=numthreads
-      PETrank=MyRank
-      NSUB=1
+      NSUB=numthreads
 !
 !  Insure that MyModel is not zero.
 !
@@ -74,10 +69,8 @@
         proc(0,MyModel,ng)=my_getpid()
 !$OMP CRITICAL (START_WCLOCK)
         IF (ng.eq.1) THEN
-          CALL mp_barrier (ng, model, MyCOMM)
-          WRITE (stdout,10) ' Node #', PETrank,                         &
+          WRITE (stdout,10) ' Thread #', MyThread,                      &
      &                      ' (pid=',proc(0,MyModel,ng),') is active.'
-          FLUSH (stdout)
         END IF
  10     FORMAT (a,i5,a,i8,a)
         thread_count=thread_count+1
@@ -109,10 +102,6 @@
       USE mod_iounits
       USE mod_strings
 !
-      USE distribute_mod, ONLY : mp_barrier, mp_reduce
-      USE distribute_mod, ONLY : mp_collect
-      USE strings_mod,    ONLY : uppercase
-!
       implicit none
 !
 !  Imported variable declarations.
@@ -123,16 +112,10 @@
 !  Local variable declarations.
 !
       integer :: ig, imodel, iregion, MyModel, NSUB
-      integer :: MyCOMM, nPETs, PETrank
       integer :: my_threadnum
       real(r8) :: percent, sumcpu, sumper, sumsum, total
       real(r8), dimension(2) :: wtime
       real(r8) :: my_wtime
-      real(r8) :: TendMin, TendMax
-      real(r8), parameter :: Tspv = 0.0_r8
-      real(r8), allocatable :: Tend(:)
-      real(r8), dimension(0:Nregion) :: rbuffer
-      character (len= 3), dimension(0:Nregion) :: op_handle
       character (len=14), dimension(4) :: label
 !
 !-----------------------------------------------------------------------
@@ -141,10 +124,7 @@
 !
 !  Set number of subdivisions, same as for global reductions.
 !
-      MyCOMM=OCN_COMM_WORLD
-      nPETs=numthreads
-      PETrank=MyRank
-      NSUB=1
+      NSUB=numthreads
 !
 !  Insure that MyModel is not zero.
 !
@@ -183,18 +163,8 @@
 !  time for all nested grids.
 !
         IF (ng.eq.1) THEN
-          CALL mp_barrier (ng, model, MyCOMM)
-          IF (.not.allocated(Tend)) THEN
-            allocate ( Tend(nPETs) )
-            Tend=0.0_r8
-          END IF
-          Tend(PETrank+1)=Cend(region,MyModel,ng)
-          CALL mp_collect (ng, model, nPETs, Tspv, Tend, MyCOMM)
-          TendMin=MINVAL(Tend)
-          TendMax=MAXVAL(Tend)
-          WRITE (stdout,10) ' Node   #', PETrank,                       &
-     &                      ' CPU:', Tend(PETrank+1)
-          FLUSH (stdout)
+          WRITE (stdout,10) ' Thread #', MyThread, ' CPU:',             &
+     &                      Cend(region,MyModel,ng)
  10       FORMAT (a,i5,a,f12.3)
         END IF
 !
@@ -212,17 +182,6 @@
 !
         IF (thread_count.eq.NSUB) THEN
           thread_count=0
-          op_handle(0:Nregion)='SUM'      ! Gather all values using a
-          DO imodel=1,4                   ! reduced sum between nodes
-            DO iregion=0,Nregion
-              rbuffer(iregion)=Csum(iregion,imodel,ng)
-            END DO
-            CALL mp_reduce (ng, MyModel, Nregion+1, rbuffer(0:),        &
-     &                      op_handle(0:), MyCOMM)
-            DO iregion=0,Nregion
-              Csum(iregion,imodel,ng)=rbuffer(iregion)
-            END DO
-          END DO
           IF (Master) THEN
             IF (ng.eq.1) THEN             ! Same for all nested grids
               total_cpu=total_cpu+Csum(region,model,ng)
@@ -239,12 +198,9 @@
  20           FORMAT (a,t18,f14.3)
               IF (numthreads.gt.1) THEN
                 WRITE (stdout,20) ' Average:', total_cpu/numthreads
-                WRITE (stdout,20) ' Minimum:', TendMin
-                WRITE (stdout,20) ' Maximum:', TendMax
               END IF
             END IF
           END IF
-          IF (allocated(Tend)) deallocate (Tend)
 !
 !  Report profiling times.
 !
@@ -295,38 +251,6 @@
             WRITE (stdout,70) total_cpu
  70         FORMAT (/,' All percentages are with respect to',           &
      &                ' total time =',5x,f12.3,/)
-          END IF
-!
-!  Report elapsed time for message passage communications.
-!
-          total=0.0_r8
-          DO iregion=Mregion,Fregion-1
-            DO imodel=1,4
-              total=total+Csum(iregion,imodel,ng)
-            END DO
-          END DO
-          IF (Master.and.(total.gt.0.0_r8)) THEN
-            WRITE (stdout,30) uppercase('mpi'),                         &
-     &                        'communications profile, Grid:', ng
-          END IF
-          IF (total.gt.0.0_r8) THEN
-            sumper=0.0_r8
-            sumsum=0.0_r8
-            DO iregion=Mregion,Fregion-1
-              sumcpu=0.0_r8
-              DO imodel=1,4
-                sumcpu=sumcpu+Csum(iregion,imodel,ng)
-              END DO
-              IF (Master.and.(sumcpu.gt.0.0_r8)) THEN
-                percent=100.0_r8*sumcpu/total_cpu
-                WRITE (stdout,40) Pregion(iregion), sumcpu, percent
-                sumsum=sumsum+sumcpu
-                sumper=sumper+percent
-              END IF
-            END DO
-            IF (Master.and.(total.gt.0.0_r8)) THEN
-              WRITE (stdout,50) sumsum, sumper
-            END IF
           END IF
         END IF
 !$OMP END CRITICAL (FINALIZE_WCLOCK)

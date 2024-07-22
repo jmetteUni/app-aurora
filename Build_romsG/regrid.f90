@@ -57,7 +57,6 @@
       USE mod_scalars
       USE roms_interpolate_mod
 !
-      USE distribute_mod,    ONLY : mp_reduce
       USE get_varcoords_mod, ONLY : get_varcoords
       USE strings_mod,       ONLY : FoundError
 !
@@ -102,7 +101,6 @@
 !
       integer :: i, j
       integer :: Istr, Iend, Jstr, Jend
-      integer :: Cgrid, ghost
 !
       real(r8), parameter :: IJspv = 0.0_r8
       real(r8) :: my_min, my_max, Xmin, Xmax, Ymin, Ymax
@@ -112,9 +110,6 @@
       real(r8), dimension(Nx,Ny) :: Yinp
       real(r8), dimension(LBi:UBi,LBj:UBj) :: Iout
       real(r8), dimension(LBi:UBi,LBj:UBj) :: Jout
-      real(r8), dimension(2) :: rbuffer
-!
-      character (len=3), dimension(2) :: op_handle
 !
       character (len=*), parameter :: MyFile =                          &
      &  "ROMS/Utility/regrid.F"//", regrid_nf90"
@@ -208,23 +203,10 @@
 !
 !  Set tile starting and ending indices.
 !
-      ghost=0                        ! non-overlapping, no ghost points
-      SELECT CASE (ABS(gtype))
-        CASE (p2dvar, p3dvar)
-          Cgrid=1
-        CASE (r2dvar, r3dvar)
-          Cgrid=2
-        CASE (u2dvar, u3dvar)
-          Cgrid=3
-        CASE (v2dvar, v3dvar)
-          Cgrid=4
-        CASE DEFAULT
-          Cgrid=1
-      END SELECT
-      Istr=BOUNDS(ng)%Imin(Cgrid,ghost,MyRank)
-      Iend=BOUNDS(ng)%Imax(Cgrid,ghost,MyRank)
-      Jstr=BOUNDS(ng)%Jmin(Cgrid,ghost,MyRank)
-      Jend=BOUNDS(ng)%Jmax(Cgrid,ghost,MyRank)
+      Istr=Imin
+      Iend=Imax
+      Jstr=Jmin
+      Jend=Jmax
 !
 !  Find fractional indices (Iout,Jout) of the grid cells in Finp
 !  containing positions to intepolate.
@@ -255,13 +237,8 @@
 !  Compute global interpolated field minimum and maximum values.
 !  Notice that gridded data values are overwritten.
 !
-      rbuffer(1)=my_min
-      rbuffer(2)=my_max
-      op_handle(1)='MIN'
-      op_handle(2)='MAX'
-      CALL mp_reduce (ng, model, 2, rbuffer, op_handle)
-      Amin=rbuffer(1)
-      Amax=rbuffer(2)
+      Amin=my_min
+      Amax=my_max
 !
       RETURN
       END SUBROUTINE regrid_nf90

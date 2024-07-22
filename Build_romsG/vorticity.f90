@@ -137,8 +137,6 @@
 !
       USE exchange_2d_mod, ONLY : exchange_p2d_tile
       USE exchange_3d_mod, ONLY : exchange_p3d_tile
-      USE mp_exchange_mod, ONLY : mp_exchange2d
-      USE mp_exchange_mod, ONLY : mp_exchange3d
 !
 !  Imported variable declarations.
 !
@@ -360,11 +358,6 @@
      &                          LBi, UBi, LBj, UBj, 1, N(ng),           &
      &                          rvor)
       END IF
-      CALL mp_exchange3d (ng, tile, iNLM, 2,                            &
-     &                    LBi, UBi, LBj, UBj, 1, N(ng),                 &
-     &                    NghostPoints, EWperiodic(ng), NSperiodic(ng), &
-     &                    pvor,                                         &
-     &                    rvor)
 !
 !-----------------------------------------------------------------------
 !  Compute 2D relative and potential vorticity.
@@ -400,11 +393,6 @@
      &                          LBi, UBi, LBj, UBj,                     &
      &                          rvor_bar)
       END IF
-      CALL mp_exchange2d (ng, tile, iNLM, 2,                            &
-     &                    LBi, UBi, LBj, UBj,                           &
-     &                    NghostPoints, EWperiodic(ng), NSperiodic(ng), &
-     &                    pvor_bar,                                     &
-     &                    rvor_bar)
 !
       RETURN
       END SUBROUTINE vorticity_tile

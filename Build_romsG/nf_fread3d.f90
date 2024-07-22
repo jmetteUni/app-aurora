@@ -70,8 +70,6 @@
 !
       USE mod_netcdf
 !
-      USE distribute_mod, ONLY : mp_bcasti
-      USE distribute_mod, ONLY : mp_scatter3d
 !
 !  Imported variable declarations.
 !
@@ -100,7 +98,6 @@
       integer :: Imin, Imax, Jmin, Jmax, Koff
       integer :: Ilen, Jlen, Klen, IJlen
       integer :: Cgrid, MyType, ghost
-      integer :: Nghost
       integer, dimension(4) :: start, total
 !
       real(r8) :: Afactor, Aoffset, Aspval
@@ -211,17 +208,6 @@
         Aspval=AttValue(3)
       END IF
 !
-!  Set the number of tile ghost points, Nghost, to scatter in
-!  distributed-memory applications. If Nghost=0, the ghost points
-!  are not processed.  They will be processed elsewhere by the
-!  appropriate call to any of the routines in "mp_exchange.F".
-!
-      IF (model.eq.iADM) THEN
-        Nghost=0                     ! no ghost points exchange
-      ELSE
-        Nghost=NghostPoints          ! do ghost points exchange
-      END IF
-!
 !  Set NetCDF dimension counters for processing requested field.
 !
       IF (MyType.gt.0) THEN
@@ -277,7 +263,6 @@
             END IF
           END IF
         END IF
-        CALL mp_bcasti (ng, model, status)
         IF (FoundError(status, nf90_noerr, 831, MyFile)) THEN
           exit_flag=2
           ioerror=status
@@ -288,21 +273,30 @@
 !  Serial I/O: Unpack read field.
 !-----------------------------------------------------------------------
 !
-!  Scatter read data over the distributed memory tiles.
+!  Unpack data into the global array: serial, serial with partitions,
+!  and shared-memory applications.
 !
-        CALL mp_scatter3d (ng, model, LBi, UBi, LBj, UBj, LBk, UBk,     &
-     &                     Nghost, MyType, Amin, Amax,                  &
-     &                     Npts, wrk, Adat)
+      IF (MyType.gt.0) THEN
+        ic=0
+        DO k=LBk,UBk
+          DO j=Js,Je
+            DO i=Is,Ie
+              ic=ic+1
+              Adat(i,j,k)=wrk(ic)
+            END DO
+          END DO
+        END DO
+      END IF
 !
 !-----------------------------------------------------------------------
 !  If requested, compute data checksum value.
 !-----------------------------------------------------------------------
 !
       IF (Lchecksum) THEN
-        Npts=(Imax-Imin+1)*(Jmax-Jmin+1)*(UBk-LBk+1)
+        Npts=(Ie-Is+1)*(Je-Js+1)*(UBk-LBk+1)
         IF (.not.allocated(Cwrk)) allocate ( Cwrk(Npts) )
-        Cwrk=PACK(Adat(Imin:Imax, Jmin:Jmax, LBk:UBk), .TRUE.)
-        CALL get_hash (Cwrk, Npts, checksum, .TRUE.)
+        Cwrk=PACK(Adat(Is:Ie, Js:Je, LBk:UBk), .TRUE.)
+        CALL get_hash (Cwrk, Npts, checksum)
         IF (allocated(Cwrk)) deallocate (Cwrk)
       END IF
 !

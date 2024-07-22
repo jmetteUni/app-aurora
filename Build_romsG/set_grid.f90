@@ -18,7 +18,6 @@
       USE mod_scalars
 !
       USE analytical_mod
-      USE distribute_mod,       ONLY : mp_bcasti
       USE equilibrium_tide_mod, ONLY : harmonic_constituents
       USE get_grid_mod,         ONLY : get_grid
       USE get_nudgcoef_mod,     ONLY : get_nudgcoef
@@ -44,9 +43,8 @@
 !-----------------------------------------------------------------------
 !
 !$OMP MASTER
-      CALL get_grid (ng, MyRank, model)
+      CALL get_grid (ng, -1, model)
 !$OMP END MASTER
-      CALL mp_bcasti (ng, model, exit_flag)
 !$OMP BARRIER
       IF (FoundError(exit_flag, NoError, 89, MyFile)) RETURN
 !
@@ -84,9 +82,8 @@
 !
       IF (Lnudging(ng)) THEN
 !$OMP MASTER
-        CALL get_nudgcoef (ng, MyRank, model)
+        CALL get_nudgcoef (ng, -1, model)
 !$OMP END MASTER
-        CALL mp_bcasti (ng, model, exit_flag)
 !$OMP BARRIER
         IF (FoundError(exit_flag, NoError, 191, MyFile)) RETURN
       END IF

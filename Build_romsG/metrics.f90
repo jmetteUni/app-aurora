@@ -117,9 +117,7 @@
       USE mod_scalars
       USE mod_iounits
 !
-      USE distribute_mod, ONLY : mp_reduce
       USE exchange_2d_mod
-      USE mp_exchange_mod, ONLY : mp_exchange2d
       USE set_depth_mod, ONLY : set_depth_tile
       implicit none
 !
@@ -169,8 +167,6 @@
       real(dp) :: my_DXmax, my_DXmin, my_DYmax, my_DYmin
       real(dp) :: my_DZmax, my_DZmin
       real(dp) :: my_Cg_Cor, my_Cg_max, my_Cg_min, my_grdmax
-      real(dp), dimension(14) :: rbuffer
-      character (len=3), dimension(14) :: op_handle
       real(r8), dimension(LBi:UBi,LBj:UBj) :: A2d
 !
 !-----------------------------------------------------------------------
@@ -261,10 +257,6 @@
      &                          LBi, UBi, LBj, UBj,                     &
      &                          fomn)
       END IF
-      CALL mp_exchange2d (ng, tile, model, 4,                           &
-     &                    LBi, UBi, LBj, UBj,                           &
-     &                    NghostPoints, EWperiodic(ng), NSperiodic(ng), &
-     &                    om_r, on_r, omn, fomn)
 !
 !-----------------------------------------------------------------------
 !  Compute n/m, and m/n at horizontal RHO-points.
@@ -287,10 +279,6 @@
      &                          LBi, UBi, LBj, UBj,                     &
      &                          pmon_r)
       END IF
-      CALL mp_exchange2d (ng, tile, model, 2,                           &
-     &                    LBi, UBi, LBj, UBj,                           &
-     &                    NghostPoints, EWperiodic(ng), NSperiodic(ng), &
-     &                    pnom_r, pmon_r)
 !
 !-----------------------------------------------------------------------
 !  Compute m/n, 1/m, and 1/n at horizontal U-points.
@@ -321,10 +309,6 @@
      &                          LBi, UBi, LBj, UBj,                     &
      &                          on_u)
       END IF
-      CALL mp_exchange2d (ng, tile, model, 4,                           &
-     &                    LBi, UBi, LBj, UBj,                           &
-     &                    NghostPoints, EWperiodic(ng), NSperiodic(ng), &
-     &                    pmon_u, pnom_u, om_u, on_u)
 !
 !-----------------------------------------------------------------------
 !  Compute n/m, 1/m, and 1/m at horizontal V-points.
@@ -355,10 +339,6 @@
      &                          LBi, UBi, LBj, UBj,                     &
      &                          on_v)
       END IF
-      CALL mp_exchange2d (ng, tile, model, 4,                           &
-     &                    LBi, UBi, LBj, UBj,                           &
-     &                    NghostPoints, EWperiodic(ng), NSperiodic(ng), &
-     &                    pmon_v, pnom_v, om_v, on_v)
 !
 !-----------------------------------------------------------------------
 !  Compute n/m and m/n at horizontal PSI-points.
@@ -391,10 +371,6 @@
      &                          LBi, UBi, LBj, UBj,                     &
      &                          on_p)
       END IF
-      CALL mp_exchange2d (ng, tile, model, 4,                           &
-     &                    LBi, UBi, LBj, UBj,                           &
-     &                    NghostPoints, EWperiodic(ng), NSperiodic(ng), &
-     &                    pnom_p, pmon_p, om_p, on_p)
 !
 !-----------------------------------------------------------------------
 ! Compute cosine and sine of grid rotation angle.
@@ -417,10 +393,6 @@
      &                          LBi, UBi, LBj, UBj,                     &
      &                          SinAngler)
       END IF
-      CALL mp_exchange2d (ng, tile, model, 2,                           &
-     &                    LBi, UBi, LBj, UBj,                           &
-     &                    NghostPoints, EWperiodic(ng), NSperiodic(ng), &
-     &                    CosAngler, SinAngler)
 !
 !-----------------------------------------------------------------------
 ! Compute squared cosine of latitude and sine of twice latitude.
@@ -445,10 +417,6 @@
      &                          LBi, UBi, LBj, UBj,                     &
      &                          SinLat2)
       END IF
-      CALL mp_exchange2d (ng, tile, model, 2,                           &
-     &                    LBi, UBi, LBj, UBj,                           &
-     &                    NghostPoints, EWperiodic(ng), NSperiodic(ng), &
-     &                    Cos2Lat, SinLat2)
 !
 !-----------------------------------------------------------------------
 !  Compute minimum and maximum grid spacing.
@@ -522,7 +490,12 @@
 !  Perform global reductions.
 !-----------------------------------------------------------------------
 !
-      NSUB=1                             ! distributed-memory
+      IF (DOMAIN(ng)%SouthWest_Corner(tile).and.                        &
+     &    DOMAIN(ng)%NorthEast_Corner(tile)) THEN
+        NSUB=1                           ! non-tiled application
+      ELSE
+        NSUB=NtileX(ng)*NtileE(ng)       ! tiled application
+      END IF
 !$OMP CRITICAL (REDUCTIONS)
       Cg_min(ng)=MIN(Cg_min(ng),my_Cg_min)
       Cg_max(ng)=MAX(Cg_max(ng),my_Cg_max)
@@ -537,45 +510,6 @@
       tile_count=tile_count+1
       IF (tile_count.eq.NSUB) THEN
         tile_count=0
-        rbuffer(1)=Cg_min(ng)
-        op_handle(1)='MIN'
-        rbuffer(2)=Cg_max(ng)
-        op_handle(2)='MAX'
-        rbuffer(3)=Cg_Cor(ng)
-        op_handle(3)='MAX'
-        rbuffer(4)=grdmax(ng)
-        op_handle(4)='MAX'
-        rbuffer(5)=DXmin(ng)
-        op_handle(5)='MIN'
-        rbuffer(6)=DXmax(ng)
-        op_handle(6)='MAX'
-        rbuffer(7)=DYmin(ng)
-        op_handle(7)='MIN'
-        rbuffer(8)=DYmax(ng)
-        op_handle(8)='MAX'
-        rbuffer(9)=DZmin(ng)
-        op_handle(9)='MIN'
-        rbuffer(10)=DZmax(ng)
-        op_handle(10)='MAX'
-        rbuffer(11)=0.0_dp
-        op_handle(11)='MIN'
-        rbuffer(12)=0.0_dp
-        op_handle(12)='MAX'
-        rbuffer(13)=0.0_dp
-        op_handle(13)='MIN'
-        rbuffer(14)=0.0_dp
-        op_handle(14)='MAX'
-        CALL mp_reduce (ng, model, 14, rbuffer, op_handle)
-        Cg_min(ng)=rbuffer(1)
-        Cg_max(ng)=rbuffer(2)
-        Cg_Cor(ng)=rbuffer(3)
-        grdmax(ng)=rbuffer(4)
-        DXmin(ng)=rbuffer(5)
-        DXmax(ng)=rbuffer(6)
-        DYmin(ng)=rbuffer(7)
-        DYmax(ng)=rbuffer(8)
-        DZmin(ng)=rbuffer(9)
-        DZmax(ng)=rbuffer(10)
         IF (Master.and.LwrtInfo(ng)) THEN
           WRITE (stdout,10) ng,                                         &
      &                      DXmin(ng)*0.001_dp,                         &

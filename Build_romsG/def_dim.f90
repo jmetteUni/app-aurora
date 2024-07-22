@@ -53,8 +53,6 @@
 !
       USE mod_netcdf
 !
-      USE distribute_mod, ONLY : mp_bcasti
-!
       implicit none
 !
 !  Imported variable declarations.
@@ -69,7 +67,6 @@
 !  Local variable declarations.
 !
       integer :: status
-      integer, dimension(3) :: ibuffer
 !
       character (len=*), parameter :: MyFile =                          &
      &  "ROMS/Utility/def_dim.F"//", def_dim_nf90"
@@ -90,16 +87,6 @@
           ioerror=status
         END IF
       END IF
-!
-!  Broadcast information to all threads in the group.
-!
-      ibuffer(1)=DimID
-      ibuffer(2)=status
-      ibuffer(3)=exit_flag
-      CALL mp_bcasti (ng, model, ibuffer)
-      DimID=ibuffer(1)
-      status=ibuffer(2)
-      exit_flag=ibuffer(3)
 !
  10   FORMAT (/,' DEF_DIM_NF90 - error while defining dimension: ',a,   &
      &        /,16x,'in file: ',a)

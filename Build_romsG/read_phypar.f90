@@ -2337,8 +2337,6 @@
         lstr=LEN_TRIM(my_fflags)
         WRITE (out,60) TRIM(title), TRIM(my_os), TRIM(my_cpu),          &
      &                 TRIM(my_fort), TRIM(my_fc), my_fflags(1:lstr),   &
-     &                 OCN_COMM_WORLD, numthreads,                      &
-     &                 TRIM(Iname),                                     &
      &                 TRIM(git_url), TRIM(git_rev),                    &
      &                 TRIM(svn_url), TRIM(svn_rev),                    &
      &                 TRIM(Rdir), TRIM(Hdir), TRIM(Hfile), TRIM(Adir)
@@ -2348,14 +2346,15 @@
 !  Report grid size and domain decomposition.  Check for correct tile
 !  decomposition.
 !
-          WRITE (out,70) ng, Lm(ng), Mm(ng), N(ng), numthreads,         &
+          WRITE (out,90) ng, Lm(ng), Mm(ng), N(ng), numthreads,         &
      &                   NtileI(ng), NtileJ(ng)
-          maxPETs=numthreads                           ! regular unsplit
-          nPETs=NtileI(ng)*NtileJ(ng)                  ! values
-          label='NtileI * NtileJ ='
-!
-          IF (nPETs.ne.maxPETs) THEN
-            WRITE (out,80) ng, TRIM(label), nPETS, maxPETs
+          IF (NtileI(ng)*NtileJ(ng).le.0) THEN
+            WRITE (out,100) ng
+            exit_flag=6
+            RETURN
+          END IF
+          IF (MOD(NtileI(ng)*NtileJ(ng),numthreads).ne.0) THEN
+            WRITE (out,100) ng
             exit_flag=6
             RETURN
           END IF
@@ -3408,8 +3407,6 @@
      &        /,1x,'Compiler system   : ',a,                            &
      &        /,1x,'Compiler command  : ',a,                            &
      &        /,1x,'Compiler flags    : ',a,                            &
-     &        /,1x,'OCN Communicator  : ',i0,',  PET size = ',i0,/,     &
-     &        /,1x,'Input Script      : ',a,/,                          &
      &        /,1x,'GIT Root URL      : ',a,                            &
      &        /,1x,'GIT Revision      : ',a,                            &
      &        /,1x,'SVN Root URL      : ',a,                            &

@@ -61,6 +61,12 @@ S.NT = 2;
 
 
 %--------------------------------------------------------------------------
+%  Set initial conditions for plume tracers
+%--------------------------------------------------------------------------
+
+dye_01 = zeros(size(S.z_r));
+
+%--------------------------------------------------------------------------
 %  Interpolate initial conditions from NEMO data to application grid.
 %--------------------------------------------------------------------------
 
@@ -328,6 +334,8 @@ if (CREATE)
     [status]=nc_write(INIname, 'v',    v,    IniRec);
     [status]=nc_write(INIname, 'temp', temp, IniRec);
     [status]=nc_write(INIname, 'salt', salt, IniRec);
+    [status]=nc_write(INIname, 'dye_01', dye_01, IniRec);
+
 end
 
 

@@ -142,16 +142,12 @@
 !
       logical :: foundit
       logical :: MasterProcess
-      integer :: MyCOMM
 !
 !-----------------------------------------------------------------------
 !  Set master process.
-!  Set distribute-memory communicator and broadcast flag value to all
-!  processes.
 !-----------------------------------------------------------------------
 !
-      MyCOMM=OCN_COMM_WORLD
-      MasterProcess=MyRank.eq.0
+      MasterProcess=Master
 !
 !-----------------------------------------------------------------------
 !  Scan array for requested string.
@@ -214,16 +210,12 @@
 !
       logical :: foundit
       logical :: MasterProcess
-      integer :: MyCOMM
 !
 !-----------------------------------------------------------------------
 !  Set master process.
-!  Set distribute-memory communicator and broadcast flag value to all
-!  processes.
 !-----------------------------------------------------------------------
 !
-      MyCOMM=OCN_COMM_WORLD
-      MasterProcess=MyRank.eq.0
+      MasterProcess=Master
 !
 !-----------------------------------------------------------------------
 !  Scan array for requested string.

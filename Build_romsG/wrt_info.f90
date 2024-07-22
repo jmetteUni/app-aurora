@@ -54,7 +54,6 @@
 !                                                                      !
 !***********************************************************************
 !
-      USE distribute_mod,  ONLY : mp_bcasti
 !
 !  Imported variable declarations.
 !
@@ -68,7 +67,6 @@
 !
       integer :: LBi, UBi, LBj, UBj
       integer :: i, j, k, ibry, ilev, itrc, status, varid
-      integer, dimension(2) :: ibuffer
       integer :: ifield = 0
 !
       real(dp) :: scale
@@ -1027,14 +1025,6 @@
 !
       CALL netcdf_sync (ng, model, ncname, ncid)
       IF (FoundError(exit_flag, NoError, 3391, MyFile)) RETURN
-!
-!  Broadcast error flags to all processors in the group.
-!
-      ibuffer(1)=exit_flag
-      ibuffer(2)=ioerror
-      CALL mp_bcasti (ng, model, ibuffer)
-      exit_flag=ibuffer(1)
-      ioerror=ibuffer(2)
 !
   10  FORMAT (/,' WRT_INFO_NF90 - error while writing variable: ',a,/,  &
      &        17x,'into file: ',a)

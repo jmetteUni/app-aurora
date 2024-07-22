@@ -321,23 +321,10 @@
 !  Set RHO-points domain lower and upper bounds (integer).
 !
       DO ng=1,Ngrids
-        CALL get_bounds (ng, MyRank, r2dvar, 0,                         &
-     &                   my_Im(ng), my_Jm(ng),                          &
-     &                   my_Lm(ng), my_Mm(ng),                          &
-     &                   Itile, Jtile,                                  &
-     &                   rILB(ng), rIUB(ng), rJLB(ng), rJUB(ng))
-        IF (Itile.eq.0) THEN
-          rILB(ng)=rILB(ng)+1
-        END IF
-        IF (Itile.eq.(NtileI(ng)-1)) THEN
-          rIUB(ng)=rIUB(ng)-1
-        END IF
-        IF (Jtile.eq.0) THEN
-          rJLB(ng)=rJLB(ng)+1
-        END IF
-        IF (Jtile.eq.(NtileJ(ng)-1)) THEN
-          rJUB(ng)=rJUB(ng)-1
-        END IF
+        rILB(ng)=1
+        rIUB(ng)=my_Lm(ng)
+        rJLB(ng)=1
+        rJUB(ng)=my_Mm(ng)
 !
 !  Minimum and maximum fractional coordinates for RHO-points.
 !
@@ -352,10 +339,10 @@
      &                     my_DOMAIN(ng)% Ymin_rho(tile),               &
      &                     my_DOMAIN(ng)% Ymax_rho(tile))
         END DO
-        rXmin(ng)=my_DOMAIN(ng)%Xmin_rho(MyRank)
-        rXmax(ng)=my_DOMAIN(ng)%Xmax_rho(MyRank)
-        rYmin(ng)=my_DOMAIN(ng)%Ymin_rho(MyRank)
-        rYmax(ng)=my_DOMAIN(ng)%Ymax_rho(MyRank)
+        rXmin(ng)=my_DOMAIN(ng)%Xmin_rho(0)
+        rXmax(ng)=my_DOMAIN(ng)%Xmax_rho(0)
+        rYmin(ng)=my_DOMAIN(ng)%Ymin_rho(0)
+        rYmax(ng)=my_DOMAIN(ng)%Ymax_rho(0)
       END DO
 !
 !  Set U-points domain lower and upper bounds (integer).
@@ -366,23 +353,10 @@
         ELSE
           Uoff=1
         END IF
-        CALL get_bounds (ng, MyRank, u2dvar, 0,                         &
-     &                   my_Im(ng), my_Jm(ng),                          &
-     &                   my_Lm(ng), my_Mm(ng),                          &
-     &                   Itile, Jtile,                                  &
-     &                   uILB(ng), uIUB(ng), uJLB(ng), uJUB(ng))
-        IF (Itile.eq.0) THEN
-          uILB(ng)=uILB(ng)+Uoff
-        END IF
-        IF (Itile.eq.(NtileI(ng)-1)) THEN
-          uIUB(ng)=uIUB(ng)-1
-        END IF
-        IF (Jtile.eq.0) THEN
-          uJLB(ng)=uJLB(ng)+1
-        END IF
-        IF (Jtile.eq.(NtileJ(ng)-1)) THEN
-          uJUB(ng)=uJUB(ng)-1
-        END IF
+        uILB(ng)=1+Uoff
+        uIUB(ng)=my_Lm(ng)
+        uJLB(ng)=1
+        uJUB(ng)=my_Mm(ng)
 !
 !  Minimum and maximum fractional coordinates for U-points.
 !
@@ -397,10 +371,10 @@
      &                     my_DOMAIN(ng)% Ymin_u(tile),                 &
      &                     my_DOMAIN(ng)% Ymax_u(tile))
         END DO
-        uXmin(ng)=my_DOMAIN(ng)%Xmin_u(MyRank)
-        uXmax(ng)=my_DOMAIN(ng)%Xmax_u(MyRank)
-        uYmin(ng)=my_DOMAIN(ng)%Ymin_u(MyRank)
-        uYmax(ng)=my_DOMAIN(ng)%Ymax_u(MyRank)
+        uXmin(ng)=my_DOMAIN(ng)%Xmin_u(0)
+        uXmax(ng)=my_DOMAIN(ng)%Xmax_u(0)
+        uYmin(ng)=my_DOMAIN(ng)%Ymin_u(0)
+        uYmax(ng)=my_DOMAIN(ng)%Ymax_u(0)
       END DO
 !
 !  Set V-points domain lower and upper bounds (integer).
@@ -411,23 +385,10 @@
         ELSE
           Voff=1
         END IF
-        CALL get_bounds (ng, MyRank, v2dvar, 0,                         &
-     &                   my_Im(ng), my_Jm(ng),                          &
-     &                   my_Lm(ng), my_Mm(ng),                          &
-     &                   Itile, Jtile,                                  &
-     &                   vILB(ng), vIUB(ng), vJLB(ng), vJUB(ng))
-        IF (Itile.eq.0) THEN
-          vILB(ng)=vILB(ng)+1
-        END IF
-        IF (Itile.eq.(NtileI(ng)-1)) THEN
-          vIUB(ng)=vIUB(ng)-1
-        END IF
-        IF (Jtile.eq.0) THEN
-          vJLB(ng)=vJLB(ng)+Voff
-        END IF
-        IF (Jtile.eq.(NtileJ(ng)-1)) THEN
-          vJUB(ng)=vJUB(ng)-1
-        END IF
+        vILB(ng)=1
+        vIUB(ng)=Lm(ng)
+        vJLB(ng)=1+Voff
+        vJUB(ng)=Mm(ng)
 !
 !  Minimum and maximum fractional coordinates for V-points.
 !
@@ -442,10 +403,10 @@
      &                     my_DOMAIN(ng)% Ymin_v(tile),                 &
      &                     my_DOMAIN(ng)% Ymax_v(tile))
         END DO
-        vXmin(ng)=my_DOMAIN(ng)%Xmin_v(MyRank)
-        vXmax(ng)=my_DOMAIN(ng)%Xmax_v(MyRank)
-        vYmin(ng)=my_DOMAIN(ng)%Ymin_v(MyRank)
-        vYmax(ng)=my_DOMAIN(ng)%Ymax_v(MyRank)
+        vXmin(ng)=my_DOMAIN(ng)%Xmin_v(0)
+        vXmax(ng)=my_DOMAIN(ng)%Xmax_v(0)
+        vYmin(ng)=my_DOMAIN(ng)%Ymin_v(0)
+        vYmax(ng)=my_DOMAIN(ng)%Ymax_v(0)
       END DO
 !
       RETURN

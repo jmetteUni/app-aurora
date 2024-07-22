@@ -42,8 +42,6 @@
       USE mod_parallel
       USE mod_ncparam
 !
-      USE distribute_mod, ONLY : mp_reduce
-!
 !  Imported variable declarations.
 !
       integer, intent(in) :: ng, tile, model
@@ -67,7 +65,6 @@
       integer :: ir, it
       real(r8) :: cff
       real(r8), dimension(0:NstateVars) :: my_DotProd
-      character (len=3), dimension(0:NstateVars) :: op_handle
 !
 !-----------------------------------------------------------------------
 !  Set lower and upper tile bounds and staggered variables bounds for
@@ -188,7 +185,12 @@
 !  Perform parallel global reduction operations.
 !-----------------------------------------------------------------------
 !
-      NSUB=1                             ! distributed-memory
+      IF (DOMAIN(ng)%SouthWest_Corner(tile).and.                        &
+     &    DOMAIN(ng)%NorthEast_Corner(tile)) THEN
+        NSUB=1                           ! non-tiled application
+      ELSE
+        NSUB=NtileX(ng)*NtileE(ng)       ! tiled application
+      END IF
 !$OMP CRITICAL (DOT_PROD)
       IF (tile_count.eq.0) THEN
         DO i=0,NstateVars
@@ -201,11 +203,6 @@
       tile_count=tile_count+1
       IF (tile_count.eq.NSUB) THEN
         tile_count=0
-        DO i=0,NstateVars
-          op_handle(i)='SUM'
-        END DO
-        CALL mp_reduce (ng, model, NstateVars+1, DotProd(0:),           &
-     &                  op_handle(0:))
       END IF
 !$OMP END CRITICAL (DOT_PROD)
 !

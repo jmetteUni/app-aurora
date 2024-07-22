@@ -85,8 +85,6 @@
       USE mod_parallel
       USE mod_scalars
 !
-      USE distribute_mod, ONLY : mp_reduce
-!
 !  Imported variable declarations.
 !
       integer, intent(in) :: ng, tile
@@ -105,8 +103,6 @@
 !
       integer :: NSUB, i, j
       real(r8) :: cff, my_area, my_flux
-      real(r8), dimension(2) :: rbuffer
-      character (len=3), dimension(2) :: op_handle
 !
 !-----------------------------------------------------------------------
 !  Set lower and upper tile bounds and staggered variables bounds for
@@ -220,7 +216,12 @@
 !-----------------------------------------------------------------------
 !
       IF (ANY(VolCons(:,ng))) THEN
-        NSUB=1                           ! distributed-memory
+        IF (DOMAIN(ng)%SouthWest_Corner(tile).and.                      &
+     &      DOMAIN(ng)%NorthEast_Corner(tile)) THEN
+          NSUB=1                         ! non-tiled application
+        ELSE
+          NSUB=NtileX(ng)*NtileE(ng)     ! tiled application
+        END IF
 !$OMP CRITICAL (OBC_VOLUME)
         IF (tile_count.eq.0) THEN
           bc_flux=0.0_r8
@@ -231,13 +232,6 @@
         tile_count=tile_count+1
         IF (tile_count.eq.NSUB) THEN
           tile_count=0
-          rbuffer(1)=bc_area
-          rbuffer(2)=bc_flux
-          op_handle(1)='SUM'
-          op_handle(2)='SUM'
-          CALL mp_reduce (ng, iNLM, 2, rbuffer, op_handle)
-          bc_area=rbuffer(1)
-          bc_flux=rbuffer(2)
           ubar_xs=bc_flux/bc_area
         END IF
 !$OMP END CRITICAL (OBC_VOLUME)
@@ -256,8 +250,6 @@
 !
       USE mod_param
       USE mod_scalars
-!
-      USE mp_exchange_mod, ONLY : mp_exchange2d
 !
 !  Imported variable declarations.
 !
@@ -346,7 +338,7 @@
 !
       IF (VolCons(iwest,ng)) THEN
         IF (DOMAIN(ng)%Western_Edge(tile)) THEN
-          DO j=-2+JstrV,MIN(Jend+1,Mm(ng))+1
+          DO j=-2+MAX(2,JstrV-1),MIN(Jend+1,Mm(ng))+1
             Duon(Istr,j)=0.5_r8*(Drhs(Istr,j)+Drhs(Istr-1,j))*          &
      &                   (ubar(Istr,j,kinp)-ubar_xs)*                   &
      &                   on_u(Istr,j)
@@ -355,7 +347,7 @@
       END IF
       IF (VolCons(ieast,ng)) THEN
         IF (DOMAIN(ng)%Eastern_Edge(tile)) THEN
-          DO j=-2+JstrV,MIN(Jend+1,Mm(ng))+1
+          DO j=-2+MAX(2,JstrV-1),MIN(Jend+1,Mm(ng))+1
             Duon(Iend+1,j)=0.5_r8*(Drhs(Iend+1,j)+Drhs(Iend,j))*        &
      &                     (ubar(Iend+1,j,kinp)+ubar_xs)*               &
      &                     on_u(Iend+1,j)
@@ -364,7 +356,7 @@
       END IF
       IF (VolCons(isouth,ng)) THEN
         IF (DOMAIN(ng)%Southern_Edge(tile)) THEN
-          DO i=-2+IstrU,MIN(Iend+1,Lm(ng))+1
+          DO i=-2+MAX(2,IstrU-1),MIN(Iend+1,Lm(ng))+1
             Dvom(i,Jstr)=0.5_r8*(Drhs(i,Jstr)+Drhs(i,Jstr-1))*          &
      &                   (vbar(i,Jstr,kinp)-ubar_xs)*                   &
      &                   om_v(i,Jstr)
@@ -373,30 +365,12 @@
       END IF
       IF (VolCons(inorth,ng)) THEN
         IF (DOMAIN(ng)%Northern_Edge(tile)) THEN
-          DO i=-2+IstrU,MIN(Iend+1,Lm(ng))+1
+          DO i=-2+MAX(2,IstrU-1),MIN(Iend+1,Lm(ng))+1
             Dvom(i,Jend+1)=0.5_r8*(Drhs(i,Jend+1)+Drhs(i,Jend))*        &
      &                     (vbar(i,Jend+1,kinp)+ubar_xs)*               &
      &                     om_v(i,Jend+1)
           END DO
         END IF
-      END IF
-!
-! Do a special exchange to avoid having three ghost points for high
-! order numerical stencil.
-!
-      IF (VolCons(iwest,ng).or.VolCons(ieast,ng)) THEN
-        CALL mp_exchange2d (ng, tile, iNLM, 1,                          &
-     &                      IminS, ImaxS, JminS, JmaxS,                 &
-     &                      NghostPoints,                               &
-     &                      EWperiodic(ng), NSperiodic(ng),             &
-     &                      Duon)
-      END IF
-      IF (VolCons(isouth,ng).or.VolCons(inorth,ng)) THEN
-        CALL mp_exchange2d (ng, tile, iNLM, 1,                          &
-     &                      IminS, ImaxS, JminS, JmaxS,                 &
-     &                      NghostPoints,                               &
-     &                      EWperiodic(ng), NSperiodic(ng),             &
-     &                      Dvom)
       END IF
       RETURN
       END SUBROUTINE set_DUV_bc_tile

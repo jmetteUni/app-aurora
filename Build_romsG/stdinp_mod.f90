@@ -30,8 +30,6 @@
 !
       USE mod_iounits,    ONLY : Iname, SourceFile, stdinp, stdout
       USE mod_scalars,    ONLY : exit_flag
-!
-      USE distribute_mod, ONLY : mp_bcasts
       USE strings_mod,    ONLY : FoundError
 !
       INTERFACE getpar_i
@@ -95,25 +93,12 @@
 !-----------------------------------------------------------------------
 !  Determine ROMS standard input unit.
 !-----------------------------------------------------------------------
-!  The ROMS standard input 'roms.in' script filename (Iname) is read
-!  from the execution command and opened as a regular formatted file in
-!  distributed-memory configurations using the 'my_getarg' function.
-!  Then, it is read and processed by all parallel nodes to avoid complex
-!  broadcasting of the ROMS input parameters to all nodes.
 !
-      InpUnit=1
-      io_err=0
-      IF (MyMaster) CALL my_getarg (1, Iname)
-      CALL mp_bcasts (1, 1, Iname)
-      OPEN (InpUnit, FILE=TRIM(Iname), FORM='formatted', STATUS='old',  &
-     &      IOSTAT=io_err, IOMSG=io_errmsg)
-      IF (io_err.ne.0) THEN
-        IF (MyMaster) WRITE (stdout,10) TRIM(io_errmsg)
-        exit_flag=2
-        RETURN
-      ELSE
-        GotFile=.TRUE.
-      END IF
+! The ROMS stardard input file is read from Fortran default standard
+! input unit.
+!
+      InpUnit=stdinp
+      GotFile=.FALSE.
 !
  10   FORMAT (/,' STDINP_UNIT - Unable to open ROMS/TOMS input script', &
      &                        ' file.',/,                               &

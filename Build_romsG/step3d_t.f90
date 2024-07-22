@@ -126,8 +126,6 @@
       USE mod_sources
 !
       USE exchange_3d_mod, ONLY : exchange_r3d_tile
-      USE mp_exchange_mod, ONLY : mp_exchange3d
-      USE mp_exchange_mod, ONLY : mp_exchange4d
       USE mpdata_adiff_mod
       USE t3dbc_mod, ONLY : t3dbc_tile
 !
@@ -320,11 +318,6 @@
      &                              LBi, UBi, LBj, UBj, 1, N(ng),       &
      &                              t(:,:,:,nnew,itrc))
           END IF
-          CALL mp_exchange3d (ng, tile, iNLM, 1,                        &
-     &                        LBi, UBi, LBj, UBj, 1, N(ng),             &
-     &                        NghostPoints,                             &
-     &                        EWperiodic(ng), NSperiodic(ng),           &
-     &                        t(:,:,:,nnew,itrc))
         END IF
 !
 !  Compute horizontal tracer advection fluxes.
@@ -1357,14 +1350,6 @@
      &                            t(:,:,:,nnew,itrc))
         END IF
       END DO
-!
-!  Exchange boundary data.
-!
-      CALL mp_exchange4d (ng, tile, iNLM, 1,                            &
-     &                    LBi, UBi, LBj, UBj, 1, N(ng), 1, NT(ng),      &
-     &                    NghostPoints,                                 &
-     &                    EWperiodic(ng), NSperiodic(ng),               &
-     &                    t(:,:,:,nnew,:))
 !
 !-----------------------------------------------------------------------
 !  If applicable, deallocate local arrays.

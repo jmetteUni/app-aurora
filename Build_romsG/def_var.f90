@@ -90,7 +90,6 @@
 !
       USE mod_netcdf
 !
-      USE distribute_mod, ONLY : mp_bcasti
       USE strings_mod,    ONLY : FoundError
 !
 !  Imported variable declarations.
@@ -913,10 +912,6 @@
           Vinfo(i)(j:j)=' '
         END DO
       END DO
-!
-!  Broadcast error flag.
-!
-      CALL mp_bcasti (ng, model, exit_flag)
 !
  10   FORMAT (/,' DEF_VAR_NF90 - Grid ',i2.2,                           &
      &          ', unable to define variable: ',a,/,                    &

@@ -70,8 +70,6 @@
 !
       USE mod_netcdf
 !
-      USE distribute_mod, ONLY : mp_bcasti, mp_gather2d
-!
 !  Imported variable declarations.
 !
       logical, intent(in), optional :: SetFillVal
@@ -107,7 +105,7 @@
 !
 !  Set parallel tile.
 !
-      tile=MyRank
+      tile=-1
 !
 !  Set switch to replace land areas with fill value, spval.
 !
@@ -162,12 +160,6 @@
       IF (OutThread) THEN
         status=nf90_put_var(ncid, ncvarid, Awrk, start, total)
       END IF
-!
-!-----------------------------------------------------------------------
-!  Broadcast IO error flag to all nodes.
-!-----------------------------------------------------------------------
-!
-      CALL mp_bcasti (ng, model, status)
 !
       RETURN
       END FUNCTION nf90_fwrite2d

@@ -35,8 +35,6 @@
       USE dateclock_mod,      ONLY : time_string
       USE checkvars_mod,      ONLY : checkvars
       USE lbc_mod,            ONLY : lbc_getatt
-      USE mp_exchange_mod,    ONLY : mp_exchange2d
-      USE mp_exchange_mod,    ONLY : mp_exchange3d
       USE nf_fread2d_mod,     ONLY : nf_fread2d
       USE nf_fread3d_mod,     ONLY : nf_fread3d
       USE nf_fread4d_mod,     ONLY : nf_fread4d
@@ -73,7 +71,7 @@
 !  Write out history fields according to IO type.
 !-----------------------------------------------------------------------
 !
-      tile=MyRank
+      tile=-1
 !
       LBi=BOUNDS(ng)%LBi(tile)
       UBi=BOUNDS(ng)%UBi(tile)

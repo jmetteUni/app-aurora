@@ -22,30 +22,6 @@
 !=======================================================================
 !
 !-----------------------------------------------------------------------
-      SUBROUTINE my_getarg (Iarg, Carg)
-!-----------------------------------------------------------------------
-!
-      USE mod_kinds
-!
-      implicit none
-!
-!  Imported variable declarations.
-!
-      integer, intent(in) :: Iarg
-      character (len=*), intent(inout) :: Carg
-!
-!  Local variable declarations.
-!
-      integer :: Lstr, ierror
-!
-!  Get argument value from command-line.
-!
-      CALL getarg (Iarg, Carg)
-!
-      RETURN
-      END SUBROUTINE my_getarg
-!
-!-----------------------------------------------------------------------
       FUNCTION my_getpid ()
 !-----------------------------------------------------------------------
 !

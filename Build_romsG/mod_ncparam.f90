@@ -1040,7 +1040,6 @@
 !
       logical :: FirstPass, Ldone, load
 !
-      integer :: Itile, Jtile
       integer :: Lvar, Ntiles, i, ic, ic_brylast, j, ng
       integer :: gtype, tile, varid
 !

@@ -69,8 +69,6 @@
       USE mod_ncparam
       USE mod_scalars
 !
-      USE distribute_mod, ONLY : mp_collect
-!
 !  Imported variable declarations.
 !
       logical, intent(in) :: Cgrid
@@ -244,13 +242,6 @@
       END IF
 !
 !-----------------------------------------------------------------------
-!  Collect all extracted data.
-!-----------------------------------------------------------------------
-!
-      CALL mp_collect (ng, model, Npos, Aspv, Apos)
-      CALL mp_collect (ng, model, Npos, 0.0_r8, bounded)
-!
-!-----------------------------------------------------------------------
 !  Set unbounded data to special value.
 !-----------------------------------------------------------------------
 !
@@ -273,8 +264,6 @@
       USE mod_grid
       USE mod_ncparam
       USE mod_scalars
-!
-      USE distribute_mod, ONLY : mp_collect
 !
 !  Imported variable declarations.
 !
@@ -704,13 +693,6 @@
           END IF
         END DO
       END IF
-!
-!-----------------------------------------------------------------------
-!  Collect all extracted data.
-!-----------------------------------------------------------------------
-!
-      CALL mp_collect (ng, model, Npos, Aspv, Apos)
-      CALL mp_collect (ng, model, Npos, 0.0_r8, bounded)
 !
 !-----------------------------------------------------------------------
 !  Set unbounded data to special value.

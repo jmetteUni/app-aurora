@@ -27,7 +27,6 @@
       USE def_his_mod,     ONLY : def_his
       USE def_quick_mod,   ONLY : def_quick
       USE def_rst_mod,     ONLY : def_rst
-      USE distribute_mod,  ONLY : mp_bcasts
       USE strings_mod,     ONLY : FoundError
       USE wrt_avg_mod,     ONLY : wrt_avg
       USE wrt_diags_mod,   ONLY : wrt_diags
@@ -64,7 +63,7 @@
 !
 !  Set tile for local array manipulations in output routines.
 !
-      tile=MyRank
+      tile=-1
 !
 !  Turn off checking for analytical header files.
 !
@@ -129,7 +128,6 @@
             IF (Master) THEN
               WRITE (HIS(ng)%name,20) TRIM(HIS(ng)%base), ifile
             END IF
-            CALL mp_bcasts (ng, iNLM, HIS(ng)%name)
             HIS(ng)%files(Fcount)=TRIM(HIS(ng)%name)
             CALL close_file (ng, iNLM, HIS(ng), HIS(ng)%name, Lupdate)
             CALL def_his (ng, NewFile)
@@ -226,7 +224,6 @@
             IF (Master) THEN
               WRITE (QCK(ng)%name,20) TRIM(QCK(ng)%base), ifile
             END IF
-            CALL mp_bcasts (ng, iNLM, QCK(ng)%name)
             QCK(ng)%files(Fcount)=TRIM(QCK(ng)%name)
             CALL close_file (ng, iNLM, QCK(ng), QCK(ng)%name, Lupdate)
             CALL def_quick (ng, NewFile)
@@ -329,7 +326,6 @@
             IF (Master) THEN
               WRITE (AVG(ng)%name,20) TRIM(AVG(ng)%base), ifile
             END IF
-            CALL mp_bcasts (ng, iNLM, AVG(ng)%name)
             AVG(ng)%files(Fcount)=TRIM(AVG(ng)%name)
             CALL close_file (ng, iNLM, AVG(ng), AVG(ng)%name, Lupdate)
             CALL def_avg (ng, Newfile)
@@ -419,7 +415,6 @@
             IF (Master) THEN
               WRITE (DIA(ng)%name,20) TRIM(DIA(ng)%base), ifile
             END IF
-            CALL mp_bcasts (ng, iNLM, DIA(ng)%name)
             DIA(ng)%files(Fcount)=TRIM(DIA(ng)%name)
             CALL close_file (ng, iNLM, DIA(ng), DIA(ng)%name, Lupdate)
             CALL def_diags (ng, Newfile)

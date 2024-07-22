@@ -27,7 +27,6 @@
       USE mod_parallel
       USE mod_iounits
 !
-      USE distribute_mod, ONLY : mp_collect
       USE mod_netcdf,     ONLY : Matts, Mdims, Mvars, NvarD, NvarA
       USE mod_scalars,    ONLY : LallocatedMemory
 !
@@ -44,8 +43,6 @@
       real(r8) :: totalAsize, totalBsize, totalDsize
 !
       real(r8), parameter :: spv = 0.0_r8
-!
-      real(r8), allocatable ::  Bwrk(:), Dwrk(:)
 !
       real(r8), allocatable ::  Asize(:,:)      ! automatic arrays
       real(r8), allocatable ::  Bsize(:,:)      ! automatic mpi-buffers
@@ -78,12 +75,6 @@
       IF (.not.allocated(IOsize)) THEN
         allocate ( IOsize(0:Ntiles,Ngrids) )
         IOsize=spv
-      END IF
-      IF (.not.allocated(Bwrk)) THEN
-        allocate ( Bwrk(Ntiles+1) )
-      END IF
-      IF (.not.allocated(Dwrk)) THEN
-        allocate ( Dwrk(Ntiles+1) )
       END IF
 !
 !  Determine size floating-point arrays in bytes.  We could use the
@@ -138,17 +129,9 @@
 !  Determine total maximum value of dynamic-memory and automatic-memory
 !  requirements, and convert number of array elements to megabytes.
 !
-      Bwrk=spv
-      Dwrk=spv
+      Dsize(0:numthreads-1,1:Ngrids)=spv
       DO ng=1,Ngrids
-        Bwrk(MyRank+1)=BmemMax(ng)*1.0E-6_r8        ! already in bytes
-        Dwrk(MyRank+1)=megabytefac*Dmem(ng)
-        CALL mp_collect (ng, iNLM, numthreads, spv, Bwrk)
-        CALL mp_collect (ng, iNLM, numthreads, spv, Dwrk)
-        Bsize(MyRank,ng)=Bwrk(MyRank+1)
-        Dsize(MyRank,ng)=Dwrk(MyRank+1)
-        Bwrk=spv
-        Dwrk=spv
+        Dsize(0,ng)=megabytefac*Dmem(ng)
       END DO
 !
 !  Report dynamic and automatic memory requirements.
@@ -170,22 +153,22 @@
             sumBsize=sumBsize+Bsize(tile,ng)
             sumDsize=sumDsize+Dsize(tile,ng)
             WRITE (stdout,20) tile, Dsize(tile,ng), Avalue,             &
-     &                        Dsize(tile,ng)+Avalue, Bsize(tile,ng)
+     &                        Dsize(tile,ng)+Avalue
           END DO
           totalAsize=totalAsize+sumAsize
           totalBsize=totalBsize+sumBsize
           totalDsize=totalDsize+sumDsize
           IF (Ngrids.gt.1) THEN
             WRITE (stdout,30) '  SUM', sumDsize, sumAsize,              &
-     &                                 sumAsize+sumDsize, sumBsize
+     &                                 sumAsize+sumDsize
           ELSE
             WRITE (stdout,30) 'TOTAL', sumDsize, sumAsize,              &
-     &                                 sumAsize+sumDsize, sumBsize
+     &                                 sumAsize+sumDsize
           END IF
         END DO
         IF (Ngrids.gt.1) THEN
             WRITE (stdout,30) 'TOTAL', totalDsize, totalAsize,          &
-     &                                 totalAsize+totalDsize, totalBsize
+     &                                 totalAsize+totalDsize
         END IF
         WRITE (stdout,"(/,80('<'))")
       END IF
@@ -203,7 +186,6 @@
      &          i2.2,':',2x,i0,'x',i0,'x',i0,2x,'tiling: ',i0,'x',i0,   &
      &          /,/,5x,'tile',10x,'Dynamic',8x,'Automatic',             &
      &          12x,'USAGE',                                            &
-     &          6x,'MPI-Buffers',                                       &
      &          /)
  20   FORMAT (4x,i5,4(4x,f13.2))
  30   FORMAT (/,4x,a,4(4x,f13.2))

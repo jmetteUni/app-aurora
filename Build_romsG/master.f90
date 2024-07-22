@@ -67,28 +67,6 @@
       integer :: ng, MyError
 !
 !-----------------------------------------------------------------------
-!  Initialize distributed-memory 1 configuration.
-!-----------------------------------------------------------------------
-!
-      CALL mpi_init (MyError)
-      IF (MyError.ne.0) THEN
-        WRITE (stdout,10)
-  10    FORMAT (/,' ROMS/TOMS - Unable to initialize MPI.')
-        exit_flag=6
-      END IF
-!
-!  Get rank of the local process in the group associated with the
-!  comunicator.
-!
-      CALL mpi_comm_rank (MPI_COMM_WORLD, MyRank, MyError)
-      IF (MyError.ne.0) THEN
-        WRITE (stdout,20)
-  20    FORMAT (/,' ROMS/TOMS - Unable to inquire rank of local',       &
-     &              ' processor.')
-        exit_flag=6
-      END IF
-!
-!-----------------------------------------------------------------------
 !  Initialize ocean internal and external parameters and state
 !  variables for all nested grids, if applicable.
 !-----------------------------------------------------------------------
@@ -117,7 +95,6 @@
 !
       CALL ROMS_finalize
       CALL ROMS_deallocate_arrays
-      CALL mpi_finalize (MyError)
 !
 !-----------------------------------------------------------------------
 !  If error, issue abort signal. It is expected that the Unix or POSIX

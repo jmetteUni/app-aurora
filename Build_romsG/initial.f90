@@ -24,7 +24,6 @@
       USE analytical_mod
       USE close_io_mod,      ONLY : close_inp
       USE dateclock_mod,     ONLY : time_string
-      USE distribute_mod,    ONLY : mp_bcasti
       USE get_state_mod,     ONLY : get_state
       USE ini_hmixcoef_mod,  ONLY : ini_hmixcoef
       USE set_depth_mod,     ONLY : set_depth0, set_depth
@@ -106,7 +105,7 @@
 !-----------------------------------------------------------------------
 !
       DO ng=1,Ngrids
-        DO thread=MyRank,MyRank
+        DO thread=0,numthreads-1
           CALL wclock_on (ng, iNLM, 2, 193, MyFile)
         END DO
       END DO
@@ -153,7 +152,6 @@
 !$OMP MASTER
         CALL get_state (ng, iNLM, 1, INI(ng), IniRec(ng), Tindex(ng))
 !$OMP END MASTER
-        CALL mp_bcasti (ng, iNLM, exit_flag)
 !$OMP BARRIER
         IF (FoundError(exit_flag, NoError, 418, MyFile)) RETURN
         time(ng)=io_time                     ! needed for shared-memory
@@ -216,7 +214,6 @@
         CALL close_inp (ng, iNLM)
         CALL check_multifile (ng, iNLM)
 !$OMP END MASTER
-        CALL mp_bcasti (ng, iNLM, exit_flag)
 !$OMP BARRIER
         IF (FoundError(exit_flag, NoError, 658, MyFile)) RETURN
       END DO
@@ -228,7 +225,6 @@
         CALL get_idata (ng)
         CALL get_data (ng)
 !$OMP END MASTER
-        CALL mp_bcasti (ng, iNLM, exit_flag)
 !$OMP BARRIER
         IF (FoundError(exit_flag, NoError, 672, MyFile)) RETURN
       END DO
@@ -263,7 +259,7 @@
 !-----------------------------------------------------------------------
 !
       DO ng=1,Ngrids
-        DO thread=MyRank,MyRank
+        DO thread=0,numthreads-1
           CALL wclock_off (ng, iNLM, 2, 869, MyFile)
         END DO
 !$OMP BARRIER

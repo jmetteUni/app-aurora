@@ -46,7 +46,6 @@
       USE mod_ncparam
       USE mod_scalars
 !
-      USE distribute_mod, ONLY : mp_bcastf
       USE get_hash_mod,   ONLY : get_hash
       USE strings_mod,    ONLY : FoundError
 !
@@ -101,7 +100,6 @@
 !
       real(r8), allocatable :: Cwrk(:)           ! used for checksum
       real(r8), dimension(3) :: AttValue
-      real(r8), dimension(3) :: rbuffer
       real(r8), dimension(LBij:UBij,LBk:UBk,4,Nrec) :: wrk
 !
       character (len=12), dimension(3) :: AttName
@@ -140,11 +138,11 @@
         CASE DEFAULT
           Cgrid=2
       END SELECT
-      tile=MyRank
-      Imin=BOUNDS(ng)%Imin(Cgrid,ghost,tile)
-      Imax=BOUNDS(ng)%Imax(Cgrid,ghost,tile)
-      Jmin=BOUNDS(ng)%Jmin(Cgrid,ghost,tile)
-      Jmax=BOUNDS(ng)%Jmax(Cgrid,ghost,tile)
+      tile=-1
+      Imin=LBij
+      Imax=UBij
+      Jmin=LBij
+      Jmax=UBij
       IorJ=IOBOUNDS(ng)%IorJ
       Klen=UBk-LBk+1
       IJKlen=IorJ*Klen
@@ -268,23 +266,11 @@
         END IF
       END IF
 !
-      rbuffer(1)=REAL(status,r8)
-      rbuffer(2)=Amin
-      rbuffer(3)=Amax
-      CALL mp_bcastf (ng, model, rbuffer)
-      status=INT(rbuffer(1))
-      Amin=rbuffer(2)
-      Amax=rbuffer(3)
-!
       IF (FoundError(status, nf90_noerr, 327, MyFile)) THEN
         exit_flag=2
         ioerror=status
         RETURN
       END IF
-!
-!  Broadcast data to all spawned nodes.
-!
-      CALL mp_bcastf (ng, model, wrk)
 !
 !-----------------------------------------------------------------------
 !  Unpack read data.

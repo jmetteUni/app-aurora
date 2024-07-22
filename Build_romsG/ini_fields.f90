@@ -100,8 +100,6 @@
 !
       USE exchange_2d_mod
       USE exchange_3d_mod
-      USE mp_exchange_mod, ONLY : mp_exchange2d
-      USE mp_exchange_mod, ONLY : mp_exchange3d, mp_exchange4d
       USE t3dbc_mod, ONLY : t3dbc_tile
       USE u3dbc_mod, ONLY : u3dbc_tile
       USE v3dbc_mod, ONLY : v3dbc_tile
@@ -254,13 +252,6 @@
      &                          v(:,:,:,nnew))
       END IF
 !
-      CALL mp_exchange3d (ng, tile, model, 4,                           &
-     &                    LBi, UBi, LBj, UBj, 1, N(ng),                 &
-     &                    NghostPoints,                                 &
-     &                    EWperiodic(ng), NSperiodic(ng),               &
-     &                    u(:,:,:,nstp), v(:,:,:,nstp),                 &
-     &                    u(:,:,:,nnew), v(:,:,:,nnew))
-!
 !-----------------------------------------------------------------------
 !  If not perfect restart, compute vertically-integrated momentum
 !  (ubar, vbar) from initial 3D momentum (u, v).
@@ -354,13 +345,6 @@
      &                          vbar(:,:,knew))
       END IF
 !
-      CALL mp_exchange2d (ng, tile, model, 4,                           &
-     &                    LBi, UBi, LBj, UBj,                           &
-     &                    NghostPoints,                                 &
-     &                    EWperiodic(ng), NSperiodic(ng),               &
-     &                    ubar(:,:,kstp), vbar(:,:,kstp),               &
-     &                    ubar(:,:,knew), vbar(:,:,knew))
-!
 !-----------------------------------------------------------------------
 !  If not perfect restart, initialize other time levels for tracers.
 !-----------------------------------------------------------------------
@@ -406,13 +390,6 @@
      &                            t(:,:,:,nnew,itrc))
         END DO
       END IF
-!
-      CALL mp_exchange4d (ng, tile, model, 2,                           &
-     &                    LBi, UBi, LBj, UBj, 1, N(ng), 1, NT(ng),      &
-     &                    NghostPoints,                                 &
-     &                    EWperiodic(ng), NSperiodic(ng),               &
-     &                    t(:,:,:,nstp,:),                              &
-     &                    t(:,:,:,nnew,:))
 !
       RETURN
       END SUBROUTINE ini_fields_tile
@@ -486,7 +463,6 @@
       USE mod_scalars
 !
       USE exchange_2d_mod, ONLY : exchange_r2d_tile
-      USE mp_exchange_mod, ONLY : mp_exchange2d
       USE zetabc_mod, ONLY : zetabc_tile
 !
 !  Imported variable declarations.
@@ -621,19 +597,6 @@
      &                            zeta(:,:,krhs))
         END IF
       END IF
-      CALL mp_exchange2d (ng, tile, model, 2,                           &
-     &                    LBi, UBi, LBj, UBj,                           &
-     &                    NghostPoints,                                 &
-     &                    EWperiodic(ng), NSperiodic(ng),               &
-     &                    zeta(:,:,kstp),                               &
-     &                    zeta(:,:,knew))
-      IF (PerfectRST(ng)) THEN
-        CALL mp_exchange2d (ng, tile, model, 1,                         &
-     &                      LBi, UBi, LBj, UBj,                         &
-     &                      NghostPoints,                               &
-     &                      EWperiodic(ng), NSperiodic(ng),             &
-     &                      zeta(:,:,krhs))
-      END IF
 !
 !-----------------------------------------------------------------------
 !  Initialize fast-time averaged free-surface (Zt_avg1) with the inital
@@ -651,11 +614,6 @@
      &                          LBi, UBi, LBj, UBj,                     &
      &                          Zt_avg1)
       END IF
-      CALL mp_exchange2d (ng, tile, model, 1,                           &
-     &                    LBi, UBi, LBj, UBj,                           &
-     &                    NghostPoints,                                 &
-     &                    EWperiodic(ng), NSperiodic(ng),               &
-     &                    Zt_avg1)
 !
       RETURN
       END SUBROUTINE ini_zeta_tile

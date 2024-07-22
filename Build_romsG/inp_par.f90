@@ -19,10 +19,8 @@
       USE mod_iounits
       USE mod_ncparam
       USE mod_scalars
-      USE mod_strings
 !
       USE dateclock_mod,    ONLY : get_date
-      USE distribute_mod,   ONLY : mp_bcasti, mp_bcasts
       USE lbc_mod,          ONLY : lbc_report
       USE ran_state,        ONLY : ran_seed
       USE stdinp_mod,       ONLY : stdinp_unit
@@ -50,7 +48,6 @@
 !
       integer :: Nghost, tile
       integer :: Imin, Imax, Jmin, Jmax
-      integer :: MaxHaloLenI, MaxHaloLenJ
       integer :: ibry, inp, out, i, ic, ifield, itrc, j, ng, npts
       integer :: sequence, varid
 !
@@ -67,26 +64,15 @@
 !-----------------------------------------------------------------------
 !
 !
-!  Get in ROMS standard input script filename (Iname) and and open it
-!  as a regular formatted file in distributed-memory configurations.
+!  Set standard inpur and output units.
 !
-      inp=stdinp_unit(Master, GotFile)
+      inp=stdinp
       out=stdout
       Lwrite=Master
 !
-      IF (.not.GotFile) THEN
-        IF (Master) WRITE (out,10)
- 10     FORMAT (/,' INP_PAR - Unable to ROMS standard input file, ',    &
-
-                'Iname')
-        exit_flag=2
-      END IF
-      IF (FoundError(exit_flag, NoError, 105, MyFile)) RETURN
-!
 !  Get current date.
 !
-      IF (Master) CALL get_date (date_str)
-      CALL mp_bcasts (1, model, date_str)
+      CALL get_date (date_str)
 !
 !-----------------------------------------------------------------------
 !  Read in physical model input parameters.
@@ -100,7 +86,6 @@
 !  Process ROMS standard input Iname script.
 !
       CALL read_PhyPar (model, inp, out, Lwrite)
-      CALL mp_bcasti (1, model, exit_flag)
       IF (FoundError(exit_flag, NoError, 148, MyFile)) RETURN
 !
 !-----------------------------------------------------------------------
@@ -211,7 +196,6 @@
      &          /,11x,'because it yields too small tile, ',a,i0,a,i0,   &
      &          /,11x,'Decrease partition parameter: ',a)
       END IF
-      CALL mp_bcasti (1, model, exit_flag)
       IF (FoundError(exit_flag, NoError, 414, MyFile)) RETURN
 !
 !  Report tile minimum and maximum fractional grid coordinates.
@@ -248,44 +232,6 @@
      &            5x,'tile',5x,'Xmin',5x,'Xmax',5x,'Ymin',5x,'Ymax',    &
      &            5x,'grid',/)
  100      FORMAT (5x,i4,4f9.2,2x,a)
-        END IF
-      END DO
-!
-!-----------------------------------------------------------------------
-!  Determine the maximum tile lengths in XI and ETA directions for
-!  distributed-memory communications.  Notice that halo size are
-!  increased by few points to allow exchanging of private arrays.
-!-----------------------------------------------------------------------
-!
-      IF (ANY(EWperiodic).or.ANY(NSperiodic)) THEN
-        Nghost=NghostPoints+1
-      ELSE
-        Nghost=NghostPoints
-      END IF
-      DO ng=1,Ngrids
-        MaxHaloLenI=0
-        MaxHaloLenJ=0
-        HaloBry(ng)=Nghost
-        DO tile=0,NtileI(ng)*NtileJ(ng)-1
-          Imin=BOUNDS(ng)%LBi(tile)-1
-          Imax=BOUNDS(ng)%UBi(tile)+1
-          Jmin=BOUNDS(ng)%LBj(tile)-1
-          Jmax=BOUNDS(ng)%UBj(tile)+1
-          MaxHaloLenI=MAX(MaxHaloLenI,(Imax-Imin+1))
-          MaxHaloLenJ=MAX(MaxHaloLenJ,(Jmax-Jmin+1))
-        END DO
-        HaloSizeI(ng)=Nghost*MaxHaloLenI+6*Nghost
-        HaloSizeJ(ng)=Nghost*MaxHaloLenJ+6*Nghost
-        TileSide(ng)=MAX(MaxHaloLenI,MaxHaloLenJ)
-        TileSize(ng)=MaxHaloLenI*MaxHaloLenJ
-        IF (Master.and.Lwrite) THEN
-          WRITE (stdout,110) ng, HaloSizeI(ng), ng, HaloSizeJ(ng),      &
-     &                       ng, TileSide(ng),  ng, TileSize(ng)
- 110      FORMAT (/,' Maximum halo size in XI and ETA directions:',/,   &
-     &            /,'               HaloSizeI(',i1,') = ',i7,           &
-     &            /,'               HaloSizeJ(',i1,') = ',i7,           &
-     &            /,'                TileSide(',i1,') = ',i7,           &
-     &            /,'                TileSize(',i1,') = ',i7,/)
         END IF
       END DO
 !
@@ -537,8 +483,6 @@
         CALL checkdefs
         FLUSH (out)
       END IF
-      CALL mp_bcasti (1, model, exit_flag)
-      CALL mp_bcasts (1, model, Coptions)
       IF (FoundError(exit_flag, NoError, 917, MyFile)) RETURN
 !
 !-----------------------------------------------------------------------

@@ -122,7 +122,6 @@
 !
       USE exchange_2d_mod
       USE exchange_3d_mod
-      USE mp_exchange_mod, ONLY : mp_exchange2d, mp_exchange3d
 !
 !  Imported variable declarations.
 !
@@ -326,17 +325,6 @@
      &                          LBi, UBi, LBj, UBj,                     &
      &                          rhoS)
       END IF
-!
-      CALL mp_exchange3d (ng, tile, model, 2,                           &
-     &                    LBi, UBi, LBj, UBj, 1, N(ng),                 &
-     &                    NghostPoints,                                 &
-     &                    EWperiodic(ng), NSperiodic(ng),               &
-     &                    rho, pden)
-      CALL mp_exchange2d (ng, tile, model, 2,                           &
-     &                    LBi, UBi, LBj, UBj,                           &
-     &                    NghostPoints,                                 &
-     &                    EWperiodic(ng), NSperiodic(ng),               &
-     &                    rhoA, rhoS)
 !
       RETURN
       END SUBROUTINE rho_eos_tile

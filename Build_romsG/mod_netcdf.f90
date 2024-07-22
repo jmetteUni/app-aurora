@@ -24,8 +24,6 @@
       USE mod_scalars
       USE netcdf
 !
-      USE distribute_mod, ONLY : mp_bcastf, mp_bcasti, mp_bcastl,       &
-     &                           mp_bcasts
       USE strings_mod,    ONLY : FoundError
 !
       implicit none
@@ -223,8 +221,6 @@
 !
       integer :: status
 !
-      integer, dimension(3) :: ibuffer
-!
       character (len=*), parameter :: MyFile =                          &
      &  "ROMS/Modules/mod_netcdf.F"//", netcdf_find_var"
 !
@@ -238,12 +234,6 @@
       IF (InpThread) THEN
         status=nf90_inq_varid(ncid, TRIM(VarName), VarID)
       END IF
-!
-      ibuffer(1)=status
-      ibuffer(2)=VarID
-      CALL mp_bcasti (ng, model, ibuffer)
-      status=ibuffer(1)
-      VarID=ibuffer(2)
 !
       IF (status.eq.nf90_noerr) THEN
         foundit=.TRUE.
@@ -308,7 +298,6 @@
 !
       integer :: my_ncid, i, j, status
       integer :: myID, myValue
-      integer, dimension(5) :: ibuffer
 !
       character (len=*), parameter :: MyFile =                          &
      &  "ROMS/Modules/mod_netcdf.F"//", netcdf_get_dim"
@@ -347,10 +336,6 @@
       IF (InpThread) THEN
         status=nf90_inquire(my_ncid, n_dim, n_var, n_gatt, rec_id)
         IF ((status.eq.nf90_noerr).and.(n_dim.le.Mdims)) THEN
-          ibuffer(1)=n_dim
-          ibuffer(2)=n_var
-          ibuffer(3)=n_gatt
-          ibuffer(4)=rec_id
 !
 !  Inquire about dimensions: names, ID, and size.
 !
@@ -368,7 +353,6 @@
             END IF
             IF (dim_id(i).eq.rec_id) THEN
               rec_size=dim_size(i)
-              ibuffer(5)=rec_size
             END IF
           END DO
         ELSE
@@ -383,21 +367,6 @@
             ioerror=status
           END IF
         END IF
-      END IF
-!
-!  Broadcast dimension to all processors in the group.
-!
-      CALL mp_bcasti (ng, model, exit_flag)
-      IF (exit_flag.eq.NoError) THEN
-        CALL mp_bcasti (ng, model, ibuffer)
-        n_dim=ibuffer(1)
-        n_var=ibuffer(2)
-        n_gatt=ibuffer(3)
-        rec_id=ibuffer(4)
-        rec_size=ibuffer(5)
-        CALL mp_bcasti (ng, model, dim_id)
-        CALL mp_bcasti (ng, model, dim_size)
-        CALL mp_bcasts (ng, model, dim_name)
       END IF
 !
 !  Load requested information.
@@ -879,7 +848,6 @@
 !
       integer :: i, j, status
       integer :: att_id, my_Alen, my_Atype, my_id, my_ncid
-      integer, dimension(5) :: ibuffer
 !
       real(r4) :: my_Afloat
       real(r8) :: my_Adouble
@@ -939,10 +907,6 @@
       IF (InpThread) THEN
         status=nf90_inquire(my_ncid, n_dim, n_var, n_gatt, rec_id)
         IF ((status.eq.nf90_noerr).and.(n_var.le.Mvars)) THEN
-          ibuffer(1)=n_dim
-          ibuffer(2)=n_var
-          ibuffer(3)=n_gatt
-          ibuffer(4)=rec_id
 !
 !  Inquire about global dimensions: names, ID, and size.
 !
@@ -960,7 +924,6 @@
             END IF
             IF (dim_id(i).eq.rec_id) THEN
               rec_size=dim_size(i)
-              ibuffer(5)=rec_size
             END IF
           END DO
 !
@@ -1041,30 +1004,6 @@
             ioerror=status
           END IF
         END IF
-      END IF
-!
-!  Broadcast dimension to all processors in the group.
-!
-      CALL mp_bcasti (ng, model, exit_flag)
-      IF (exit_flag.eq.NoError) THEN
-        CALL mp_bcasti (ng, model, ibuffer)
-        n_dim=ibuffer(1)
-        n_var=ibuffer(2)
-        n_gatt=ibuffer(3)
-        rec_id=ibuffer(4)
-        rec_size=ibuffer(5)
-        CALL mp_bcasti (ng, model, att_kind)
-        CALL mp_bcasti (ng, model, dim_id)
-        CALL mp_bcasti (ng, model, dim_size)
-        CALL mp_bcasts (ng, model, dim_name)
-        CALL mp_bcasti (ng, model, var_id)
-        CALL mp_bcasti (ng, model, var_flag)
-        CALL mp_bcasti (ng, model, var_type)
-        CALL mp_bcasti (ng, model, var_ndim)
-        CALL mp_bcasti (ng, model, var_natt)
-        CALL mp_bcasti (ng, model, var_dim)
-        CALL mp_bcasts (ng, model, att_name)
-        CALL mp_bcasts (ng, model, var_name)
       END IF
 !
 !  Load requested requested variable information.
@@ -1229,25 +1168,6 @@
             END IF
           END IF
 !
-!  Broadcast requested variable information to all processors in the
-!  group.
-!
-          IF (foundit) THEN
-            CALL mp_bcasti (ng, model, exit_flag)
-            IF (exit_flag.eq.NoError) THEN
-              CALL mp_bcasts (ng, model, var_Dname)
-              IF (n_vdim.gt.0) THEN
-                CALL mp_bcasti (ng, model, var_Dsize)
-              END IF
-              CALL mp_bcasts (ng, model, var_Aname)
-              CALL mp_bcasts (ng, model, var_Achar)
-              IF (n_vatt.gt.0) THEN
-                CALL mp_bcasti (ng, model, var_Aint)
-                CALL mp_bcastf (ng, model, var_Afloat)
-              END IF
-            END IF
-          END IF
-!
 !  Ignore error message if requested variable not found when searching
 !  over multiple input NetCDF files.
 !
@@ -1336,7 +1256,6 @@
 !  Local variable declarations.
 !
       integer :: status
-      integer, dimension(3) :: ibuffer
 !
       character (len=*), parameter :: MyFile =                          &
      &  "ROMS/Modules/mod_netcdf.F"//", netcdf_inq_varid"
@@ -1354,13 +1273,6 @@
           ioerror=status
         END IF
       END IF
-      ibuffer(1)=exit_flag
-      ibuffer(2)=ioerror
-      ibuffer(3)=VarID
-      CALL mp_bcasti (ng, model, ibuffer)
-      exit_flag=ibuffer(1)
-      ioerror=ibuffer(2)
-      VarID=ibuffer(3)
 !
   10  FORMAT (/,' NETCDF_INQ_VARID - error while inquiring ID for ',    &
      &        'variable:',2x,a,/,20x,'in input file:',2x,a,/,           &
@@ -1410,8 +1322,6 @@
 !
       integer :: i, j, my_natts, my_ncid, natts, status
 !
-      real(r8), allocatable :: rbuffer(:)
-!
       character (len=40) :: my_Aname
       character (len=40) :: my_Vname
       character (len=*), parameter :: MyFile =                          &
@@ -1428,9 +1338,6 @@
         foundit(i)=.FALSE.
         AttValue(i)=0.0_r8
       END DO
-      IF (.not.allocated(rbuffer)) THEN
-        allocate ( rbuffer(2*natts+1) )
-      END IF
 !
 !  If appropriate, open file for reading.
 !
@@ -1485,15 +1392,6 @@
               EXIT
             END IF
           END DO
-!
-          rbuffer=0.0_r8
-          DO i=1,natts
-            rbuffer(i)=AttValue(i)
-            IF (foundit(i)) THEN
-               rbuffer(i+natts)=1.0_r8
-            END IF
-          END DO
-          rbuffer(2*natts+1)=REAL(ioerror, r8)
         ELSE
           IF (Master) WRITE (stdout,30) TRIM(my_Vname),                 &
      &                                  TRIM(ncname),                   &
@@ -1501,24 +1399,6 @@
      &                                  nf90_strerror(status)
           exit_flag=2
           ioerror=status
-        END IF
-      END IF
-!
-!  Broadcast information to all processors in the group. Pack all
-!  data into a real array for efficient communications.
-!
-      CALL mp_bcasti (ng, model, exit_flag)
-      IF (exit_flag.eq.NoError) THEN
-        CALL mp_bcastf (ng, model, rbuffer)
-        DO i=1,natts
-          AttValue(i)=rbuffer(i)
-          IF (rbuffer(i+natts).gt.0.0_r8) THEN
-            foundit(i)=.TRUE.
-          END IF
-        END DO
-        ioerror=INT(rbuffer(2*natts+1))
-        IF (allocated(rbuffer)) THEN
-          deallocate (rbuffer)
         END IF
       END IF
 !
@@ -1581,7 +1461,6 @@
 !  Local variable declarations.
 !
       integer :: i, j, my_natts, my_ncid, natts, status
-      integer, allocatable :: ibuffer(:)
 !
       character (len=40) :: my_Aname
       character (len=40) :: my_Vname
@@ -1599,9 +1478,6 @@
         foundit(i)=.FALSE.
         AttValue(i)=' '
       END DO
-      IF (.not.allocated(ibuffer)) THEN
-        allocate ( ibuffer(natts+1) )
-      END IF
 !
 !  If appropriate, open file for reading.
 !
@@ -1656,14 +1532,6 @@
               EXIT
             END IF
           END DO
-!
-          ibuffer=0
-          DO i=1,natts
-            IF (foundit(i)) THEN
-              ibuffer(i)=1
-            END IF
-          END DO
-          ibuffer(natts+1)=ioerror
         ELSE
           IF (Master) WRITE (stdout,30) TRIM(my_Vname),                 &
      &                                  TRIM(ncname),                   &
@@ -1672,24 +1540,6 @@
           exit_flag=2
           ioerror=status
         END IF
-      END IF
-!
-!  Broadcast information to all processors in the group. Pack all
-!  data into a real array for efficient communications.
-!
-      CALL mp_bcasti (ng, model, exit_flag)
-      IF (exit_flag.eq.NoError) THEN
-        CALL mp_bcasti (ng, model, ibuffer)
-        DO i=1,natts
-          IF (ibuffer(i).gt.0) THEN
-            foundit(i)=.TRUE.
-          END IF
-        END DO
-        ioerror=ibuffer(natts+1)
-        CALL mp_bcasts (ng, model, AttValue)
-      END IF
-      IF (allocated(ibuffer)) THEN
-        deallocate (ibuffer)
       END IF
 !
 !  If applicable, close input NetCDF file.
@@ -1768,10 +1618,7 @@
 !
 !  Local variable declarations.
 !
-      logical :: DoBroadcast
-!
       integer :: my_ncid, status, varid
-      integer, dimension(2) :: ibuffer
 !
       real(r8), dimension(1) :: my_A
 !
@@ -1789,15 +1636,6 @@
         IF (FoundError(exit_flag, NoError, 3514, MyFile)) RETURN
       ELSE
         my_ncid=ncid
-      END IF
-!
-!  Determine if the read data is only needed and allocated by the master
-!  node ins distribute-memory applications.
-!
-      IF (.not.PRESENT(broadcast)) THEN
-        DoBroadcast=.TRUE.
-      ELSE
-        DoBroadcast=broadcast
       END IF
 !
 !  Read in variable.
@@ -1823,17 +1661,6 @@
           exit_flag=2
           ioerror=status
         END IF
-      END IF
-!
-!  Broadcast read variable to all processors in the group.
-!
-      ibuffer(1)=exit_flag
-      ibuffer(2)=ioerror
-      CALL mp_bcasti (ng, model, ibuffer)
-      exit_flag=ibuffer(1)
-      ioerror=ibuffer(2)
-      IF (DoBroadcast.and.(exit_flag.eq.NoError)) THEN
-        CALL mp_bcastf (ng, model, A)
       END IF
 !
 !  Compute minimum and maximum values of read variable. Notice that
@@ -1921,12 +1748,10 @@
 !
 !  Local variable declarations.
 !
-      logical :: DoBroadcast
       logical, dimension(3) :: foundit
 !
       integer :: i, my_ncid, status, varid
       integer, dimension(1) :: Asize
-      integer, dimension(2) :: ibuffer
 !
       real(r8) :: Afactor, Aoffset, Aspval
       real(r8), parameter :: Aepsilon = 1.0E-8_r8
@@ -1958,15 +1783,6 @@
         my_ncid=ncid
       END IF
 !
-!  Determine if the read data is only needed and allocated by the master
-!  node ins distribute-memory applications.
-!
-      IF (.not.PRESENT(broadcast)) THEN
-        DoBroadcast=.TRUE.
-      ELSE
-        Dobroadcast=broadcast
-      END IF
-!
 !  Read in variable.
 !
       IF (InpThread) THEN
@@ -1989,17 +1805,6 @@
           exit_flag=2
           ioerror=status
         END IF
-      END IF
-!
-!  Broadcast read variable to all processors in the group.
-!
-      ibuffer(1)=exit_flag
-      ibuffer(2)=ioerror
-      CALL mp_bcasti (ng, model, ibuffer)
-      exit_flag=ibuffer(1)
-      ioerror=ibuffer(2)
-      IF (DoBroadcast.and.(exit_flag.eq.NoError)) THEN
-        CALL mp_bcastf (ng, model, A)
       END IF
 !
 !  Check if the following attributes: "scale_factor", "add_offset", and
@@ -2139,12 +1944,10 @@
 !
 !  Local variable declarations.
 !
-      logical :: Dobroadcast
       logical, dimension(3) :: foundit
 !
       integer :: i, j, my_ncid, status, varid
       integer, dimension(2) :: Asize
-      integer, dimension(2) :: ibuffer
 !
       real(r8) :: Afactor, Aoffset, Aspval
       real(r8), parameter :: Aepsilon = 1.0E-8_r8
@@ -2175,15 +1978,6 @@
         my_ncid=ncid
       END IF
 !
-!  Determine if the read data is only needed and allocated by the master
-!  node ins distribute-memory applications.
-!
-      IF (.not.PRESENT(broadcast)) THEN
-        DoBroadcast=.TRUE.
-      ELSE
-        DoBroadcast=broadcast
-      END IF
-!
 !  Read in variable.
 !
       IF (InpThread) THEN
@@ -2207,17 +2001,6 @@
           exit_flag=2
           ioerror=status
         END IF
-      END IF
-!
-!  Broadcast read variable to all processors in the group.
-!
-      ibuffer(1)=exit_flag
-      ibuffer(2)=ioerror
-      CALL mp_bcasti (ng, model, ibuffer)
-      exit_flag=ibuffer(1)
-      ioerror=ibuffer(2)
-      IF (DoBroadcast.and.(exit_flag.eq.NoError)) THEN
-        CALL mp_bcastf (ng, model, A)
       END IF
 !
 !  Check if the following attributes: "scale_factor", "add_offset", and
@@ -2360,12 +2143,10 @@
 !
 !  Local variable declarations.
 !
-      logical :: DoBroadcast
       logical, dimension(3) :: foundit
 !
       integer :: i, j, k, my_ncid, status, varid
       integer, dimension(3) :: Asize
-      integer, dimension(2) :: ibuffer
 !
       real(r8) :: Afactor, Aoffset, Aspval
       real(r8), parameter :: Aepsilon = 1.0E-8_r8
@@ -2398,15 +2179,6 @@
         my_ncid=ncid
       END IF
 !
-!  Determine if the read data is only needed and allocated by the master
-!  node ins distribute-memory applications.
-!
-      IF (.not.PRESENT(broadcast)) THEN
-        DoBroadcast=.TRUE.
-      ELSE
-        DoBroadcast=broadcast
-      END IF
-!
 !  Read in variable.
 !
       IF (InpThread) THEN
@@ -2429,17 +2201,6 @@
           exit_flag=2
           ioerror=status
         END IF
-      END IF
-!
-!  Broadcast read variable to all processors in the group.
-!
-      ibuffer(1)=exit_flag
-      ibuffer(2)=ioerror
-      CALL mp_bcasti (ng, model, ibuffer)
-      exit_flag=ibuffer(1)
-      ioerror=ibuffer(2)
-      IF (DoBroadcast.and.(exit_flag.eq.NoError)) THEN
-        CALL mp_bcastf (ng, model, A)
       END IF
 !
 !  Check if the following attributes: "scale_factor", "add_offset", and
@@ -2590,12 +2351,10 @@
 !
 !  Local variable declarations.
 !
-      logical :: DoBroadcast
       logical, dimension(3) :: foundit
 !
       integer :: i, j, k, l, my_ncid, status, varid
       integer, dimension(4) :: Asize
-      integer, dimension(2) :: ibuffer
 !
       real(r8) :: Afactor, Aoffset, Aspval
       real(r8), parameter :: Aepsilon = 1.0E-8_r8
@@ -2630,15 +2389,6 @@
         my_ncid=ncid
       END IF
 !
-!  Determine if the read data is only needed and allocated by the master
-!  node ins distribute-memory applications.
-!
-      IF (.not.PRESENT(broadcast)) THEN
-        DoBroadcast=.TRUE.
-      ELSE
-        DoBroadcast=broadcast
-      END IF
-!
 !  Read in variable.
 !
       IF (InpThread) THEN
@@ -2661,17 +2411,6 @@
           exit_flag=2
           ioerror=status
         END IF
-      END IF
-!
-!  Broadcast read variable to all processors in the group.
-!
-      ibuffer(1)=exit_flag
-      ibuffer(2)=ioerror
-      CALL mp_bcasti (ng, model, ibuffer)
-      exit_flag=ibuffer(1)
-      ioerror=ibuffer(2)
-      IF (DoBroadcast.and.(exit_flag.eq.NoError)) THEN
-        CALL mp_bcastf (ng, model, A)
       END IF
 !
 !  Check if the following attributes: "scale_factor", "add_offset", and
@@ -2823,7 +2562,6 @@
       integer :: my_ncid, my_type, status, varid
       integer :: AI
       integer, dimension(1) :: my_AI
-      integer, dimension(2) :: ibuffer
 !
       character (len=1) :: Achar
       character (len=*), parameter :: MyFile =                          &
@@ -2897,17 +2635,6 @@
         END IF
       END IF
 !
-!  Broadcast read variable to all processors in the group.
-!
-      ibuffer(1)=exit_flag
-      ibuffer(2)=ioerror
-      CALL mp_bcasti (ng, model, ibuffer)
-      exit_flag=ibuffer(1)
-      ioerror=ibuffer(2)
-      IF (exit_flag.eq.NoError) THEN
-        CALL mp_bcastl (ng, model, A)
-      END IF
-!
 !  If NetCDF file ID is not provided, close input NetCDF file.
 !
       IF (.not.PRESENT(ncid)) THEN
@@ -2978,7 +2705,6 @@
 !
       integer :: i, my_ncid, my_type, status, varid
       integer, dimension(SIZE(A,1)) :: AI
-      integer, dimension(2) :: ibuffer
 !
       character (len=1), dimension(SIZE(A,1)) :: Achar
       character (len=*), parameter :: MyFile =                          &
@@ -3055,17 +2781,6 @@
         END IF
       END IF
 !
-!  Broadcast read variable to all processors in the group.
-!
-      ibuffer(1)=exit_flag
-      ibuffer(2)=ioerror
-      CALL mp_bcasti (ng, model, ibuffer)
-      exit_flag=ibuffer(1)
-      ioerror=ibuffer(2)
-      IF (exit_flag.eq.NoError) THEN
-        CALL mp_bcastl (ng, model, A)
-      END IF
-!
 !  If NetCDF file ID is not provided, close input NetCDF file.
 !
       IF (.not.PRESENT(ncid)) THEN
@@ -3133,7 +2848,6 @@
 !
       integer :: my_ncid, status, varid
       integer, dimension(1) :: my_A
-      integer, dimension(2) :: ibuffer
 !
       character (len=*), parameter :: MyFile =                          &
      &  "ROMS/Modules/mod_netcdf.F"//", netcdf_get_ivar_0d"
@@ -3174,17 +2888,6 @@
           exit_flag=2
           ioerror=status
         END IF
-      END IF
-!
-!  Broadcast read variable to all processors in the group.
-!
-      ibuffer(1)=exit_flag
-      ibuffer(2)=ioerror
-      CALL mp_bcasti (ng, model, ibuffer)
-      exit_flag=ibuffer(1)
-      ioerror=ibuffer(2)
-      IF (exit_flag.eq.NoError) THEN
-        CALL mp_bcasti (ng, model, A)
       END IF
 !
 !  If NetCDF file ID is not provided, close input NetCDF file.
@@ -3251,7 +2954,6 @@
 !  Local variable declarations.
 !
       integer :: my_ncid, status, varid
-      integer, dimension(2) :: ibuffer
 !
       character (len=*), parameter :: MyFile =                          &
      &  "ROMS/Modules/mod_netcdf.F"//", netcdf_get_ivar_1d"
@@ -3291,17 +2993,6 @@
           exit_flag=2
           ioerror=status
         END IF
-      END IF
-!
-!  Broadcast read variable to all processors in the group.
-!
-      ibuffer(1)=exit_flag
-      ibuffer(2)=ioerror
-      CALL mp_bcasti (ng, model, ibuffer)
-      exit_flag=ibuffer(1)
-      ioerror=ibuffer(2)
-      IF (exit_flag.eq.NoError) THEN
-        CALL mp_bcasti (ng, model, A)
       END IF
 !
 !  If NetCDF file ID is not provided, close input NetCDF file.
@@ -3369,7 +3060,6 @@
 !  Local variable declarations.
 !
       integer :: my_ncid, status, varid
-      integer, dimension(2) :: ibuffer
 !
       character (len=*), parameter :: MyFile =                          &
      &  "ROMS/Modules/mod_netcdf.F"//", netcdf_get_ivar_2d"
@@ -3409,17 +3099,6 @@
           exit_flag=2
           ioerror=status
         END IF
-      END IF
-!
-!  Broadcast read variable to all processors in the group.
-!
-      ibuffer(1)=exit_flag
-      ibuffer(2)=ioerror
-      CALL mp_bcasti (ng, model, ibuffer)
-      exit_flag=ibuffer(1)
-      ioerror=ibuffer(2)
-      IF (exit_flag.eq.NoError) THEN
-        CALL mp_bcasti (ng, model, A)
       END IF
 !
 !  If NetCDF file ID is not provided, close input NetCDF file.
@@ -3494,7 +3173,6 @@
 !  Local variable declarations.
 !
       integer :: my_ncid, status, varid
-      integer, dimension(2) :: ibuffer
 !
       character (len=LEN(A)), dimension(1) :: my_A
       character (len=*), parameter :: MyFile =                          &
@@ -3536,17 +3214,6 @@
           exit_flag=2
           ioerror=status
         END IF
-      END IF
-!
-!  Broadcast read variable to all processors in the group.
-!
-      ibuffer(1)=exit_flag
-      ibuffer(2)=ioerror
-      CALL mp_bcasti (ng, model, ibuffer)
-      exit_flag=ibuffer(1)
-      ioerror=ibuffer(2)
-      IF (exit_flag.eq.NoError) THEN
-        CALL mp_bcasts (ng, model, A)
       END IF
 !
 !  If NetCDF file ID is not provided, close input NetCDF file.
@@ -3617,7 +3284,6 @@
 !  Local variable declarations.
 !
       integer :: my_ncid, status, varid
-      integer, dimension(2) :: ibuffer
 !
       character (len=*), parameter :: MyFile =                          &
      &  "ROMS/Modules/mod_netcdf.F"//", netcdf_get_svar_1d"
@@ -3657,17 +3323,6 @@
           exit_flag=2
           ioerror=status
         END IF
-      END IF
-!
-!  Broadcast read variable to all processors in the group.
-!
-      ibuffer(1)=exit_flag
-      ibuffer(2)=ioerror
-      CALL mp_bcasti (ng, model, ibuffer)
-      exit_flag=ibuffer(1)
-      ioerror=ibuffer(2)
-      IF (exit_flag.eq.NoError) THEN
-        CALL mp_bcasts (ng, model, A)
       END IF
 !
 !  If NetCDF file ID is not provided, close input NetCDF file.
@@ -3738,7 +3393,6 @@
 !  Local variable declarations.
 !
       integer :: my_ncid, status, varid
-      integer, dimension(2) :: ibuffer
 !
       character (len=*), parameter :: MyFile =                          &
      &  "ROMS/Modules/mod_netcdf.F"//", netcdf_get_svar_2d"
@@ -3778,17 +3432,6 @@
           exit_flag=2
           ioerror=status
         END IF
-      END IF
-!
-!  Broadcast read variable to all processors in the group.
-!
-      ibuffer(1)=exit_flag
-      ibuffer(2)=ioerror
-      CALL mp_bcasti (ng, model, ibuffer)
-      exit_flag=ibuffer(1)
-      ioerror=ibuffer(2)
-      IF (exit_flag.eq.NoError) THEN
-        CALL mp_bcasts (ng, model, A)
       END IF
 !
 !  If NetCDF file ID is not provided, close input NetCDF file.
@@ -3859,7 +3502,6 @@
 !  Local variable declarations.
 !
       integer :: my_ncid, status, varid
-      integer, dimension(2) :: ibuffer
 !
       character (len=*), parameter :: MyFile =                          &
      &  "ROMS/Modules/mod_netcdf.F"//", netcdf_get_svar_3d"
@@ -3899,17 +3541,6 @@
           exit_flag=2
           ioerror=status
         END IF
-      END IF
-!
-!  Broadcast read variable to all processors in the group.
-!
-      ibuffer(1)=exit_flag
-      ibuffer(2)=ioerror
-      CALL mp_bcasti (ng, model, ibuffer)
-      exit_flag=ibuffer(1)
-      ioerror=ibuffer(2)
-      IF (exit_flag.eq.NoError) THEN
-        CALL mp_bcasts (ng, model, A)
       END IF
 !
 !  If NetCDF file ID is not provided, close input NetCDF file.
@@ -3997,7 +3628,6 @@
 !
       integer :: ind, lstr, my_ncid, status, varid
       integer :: year, month, day, hour, minutes
-      integer, dimension(2) :: ibuffer
       real(dp) :: Afactor, Aoffset, my_Rdate(2), seconds
       real(dp) :: dnum_old, dnum_new, scale
       real(dp), dimension(1) :: my_A
@@ -4046,17 +3676,6 @@
           exit_flag=2
           ioerror=status
         END IF
-      END IF
-!
-!  Broadcast read variable to all processors in the group.
-!
-      ibuffer(1)=exit_flag
-      ibuffer(2)=ioerror
-      CALL mp_bcasti (ng, model, ibuffer)
-      exit_flag=ibuffer(1)
-      ioerror=ibuffer(2)
-      IF (exit_flag.eq.NoError) THEN
-        CALL mp_bcastf (ng, model, A)
       END IF
 !
 !  Check if the following attributes: "scale_factor", "add_offset", and
@@ -4279,7 +3898,6 @@
       integer :: i, ind, lstr, my_ncid, status, varid
       integer :: year, month, day, hour, minutes
       integer, dimension(1) :: Asize
-      integer, dimension(2) :: ibuffer
 !
       real(dp) :: Afactor, Aoffset, my_Rdate(2), seconds
       real(dp) :: dnum_old, dnum_new, scale
@@ -4336,17 +3954,6 @@
           exit_flag=2
           ioerror=status
         END IF
-      END IF
-!
-!  Broadcast read variable to all processors in the group.
-!
-      ibuffer(1)=exit_flag
-      ibuffer(2)=ioerror
-      CALL mp_bcasti (ng, model, ibuffer)
-      exit_flag=ibuffer(1)
-      ioerror=ibuffer(2)
-      IF (exit_flag.eq.NoError) THEN
-        CALL mp_bcastf (ng, model, A)
       END IF
 !
 !  Check if the following attributes: "scale_factor", "add_offset", and
@@ -4557,7 +4164,6 @@
 !  Local variable declarations.
 !
       integer :: my_ncid, my_varid, status
-      integer, dimension(2) :: ibuffer
 !
       real(r8), dimension(1) :: my_A
 !
@@ -4609,14 +4215,6 @@
           END IF
         END IF
       END IF
-!
-!  Broadcast error flags to all processors in the group.
-!
-      ibuffer(1)=exit_flag
-      ibuffer(2)=ioerror
-      CALL mp_bcasti (ng, model, ibuffer)
-      exit_flag=ibuffer(1)
-      ioerror=ibuffer(2)
 !
 !  Close input file.
 !
@@ -4680,7 +4278,6 @@
 !  Local variable declarations.
 !
       integer :: my_ncid, my_varid, status
-      integer, dimension(2) :: ibuffer
 !
       character (len=*), parameter :: MyFile =                          &
      &  "ROMS/Modules/mod_netcdf.F"//", netcdf_put_fvar_1d"
@@ -4725,14 +4322,6 @@
           END IF
         END IF
       END IF
-!
-!  Broadcast error flags to all processors in the group.
-!
-      ibuffer(1)=exit_flag
-      ibuffer(2)=ioerror
-      CALL mp_bcasti (ng, model, ibuffer)
-      exit_flag=ibuffer(1)
-      ioerror=ibuffer(2)
 !
 !  Close input file.
 !
@@ -4796,7 +4385,6 @@
 !  Local variable declarations.
 !
       integer :: my_ncid, my_varid, status
-      integer, dimension(2) :: ibuffer
 !
       character (len=*), parameter :: MyFile =                          &
      &  "ROMS/Modules/mod_netcdf.F"//", netcdf_put_fvar_2d"
@@ -4841,14 +4429,6 @@
           END IF
         END IF
       END IF
-!
-!  Broadcast error flags to all processors in the group.
-!
-      ibuffer(1)=exit_flag
-      ibuffer(2)=ioerror
-      CALL mp_bcasti (ng, model, ibuffer)
-      exit_flag=ibuffer(1)
-      ioerror=ibuffer(2)
 !
 !  Close input NetCDF file.
 !
@@ -4912,7 +4492,6 @@
 !  Local variable declarations.
 !
       integer :: my_ncid, my_varid, status
-      integer, dimension(2) :: ibuffer
 !
       character (len=*), parameter :: MyFile =                          &
      &  "ROMS/Modules/mod_netcdf.F"//", netcdf_put_fvar_3d"
@@ -4957,14 +4536,6 @@
           END IF
         END IF
       END IF
-!
-!  Broadcast error flags to all processors in the group.
-!
-      ibuffer(1)=exit_flag
-      ibuffer(2)=ioerror
-      CALL mp_bcasti (ng, model, ibuffer)
-      exit_flag=ibuffer(1)
-      ioerror=ibuffer(2)
 !
 !  Close input NetCDF file.
 !
@@ -5028,7 +4599,6 @@
 !  Local variable declarations.
 !
       integer :: my_ncid, my_varid, status
-      integer, dimension(2) :: ibuffer
 !
       character (len=*), parameter :: MyFile =                          &
      &  "ROMS/Modules/mod_netcdf.F"//", netcdf_put_fvar_4d"
@@ -5073,14 +4643,6 @@
           END IF
         END IF
       END IF
-!
-!  Broadcast error flags to all processors in the group.
-!
-      ibuffer(1)=exit_flag
-      ibuffer(2)=ioerror
-      CALL mp_bcasti (ng, model, ibuffer)
-      exit_flag=ibuffer(1)
-      ioerror=ibuffer(2)
 !
 !  Close input NetCDF file.
 !
@@ -5144,7 +4706,6 @@
 !
       integer :: my_ncid, my_varid, status
       integer, dimension(1) :: my_A
-      integer, dimension(2) :: ibuffer
 !
       character (len=*), parameter :: MyFile =                          &
      &  "ROMS/Modules/mod_netcdf.F"//", netcdf_put_ivar_0d"
@@ -5194,14 +4755,6 @@
           END IF
         END IF
       END IF
-!
-!  Broadcast error flags to all processors in the group.
-!
-      ibuffer(1)=exit_flag
-      ibuffer(2)=ioerror
-      CALL mp_bcasti (ng, model, ibuffer)
-      exit_flag=ibuffer(1)
-      ioerror=ibuffer(2)
 !
 !  Close file.
 !
@@ -5264,7 +4817,6 @@
 !  Local variable declarations.
 !
       integer :: my_ncid, my_varid, status
-      integer, dimension(2) :: ibuffer
 !
       character (len=*), parameter :: MyFile =                          &
      &  "ROMS/Modules/mod_netcdf.F"//", netcdf_put_ivar_1d"
@@ -5309,14 +4861,6 @@
           END IF
         END IF
       END IF
-!
-!  Broadcast error flags to all processors in the group.
-!
-      ibuffer(1)=exit_flag
-      ibuffer(2)=ioerror
-      CALL mp_bcasti (ng, model, ibuffer)
-      exit_flag=ibuffer(1)
-      ioerror=ibuffer(2)
 !
 !  Close file.
 !
@@ -5379,7 +4923,6 @@
 !  Local variable declarations.
 !
       integer :: my_ncid, my_varid, status
-      integer, dimension(2) :: ibuffer
 !
       character (len=*), parameter :: MyFile =                          &
      &  "ROMS/Modules/mod_netcdf.F"//", netcdf_put_ivar_2d"
@@ -5424,14 +4967,6 @@
           END IF
         END IF
       END IF
-!
-!  Broadcast error flags to all processors in the group.
-!
-      ibuffer(1)=exit_flag
-      ibuffer(2)=ioerror
-      CALL mp_bcasti (ng, model, ibuffer)
-      exit_flag=ibuffer(1)
-      ioerror=ibuffer(2)
 !
 !  Close file.
 !
@@ -5500,7 +5035,6 @@
       integer :: my_ncid, my_varid, status
       integer :: AI
       integer, dimension(1) :: my_AI
-      integer, dimension(2) :: ibuffer
 !
       character (len=*), parameter :: MyFile =                          &
      &  "ROMS/Modules/mod_netcdf.F"//", netcdf_put_lvar_0d"
@@ -5559,14 +5093,6 @@
           END IF
         END IF
       END IF
-!
-!  Broadcast error flags to all processors in the group.
-!
-      ibuffer(1)=exit_flag
-      ibuffer(2)=ioerror
-      CALL mp_bcasti (ng, model, ibuffer)
-      exit_flag=ibuffer(1)
-      ioerror=ibuffer(2)
 !
 !  Close file.
 !
@@ -5634,7 +5160,6 @@
 !
       integer :: i, my_ncid, my_varid, status
       integer, dimension(SIZE(A,1)) :: AI
-      integer, dimension(2) :: ibuffer
 !
       character (len=*), parameter :: MyFile =                          &
      &  "ROMS/Modules/mod_netcdf.F"//", netcdf_put_lvar_1d"
@@ -5690,14 +5215,6 @@
           END IF
         END IF
       END IF
-!
-!  Broadcast error flags to all processors in the group.
-!
-      ibuffer(1)=exit_flag
-      ibuffer(2)=ioerror
-      CALL mp_bcasti (ng, model, ibuffer)
-      exit_flag=ibuffer(1)
-      ioerror=ibuffer(2)
 !
 !  Close file.
 !
@@ -5765,7 +5282,6 @@
 !
       integer :: i, j, my_ncid, my_varid, status
       integer, dimension(SIZE(A,1),SIZE(A,2)) :: AI
-      integer, dimension(2) :: ibuffer
 !
       character (len=*), parameter :: MyFile =                          &
      &  "ROMS/Modules/mod_netcdf.F"//", netcdf_put_lvar_2d"
@@ -5823,14 +5339,6 @@
           END IF
         END IF
       END IF
-!
-!  Broadcast error flags to all processors in the group.
-!
-      ibuffer(1)=exit_flag
-      ibuffer(2)=ioerror
-      CALL mp_bcasti (ng, model, ibuffer)
-      exit_flag=ibuffer(1)
-      ioerror=ibuffer(2)
 !
 !  Close file.
 !
@@ -5902,7 +5410,6 @@
 !  Local variable declarations.
 !
       integer :: my_ncid, my_varid, status
-      integer, dimension(2) :: ibuffer
 !
       character (len=LEN(A)), dimension(1) :: my_A
       character (len=*), parameter :: MyFile =                          &
@@ -5953,14 +5460,6 @@
           END IF
         END IF
       END IF
-!
-!  Broadcast error flags to all processors in the group.
-!
-      ibuffer(1)=exit_flag
-      ibuffer(2)=ioerror
-      CALL mp_bcasti (ng, model, ibuffer)
-      exit_flag=ibuffer(1)
-      ioerror=ibuffer(2)
 !
 !  Close input NetCDF file.
 !
@@ -6033,7 +5532,6 @@
 !  Local variable declarations.
 !
       integer :: my_ncid, my_varid, status
-      integer, dimension(2) :: ibuffer
 !
       character (len=*), parameter :: MyFile =                          &
      &  "ROMS/Modules/mod_netcdf.F"//", netcdf_put_svar_1d"
@@ -6078,14 +5576,6 @@
           END IF
         END IF
       END IF
-!
-!  Broadcast error flags to all processors in the group.
-!
-      ibuffer(1)=exit_flag
-      ibuffer(2)=ioerror
-      CALL mp_bcasti (ng, model, ibuffer)
-      exit_flag=ibuffer(1)
-      ioerror=ibuffer(2)
 !
 !  Close input NetCDF file.
 !
@@ -6158,7 +5648,6 @@
 !  Local variable declarations.
 !
       integer :: my_ncid, my_varid, status
-      integer, dimension(2) :: ibuffer
 !
       character (len=*), parameter :: MyFile =                          &
      &  "ROMS/Modules/mod_netcdf.F"//", netcdf_put_svar_2d"
@@ -6203,14 +5692,6 @@
           END IF
         END IF
       END IF
-!
-!  Broadcast error flags to all processors in the group.
-!
-      ibuffer(1)=exit_flag
-      ibuffer(2)=ioerror
-      CALL mp_bcasti (ng, model, ibuffer)
-      exit_flag=ibuffer(1)
-      ioerror=ibuffer(2)
 !
 !  Close input NetCDF file.
 !
@@ -6283,7 +5764,6 @@
 !  Local variable declarations.
 !
       integer :: my_ncid, my_varid, status
-      integer, dimension(2) :: ibuffer
 !
       character (len=*), parameter :: MyFile =                          &
      &  "ROMS/Modules/mod_netcdf.F"//", netcdf_put_svar_3d"
@@ -6328,14 +5808,6 @@
           END IF
         END IF
       END IF
-!
-!  Broadcast error flags to all processors in the group.
-!
-      ibuffer(1)=exit_flag
-      ibuffer(2)=ioerror
-      CALL mp_bcasti (ng, model, ibuffer)
-      exit_flag=ibuffer(1)
-      ioerror=ibuffer(2)
 !
 !  Close input NetCDF file.
 !
@@ -6383,7 +5855,6 @@
 !  Local variable declarations.
 !
       integer :: i, status
-      integer, dimension(3) :: ibuffer
 !
       character (len=200) :: my_ncname
       character (len=*), parameter :: MyFile =                          &
@@ -6429,16 +5900,6 @@
         END IF
       END IF
 !
-!  Broadcast error flags to all processors in the group.
-!
-      ibuffer(1)=exit_flag
-      ibuffer(2)=ioerror
-      ibuffer(3)=ncid
-      CALL mp_bcasti (ng, model, ibuffer)
-      exit_flag=ibuffer(1)
-      ioerror=ibuffer(2)
-      ncid=ibuffer(3)
-!
   10  FORMAT (/,' NETCDF_CLOSE - error while writing global ',          &
      &        'attribute:',2x,a,/,16x,'file:',2x,a,/,16x,               &
      &        'call from:',2x,a,/,16x,a)
@@ -6480,7 +5941,6 @@
 !
       integer :: my_cmode, status
       integer :: OldFillMode
-      integer :: ibuffer(3)
 !
       character (len=*), parameter :: MyFile =                          &
      &  "ROMS/Modules/mod_netcdf.F"//", netcdf_create"
@@ -6518,13 +5978,6 @@
           END IF
         END IF
       END IF
-      ibuffer(1)=exit_flag
-      ibuffer(2)=ioerror
-      ibuffer(3)=ncid
-      CALL mp_bcasti (ng, model, ibuffer)
-      exit_flag=ibuffer(1)
-      ioerror=ibuffer(2)
-      ncid=ibuffer(3)
 !
   10  FORMAT (/,' NETCDF_CREATE - unable to create output NetCDF ',     &
      &        'file:',/,17x,a,/,17x,'call from:',2x,a,/,17x,a)
@@ -6562,7 +6015,6 @@
 !  Local variable declarations.
 !
       integer :: status
-      integer :: ibuffer(2)
 !
       character (len=*), parameter :: MyFile =                          &
      &  "ROMS/Modules/mod_netcdf.F"//", netcdf_enddef"
@@ -6580,11 +6032,6 @@
           ioerror=status
         END IF
       END IF
-      ibuffer(1)=exit_flag
-      ibuffer(2)=ioerror
-      CALL mp_bcasti (ng, model, ibuffer)
-      exit_flag=ibuffer(1)
-      ioerror=ibuffer(2)
 !
   10  FORMAT (/,' NETCDF_ENDDEF - unable to end definition mode for',   &
      &        ' file:',/,17x,a,/,17x,'call from:',2x,a,/,17x,a)
@@ -6625,7 +6072,6 @@
 !  Local variable declarations.
 !
       integer :: my_omode, status
-      integer :: ibuffer(3)
 !
       character (len=*), parameter :: MyFile =                          &
      &  "ROMS/Modules/mod_netcdf.F"//", netcdf_open"
@@ -6658,14 +6104,7 @@
      &           TRIM(ncname), TRIM(SourceFile)
           FLUSH (DBout)
         END IF
-        ibuffer(1)=exit_flag
-        ibuffer(2)=ioerror
-        ibuffer(3)=ncid
       END IF
-      CALL mp_bcasti (ng, model, ibuffer)
-      exit_flag=ibuffer(1)
-      ioerror=ibuffer(2)
-      ncid=ibuffer(3)
 !
   10  FORMAT (/,' NETCDF_OPEN - unable to open existing NetCDF ',       &
      &        'file:',/,15x,a,/,15x,'call from:',2x,a,/,15x,a)
@@ -6702,7 +6141,6 @@
 !  Local variable declarations.
 !
       integer :: status
-      integer :: ibuffer(2)
 !
       character (len=*), parameter :: MyFile =                          &
      &  "ROMS/Modules/mod_netcdf.F"//", netcdf_redef"
@@ -6720,11 +6158,6 @@
           ioerror=status
         END IF
       END IF
-      ibuffer(1)=exit_flag
-      ibuffer(2)=ioerror
-      CALL mp_bcasti (ng, model, ibuffer)
-      exit_flag=ibuffer(1)
-      ioerror=ibuffer(2)
 !
   10  FORMAT (/,' NETCDF_REDEF - unable to put in definition mode',     &
      &        ' file:',/,16x,a,/,16x,'call from:',2x,a,/,16x,a)
@@ -6764,7 +6197,6 @@
 !  Local variable declarations.
 !
       integer :: status
-      integer :: ibuffer(2)
 !
       character (len=*), parameter :: MyFile =                          &
      &  "ROMS/Modules/mod_netcdf.F"//", netcdf_sync"
@@ -6782,11 +6214,6 @@
           ioerror=status
         END IF
       END IF
-      ibuffer(1)=exit_flag
-      ibuffer(2)=ioerror
-      CALL mp_bcasti (ng, model, ibuffer)
-      exit_flag=ibuffer(1)
-      ioerror=ibuffer(2)
 !
   10  FORMAT (/,' NETCDF_SYNC - unable to synchronize to disk file:',   &
      &        /,15x,a,/,15x,'call from:',2x,a,/15x,a)

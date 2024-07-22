@@ -19,9 +19,6 @@
       USE mod_param
       USE mod_scalars
 !
-      USE distribute_mod,   ONLY : mp_collect,                          &
-     &                             mp_gather2d,                         &
-     &                             mp_gather3d
 !
       implicit none
 !
@@ -167,15 +164,19 @@
       IJsize=Isize*Jsize
 !
 !-----------------------------------------------------------------------
-!  If distributed-memory set-up, collect tile data from all spawned
-!  nodes and store it into a global scratch 1D array, packed in column-
-!  major order.
+!  If serial or shared-memory applications and serial output, pack data
+!  into a global 1D array in column-major order.
 !-----------------------------------------------------------------------
 !
-      IF (Extract_Flag.ge.0) THEN
-        CALL mp_gather2d (ng, model, LBi, UBi, LBj, UBj,                &
-     &                    tindex, gtype, Ascl,                          &
-     &                    Adat, Npts, Awrk, LandFill)
+      IF (gtype.gt.0) THEN
+        ic=0
+        DO j=Jmin,Jmax
+          DO i=Imin,Imax
+            ic=ic+1
+            Awrk(ic)=Adat(i,j)*Ascl
+          END DO
+        END DO
+        Npts=ic
       END IF
 !
 !-----------------------------------------------------------------------
@@ -333,14 +334,22 @@
       END IF
 !
 !-----------------------------------------------------------------------
-!  If distributed-memory set-up, collect tile data from all spawned
-!  nodes and store it into a global scratch 1D array, packed in column-
-!  major order.
+!  If serial or shared-memory applications and serial output, pack data
+!  into a global 1D array in column-major order.
 !-----------------------------------------------------------------------
 !
-      CALL mp_gather3d (ng, model, LBi, UBi, LBj, UBj, LBk, UBk,        &
-     &                  tindex, gtype, Ascl,                            &
-     &                  Adat, Npts, Awrk, LandFill)
+      IF (gtype.gt.0) THEN
+        ic=0
+        DO k=LBk,UBk
+          DO j=Jmin,Jmax
+            DO i=Imin,Imax
+              ic=ic+1
+              Awrk(ic)=Adat(i,j,k)*Ascl
+            END DO
+          END DO
+        END DO
+        Npts=ic
+      END IF
 !
 !-----------------------------------------------------------------------
 !  If there is no extracting data, set the start and total vectors
@@ -511,16 +520,24 @@
       END IF
 !
 !-----------------------------------------------------------------------
-!  If distributed-memory set-up, collect tile data from all spawned
-!  nodes and store it into a global scratch 1D array, packed in column-
-!  major order.
+!  If serial or shared-memory applications and serial output, pack data
+!  into a global 1D array in column-major order.
 !-----------------------------------------------------------------------
 !
-!  Process the data by 3D slices.
+!  The data is processed in 3D slices.
 !
-      CALL mp_gather3d (ng, model, LBi, UBi, LBj, UBj, LBk, UBk,        &
-     &                  tindex, gtype, Ascl,                            &
-     &                  Adat(:,:,:,fourth), Npts, Awrk, LandFill)
+      IF (gtype.gt.0) THEN
+        ic=0
+        Npts=IJsize*Ksize
+        DO k=LBk,UBk
+          DO j=Jmin,Jmax
+            DO i=Imin,Imax
+              ic=ic+1
+              Awrk(ic)=Adat(i,j,k,fourth)*Ascl
+            END DO
+          END DO
+        END DO
+      END IF
 !
 !-----------------------------------------------------------------------
 !  If there is no extracting data, set the start and total vectors

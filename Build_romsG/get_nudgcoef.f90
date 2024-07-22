@@ -24,9 +24,6 @@
 !
       USE exchange_2d_mod
       USE exchange_3d_mod
-      USE mp_exchange_mod, ONLY : mp_exchange2d
-      USE mp_exchange_mod, ONLY : mp_exchange3d
-      USE mp_exchange_mod, ONLY : mp_exchange4d
       USE nf_fread2d_mod,  ONLY : nf_fread2d
       USE nf_fread3d_mod,  ONLY : nf_fread3d
       USE strings_mod,     ONLY : FoundError, find_string
@@ -251,11 +248,6 @@
      &                            LBi, UBi, LBj, UBj,                   &
      &                            CLIMA(ng) % M2nudgcof)
         END IF
-        CALL mp_exchange2d (ng, tile, model, 1,                         &
-     &                      LBi, UBi, LBj, UBj,                         &
-     &                      NghostPoints,                               &
-     &                      EWperiodic(ng), NSperiodic(ng),             &
-     &                      CLIMA(ng) % M2nudgcof)
       END IF
 !
 !  If appropriate, read nudging coefficients for 3D momentum (inverse
@@ -307,11 +299,6 @@
      &                            LBi, UBi, LBj, UBj, 1, N(ng),         &
      &                            CLIMA(ng) % M3nudgcof)
         END IF
-        CALL mp_exchange3d (ng, tile, model, 1,                         &
-     &                      LBi, UBi, LBj, UBj, 1, N(ng),               &
-     &                      NghostPoints,                               &
-     &                      EWperiodic(ng), NSperiodic(ng),             &
-     &                      CLIMA(ng) % M3nudgcof)
       END IF
 !
 !  If appropriate, read nudging coefficients for tracer variables
@@ -376,13 +363,6 @@
           END IF
         END IF
       END DO
-      IF (ANY(LnudgeTCLM(:,ng))) THEN
-        CALL mp_exchange4d (ng, tile, model, 1,                         &
-     &                      LBi, UBi, LBj, UBj, 1, N(ng), 1, NTCLM(ng), &
-     &                      NghostPoints,                               &
-     &                      EWperiodic(ng), NSperiodic(ng),             &
-     &                      CLIMA(ng) % Tnudgcof)
-      END IF
 !
   10  FORMAT (/,' GET_NUDGCOEF_NF90 - unable to open nudging NetCDF',   &
      &        ' file: ',a)

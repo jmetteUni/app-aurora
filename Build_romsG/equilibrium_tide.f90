@@ -41,7 +41,6 @@
 !
       USE exchange_2d_mod
       USE dateclock_mod,   ONLY : datenum
-      USE mp_exchange_mod, ONLY : mp_exchange2d
       USE mod_param,       ONLY : BOUNDS, iADM, iNLM, iRPM, iTLM,       &
      &                            NghostPoints
       USE mod_scalars,     ONLY : EWperiodic, NSperiodic, Lnodal,       &
@@ -256,11 +255,6 @@
      &                          LBi, UBi, LBj, UBj,                     &
      &                          eq_tide)
       END IF
-      CALL mp_exchange2d (ng, tile, iNLM, 1,                            &
-     &                    LBi, UBi, LBj, UBj,                           &
-     &                    NghostPoints,                                 &
-     &                    EWperiodic(ng), NSperiodic(ng),               &
-     &                    eq_tide)
 !
       RETURN
       END SUBROUTINE equilibrium_tide_tile

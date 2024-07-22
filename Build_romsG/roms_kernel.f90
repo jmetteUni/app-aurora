@@ -61,23 +61,10 @@
 !
       logical :: allocate_vars = .TRUE.
 !
-      integer :: MyError, MySize
       integer :: chunk_size, ng, thread
 !
       character (len=*), parameter :: MyFile =                          &
      &  "ROMS/Drivers/nl_roms.h"//", ROMS_initialize"
-!
-!-----------------------------------------------------------------------
-!  Set distribute-memory (mpi) world communictor.
-!-----------------------------------------------------------------------
-!
-      IF (PRESENT(mpiCOMM)) THEN
-        OCN_COMM_WORLD=mpiCOMM
-      ELSE
-        OCN_COMM_WORLD=MPI_COMM_WORLD
-      END IF
-      CALL mpi_comm_rank (OCN_COMM_WORLD, MyRank, MyError)
-      CALL mpi_comm_size (OCN_COMM_WORLD, MySize, MyError)
 !
 !-----------------------------------------------------------------------
 !  On first pass, initialize model parameters a variables for all
@@ -119,7 +106,7 @@
 !  are private for each parallel thread/node.
 !
 !$OMP PARALLEL
-      MyThread=MyRank
+      MyThread=0
       DO ng=1,Ngrids
         chunk_size=(NtileX(ng)*NtileE(ng)+numthreads-1)/numthreads
         first_tile(ng)=MyThread*chunk_size
@@ -138,7 +125,7 @@
 !
         DO ng=1,Ngrids
 !$OMP PARALLEL
-          DO thread=MyRank,MyRank
+          DO thread=0,numthreads-1
             CALL wclock_on (ng, iNLM, 0, 173, MyFile)
           END DO
 !$OMP END PARALLEL
@@ -247,7 +234,7 @@
             END IF
             blowup=exit_flag
             exit_flag=NoError
-            CALL wrt_rst (ng, MyRank)
+            CALL wrt_rst (ng, -1)
           END IF
         END DO
       END IF
@@ -266,7 +253,7 @@
 !
       DO ng=1,Ngrids
 !$OMP PARALLEL
-        DO thread=MyRank,MyRank
+        DO thread=0,numthreads-1
           CALL wclock_off (ng, iNLM, 0, 411, MyFile)
         END DO
 !$OMP END PARALLEL

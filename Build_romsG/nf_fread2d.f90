@@ -70,8 +70,6 @@
 !***********************************************************************
 !
       USE mod_netcdf
-!
-      USE distribute_mod, ONLY : mp_bcastf, mp_bcasti, mp_scatter2d
       USE regrid_mod,     ONLY : regrid_nf90
 !
 !  Imported variable declarations.
@@ -103,7 +101,6 @@
       integer :: Imin, Imax, Jmin, Jmax
       integer :: Ilen, Jlen, IJlen
       integer :: Cgrid, MyType, ghost
-      integer :: Nghost
       integer, dimension(3) :: start, total
 !
       real(r8) :: Afactor, Aoffset, Aspval
@@ -168,17 +165,6 @@
       Imax=BOUNDS(ng)%Imax(Cgrid,ghost,MyRank)
       Jmin=BOUNDS(ng)%Jmin(Cgrid,ghost,MyRank)
       Jmax=BOUNDS(ng)%Jmax(Cgrid,ghost,MyRank)
-!
-!  Set the number of tile ghost points, Nghost, to scatter in
-!  distributed-memory applications. If Nghost=0, the ghost points
-!  are not processed.  They will be processed elsewhere by the
-!  appropriate call to any of the routines in "mp_exchange.F".
-!
-      IF (model.eq.iADM) THEN
-        Nghost=0                     ! no ghost points exchange
-      ELSE
-        Nghost=NghostPoints          ! do ghost points exchange
-      END IF
 !
 !  Determine if interpolating from coarse gridded data to model grid
 !  is required.  This is only allowed for gridded 2D fields.  This is
@@ -299,7 +285,6 @@
           END IF
         END IF
       END IF
-      CALL mp_bcasti (ng, model, status)
       IF (FoundError(status, nf90_noerr, 1021, MyFile)) THEN
         exit_flag=2
         ioerror=status
@@ -312,13 +297,18 @@
 !
       IF (.not.interpolate) THEN
 !
-!  Scatter read data over the distributed memory tiles.
+!  Unpack data into the global array: serial, serial with partitions,
+!  and shared-memory applications.
 !
-        CALL mp_scatter2d (ng, model, LBi, UBi, LBj, UBj,               &
-     &                     Nghost, MyType, Amin, Amax,                  &
-     &                     Npts, wrk, Adat)
-      ELSE
-        CALL mp_bcastf (ng, model, wrk)
+        IF (MyType.gt.0) THEN
+          ic=0
+          DO j=Js,Je
+            DO i=Is,Ie
+              ic=ic+1
+              Adat(i,j)=wrk(ic)
+            END DO
+          END DO
+        END IF
       END IF
 !
 !-----------------------------------------------------------------------
@@ -446,10 +436,10 @@
 !-----------------------------------------------------------------------
 !
       IF (Lchecksum) THEN
-        Npts=(Imax-Imin+1)*(Jmax-Jmin+1)
+        Npts=(Ie-Is+1)*(Je-Js+1)
         IF (.not.allocated(Cwrk)) allocate ( Cwrk(Npts) )
-        Cwrk = PACK(Adat(Imin:Imax, Jmin:Jmax), .TRUE.)
-        CALL get_hash (Cwrk, Npts, checksum, .TRUE.)
+        Cwrk = PACK(Adat(Is:Ie, Js:Je), .TRUE.)
+        CALL get_hash (Cwrk, Npts, checksum)
         IF (allocated(Cwrk)) deallocate (Cwrk)
       END IF
 !

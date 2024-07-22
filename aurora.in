@@ -1151,11 +1151,11 @@ PIO_I2C_Preq = 65                 ! Maximum pending I2C requests
 ! continuation (\) or a vertical bar (|) symbol after each entry, except
 ! the last one.
 
-     NFFILES == 1                          ! number of unique forcing files
+     NFFILES == 2                          ! number of unique forcing files
 
 !     FRCNAME == roms_frc.nc
-     FRCNAME == ../aurora/Data/Grid_Aurora_M64L64_bhflux_90000000MW_20220726T00.nc              ! forcing file 1, bottom heat flux, grid 1
-     FRCNAME == ../aurora/Data/Grid_Aurora_M64L64_bpflux_20220726T00.nc              ! forcing file 2, bottom tracer flux, grid 1
+     FRCNAME == ../aurora/Data/Grid_Aurora_M64L64_bhflux_90000000MW_20220726T00.nc\              ! forcing file 1, bottom heat flux, grid 1
+     		../aurora/Data/Grid_Aurora_M64L64_bpflux_20220726T00.nc             ! forcing file 2, bottom tracer flux, grid 1
 
 ! Output NetCDF file names, [1:Ngrids].
 

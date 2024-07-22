@@ -105,15 +105,6 @@
      &   'Writing out time-averaged nonlinear model fields'
       is=LEN_TRIM(Coptions)+1
       Coptions(is:is+10)=' AVERAGES,'
-      IF (Master) WRITE (stdout,20) 'BOUNDARY_ALLREDUCE',               &
-     &   'Using mpi_allreduce in mp_boundary routine'
-      is=LEN_TRIM(Coptions)+1
-      Coptions(is:is+20)=' BOUNDARY_ALLREDUCE,'
-!
-      IF (Master) WRITE (stdout,20) 'COLLECT_ALLREDUCE',                &
-     &   'Using mpi_allreduce in mp_collect routine'
-      is=LEN_TRIM(Coptions)+1
-      Coptions(is:is+19)=' COLLECT_ALLGATHER,'
 !
       IF (Master) WRITE (stdout,20) 'DIAGNOSTICS_TS',                   &
      &   'Computing and writing tracer diagnostic terms'
@@ -150,11 +141,6 @@
       is=LEN_TRIM(Coptions)+1
       Coptions(is:is+10)=' MIX_S_UV,'
 !
-      IF (Master) WRITE (stdout,20) 'MPI',                              &
-     &   'MPI distributed-memory configuration'
-      is=LEN_TRIM(Coptions)+1
-      Coptions(is:is+4)=' MPI,'
-!
       IF (Master) WRITE (stdout,20) 'NONLINEAR',                        &
      &   'Nonlinear Model'
       is=LEN_TRIM(Coptions)+1
@@ -179,11 +165,6 @@
      &   'Use tangential phase speed in radiation conditions'
       is=LEN_TRIM(Coptions)+1
       Coptions(is:is+14)=' RADIATION_2D,'
-!
-      IF (Master) WRITE (stdout,20) 'REDUCE_ALLREDUCE',                 &
-     &   'Using mpi_allreduce in mp_reduce routine'
-      is=LEN_TRIM(Coptions)+1
-      Coptions(is:is+18)=' REDUCE_ALLREDUCE,'
 !
       IF (Master) WRITE (stdout,20) '!RST_SINGLE',                      &
      &   'Double precision fields in restart NetCDF file'

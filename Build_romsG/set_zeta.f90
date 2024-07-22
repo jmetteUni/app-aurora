@@ -82,7 +82,6 @@
       USE mod_scalars
 !
       USE exchange_2d_mod, ONLY : exchange_r2d_tile
-      USE mp_exchange_mod, ONLY : mp_exchange2d
 !
 !  Imported variable declarations.
 !
@@ -176,12 +175,6 @@
      &                          LBi, UBi, LBj, UBj,                     &
      &                          zeta(:,:,2))
       END IF
-      CALL mp_exchange2d (ng, tile, iNLM, 2,                            &
-     &                    LBi, UBi, LBj, UBj,                           &
-     &                    NghostPoints,                                 &
-     &                    EWperiodic(ng), NSperiodic(ng),               &
-     &                    zeta(:,:,1),                                  &
-     &                    zeta(:,:,2))
 !
       RETURN
       END SUBROUTINE set_zeta_tile

@@ -138,7 +138,6 @@
       USE mod_sources
 !
       USE exchange_3d_mod, ONLY : exchange_r3d_tile
-      USE mp_exchange_mod, ONLY : mp_exchange4d
       USE t3dbc_mod, ONLY : t3dbc_tile
 !
 !  Imported variable declarations.
@@ -914,11 +913,6 @@
      &                            t(:,:,:,3,itrc))
         END IF
       END DO
-      CALL mp_exchange4d (ng, tile, iNLM, 1,                            &
-     &                    LBi, UBi, LBj, UBj, 1, N(ng), 1, NT(ng),      &
-     &                    NghostPoints,                                 &
-     &                    EWperiodic(ng), NSperiodic(ng),               &
-     &                    t(:,:,:,3,:))
 !
       RETURN
       END SUBROUTINE pre_step3d_tile

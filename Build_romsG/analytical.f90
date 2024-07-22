@@ -73,7 +73,7 @@
 !
 ! Set analytical header file name used.
 !
-      IF (Lanafile) THEN
+      IF (Lanafile.and.(tile.eq.0)) THEN
         ANANAME( 3)=MyFile
       END IF
 !
@@ -257,7 +257,7 @@
 !
 ! Set analytical header file name used.
 !
-      IF (Lanafile) THEN
+      IF (Lanafile.and.(tile.eq.0)) THEN
         ANANAME(24)=MyFile
       END IF
 !
@@ -277,7 +277,6 @@
       USE mod_scalars
 !
       USE exchange_2d_mod
-      USE mp_exchange_mod, ONLY : mp_exchange2d
 !
 !  Imported variable declarations.
 !
@@ -388,11 +387,6 @@
      &                          LBi, UBi, LBj, UBj,                     &
      &                          svstr)
       END IF
-      CALL mp_exchange2d (ng, tile, model, 2,                           &
-     &                    LBi, UBi, LBj, UBj,                           &
-     &                    NghostPoints,                                 &
-     &                    EWperiodic(ng), NSperiodic(ng),               &
-     &                    sustr, svstr)
 !
       RETURN
       END SUBROUTINE ana_smflux_tile
@@ -450,7 +444,7 @@
 !
 ! Set analytical header file name used.
 !
-      IF (Lanafile) THEN
+      IF (Lanafile.and.(tile.eq.0)) THEN
         ANANAME(31)=MyFile
       END IF
 !
@@ -468,7 +462,6 @@
       USE mod_scalars
 !
       USE exchange_2d_mod, ONLY : exchange_r2d_tile
-      USE mp_exchange_mod, ONLY : mp_exchange2d
 !
 !  Imported variable declarations.
 !
@@ -585,12 +578,6 @@
      &                          stflux(:,:,itrc))
       END IF
 !
-      CALL mp_exchange2d (ng, tile, model, 1,                           &
-     &                    LBi, UBi, LBj, UBj,                           &
-     &                    NghostPoints,                                 &
-     &                    EWperiodic(ng), NSperiodic(ng),               &
-     &                    stflux(:,:,itrc))
-!
       RETURN
       END SUBROUTINE ana_stflux_tile
       SUBROUTINE ana_vmix (ng, tile, model)
@@ -655,7 +642,7 @@
 !
 ! Set analytical header file name used.
 !
-      IF (Lanafile) THEN
+      IF (Lanafile.and.(tile.eq.0)) THEN
         ANANAME(35)=MyFile
       END IF
 !
@@ -674,7 +661,6 @@
       USE mod_scalars
 !
       USE exchange_3d_mod, ONLY : exchange_w3d_tile
-      USE mp_exchange_mod, ONLY : mp_exchange3d, mp_exchange4d
 !
 !  Imported variable declarations.
 !
@@ -772,11 +758,6 @@
      &                          LBi, UBi, LBj, UBj, 0, N(ng),           &
      &                          Akv)
       END IF
-      CALL mp_exchange3d (ng, tile, model, 1,                           &
-     &                    LBi, UBi, LBj, UBj, 0, N(ng),                 &
-     &                    NghostPoints,                                 &
-     &                    EWperiodic(ng), NSperiodic(ng),               &
-     &                    Akv)
 !
 !-----------------------------------------------------------------------
 !  Set vertical diffusion coefficient (m2/s).
@@ -800,11 +781,6 @@
      &                            Akt(:,:,:,itrc))
         END DO
       END IF
-      CALL mp_exchange4d (ng, tile, model, 1,                           &
-     &                    LBi, UBi, LBj, UBj, 0, N(ng), 1, NAT,         &
-     &                    NghostPoints,                                 &
-     &                    EWperiodic(ng), NSperiodic(ng),               &
-     &                    Akt)
 !
       RETURN
       END SUBROUTINE ana_vmix_tile

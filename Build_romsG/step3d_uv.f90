@@ -133,7 +133,6 @@
 !
       USE exchange_2d_mod
       USE exchange_3d_mod
-      USE mp_exchange_mod, ONLY : mp_exchange2d, mp_exchange3d
       USE u3dbc_mod,       ONLY : u3dbc_tile
       USE v3dbc_mod,       ONLY : v3dbc_tile
 !
@@ -895,20 +894,6 @@
      &                            vbar(:,:,k))
         END DO
       END IF
-!
-      CALL mp_exchange3d (ng, tile, iNLM, 4,                            &
-     &                    LBi, UBi, LBj, UBj, 1, N(ng),                 &
-     &                    NghostPoints,                                 &
-     &                    EWperiodic(ng), NSperiodic(ng),               &
-     &                    u(:,:,:,nnew), v(:,:,:,nnew),                 &
-     &                    Huon, Hvom)
-!
-      CALL mp_exchange2d (ng, tile, iNLM, 4,                            &
-     &                    LBi, UBi, LBj, UBj,                           &
-     &                    NghostPoints,                                 &
-     &                    EWperiodic(ng), NSperiodic(ng),               &
-     &                    ubar(:,:,1), vbar(:,:,1),                     &
-     &                    ubar(:,:,2), vbar(:,:,2))
 !
       RETURN
       END SUBROUTINE step3d_uv_tile

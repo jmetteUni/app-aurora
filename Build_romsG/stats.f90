@@ -74,8 +74,6 @@
       USE mod_parallel
       USE mod_iounits
       USE mod_ncparam
-!
-      USE distribute_mod, ONLY : mp_reduce
       USE get_hash_mod,   ONLY : get_hash
 !
 !  Imported variable declarations.
@@ -102,8 +100,6 @@
       real(r8) :: my_max, my_min
       real(r8) :: my_avg, my_rms
       real(r8), allocatable :: Cwrk(:)
-      real(r8), dimension(5) :: rbuffer
-      character (len=3), dimension(5) :: op_handle
 !
 !-----------------------------------------------------------------------
 !  Set tile indices.
@@ -198,12 +194,12 @@
       Npts=(Imax-Imin+1)*(Jmax-Jmin+1)
       IF (.not.allocated(Cwrk)) allocate ( Cwrk(Npts) )
       Cwrk=PACK(F(Imin:Imax, Jmin:Jmax), .TRUE.)
-      CALL get_hash (Cwrk, Npts, S%checksum, .TRUE.)
+      CALL get_hash (Cwrk, Npts, S%checksum)
       IF (allocated(Cwrk)) deallocate (Cwrk)
 !
 !  Compute global field mean, range, and processed values count.
 !
-      NSUB=1                             ! distributed-memory
+      NSUB=NtileX(ng)*NtileE(ng)         ! tiled application
 !$OMP CRITICAL (F_STATS)
       S%count=S%count+my_count
       S%min=MIN(S%min,my_min)
@@ -237,22 +233,6 @@
       tile_count=tile_count+1
       IF (tile_count.eq.NSUB) THEN
         tile_count=0
-        rbuffer(1)=REAL(S%count, r8)
-        rbuffer(2)=S%min
-        rbuffer(3)=S%max
-        rbuffer(4)=S%avg
-        rbuffer(5)=S%rms
-        op_handle(1)='SUM'
-        op_handle(2)='MIN'
-        op_handle(3)='MAX'
-        op_handle(4)='SUM'
-        op_handle(5)='SUM'
-        CALL mp_reduce (ng, model, 5, rbuffer, op_handle)
-        S%count=INT(rbuffer(1))
-        S%min=rbuffer(2)
-        S%max=rbuffer(3)
-        S%avg=rbuffer(4)
-        S%rms=rbuffer(5)
 !
 !  Finalize computation of the mean and root mean square.
 !
@@ -307,8 +287,6 @@
       USE mod_parallel
       USE mod_iounits
       USE mod_ncparam
-!
-      USE distribute_mod, ONLY : mp_reduce
       USE get_hash_mod,   ONLY : get_hash
 !
 !  Imported variable declarations.
@@ -335,8 +313,6 @@
       real(r8) :: my_max, my_min
       real(r8) :: my_avg, my_rms
       real(r8), allocatable :: Cwrk(:)
-      real(r8), dimension(5) :: rbuffer
-      character (len=3), dimension(5) :: op_handle
 !
 !-----------------------------------------------------------------------
 !  Set tile indices.
@@ -435,7 +411,7 @@
       Npts=(Imax-Imin+1)*(Jmax-Jmin+1)*(UBk-LBk+1)
       IF (.not.allocated(Cwrk)) allocate ( Cwrk(Npts) )
       Cwrk=PACK(F(Imin:Imax, Jmin:Jmax, LBk:UBk), .TRUE.)
-      CALL get_hash (Cwrk, Npts, S%checksum, .TRUE.)
+      CALL get_hash (Cwrk, Npts, S%checksum)
       IF (allocated(Cwrk)) deallocate (Cwrk)
 !
 !  Compute global field mean, range, and processed values count.
@@ -443,7 +419,7 @@
 !  "stats_2dfld" but we are usinf different counter "thread_count"
 !  to avoid interference and race conditions in shared-memory.
 !
-      NSUB=1                             ! distributed-memory
+      NSUB=NtileX(ng)*NtileE(ng)         ! tiled application
 !$OMP CRITICAL (F_STATS)
       S%count=S%count+my_count
       S%min=MIN(S%min,my_min)
@@ -477,22 +453,6 @@
       thread_count=thread_count+1
       IF (thread_count.eq.NSUB) THEN
         thread_count=0
-        rbuffer(1)=REAL(S%count, r8)
-        rbuffer(2)=S%min
-        rbuffer(3)=S%max
-        rbuffer(4)=S%avg
-        rbuffer(5)=S%rms
-        op_handle(1)='SUM'
-        op_handle(2)='MIN'
-        op_handle(3)='MAX'
-        op_handle(4)='SUM'
-        op_handle(5)='SUM'
-        CALL mp_reduce (ng, model, 5, rbuffer, op_handle)
-        S%count=INT(rbuffer(1))
-        S%min=rbuffer(2)
-        S%max=rbuffer(3)
-        S%avg=rbuffer(4)
-        S%rms=rbuffer(5)
 !
 !  Finalize computation of the mean and root mean square.
 !
@@ -549,8 +509,6 @@
       USE mod_parallel
       USE mod_iounits
       USE mod_ncparam
-!
-      USE distribute_mod, ONLY : mp_reduce
       USE get_hash_mod,   ONLY : get_hash
 !
 !  Imported variable declarations.
@@ -577,8 +535,6 @@
       real(r8) :: my_max, my_min
       real(r8) :: my_avg, my_rms
       real(r8), allocatable :: Cwrk(:)
-      real(r8), dimension(5) :: rbuffer
-      character (len=3), dimension(5) :: op_handle
 !
 !-----------------------------------------------------------------------
 !  Set tile indices.
@@ -681,7 +637,7 @@
       Npts=(Imax-Imin+1)*(Jmax-Jmin+1)*(UBk-LBk+1)*(UBt-LBt+1)
       IF (.not.allocated(Cwrk)) allocate ( Cwrk(Npts) )
       Cwrk=PACK(F(Imin:Imax, Jmin:Jmax, LBk:UBk, LBt:UBt), .TRUE.)
-      CALL get_hash (Cwrk, Npts, S%checksum, .TRUE.)
+      CALL get_hash (Cwrk, Npts, S%checksum)
       IF (allocated(Cwrk)) deallocate (Cwrk)
 !
 !  Compute global field mean, range, and processed values count.
@@ -689,7 +645,7 @@
 !  "stats_2dfld" but we are usinf different counter "thread_count"
 !  to avoid interference and race conditions in shared-memory.
 !
-      NSUB=1                             ! distributed-memory
+      NSUB=NtileX(ng)*NtileE(ng)         ! tiled application
 !$OMP CRITICAL (F_STATS)
       S%count=S%count+my_count
       S%min=MIN(S%min,my_min)
@@ -723,22 +679,6 @@
       thread_count=thread_count+1
       IF (thread_count.eq.NSUB) THEN
         thread_count=0
-        rbuffer(1)=REAL(S%count, r8)
-        rbuffer(2)=S%min
-        rbuffer(3)=S%max
-        rbuffer(4)=S%avg
-        rbuffer(5)=S%rms
-        op_handle(1)='SUM'
-        op_handle(2)='MIN'
-        op_handle(3)='MAX'
-        op_handle(4)='SUM'
-        op_handle(5)='SUM'
-        CALL mp_reduce (ng, model, 5, rbuffer, op_handle)
-        S%count=INT(rbuffer(1))
-        S%min=rbuffer(2)
-        S%max=rbuffer(3)
-        S%avg=rbuffer(4)
-        S%rms=rbuffer(5)
 !
 !  Finalize computation of the mean and root mean square.
 !
